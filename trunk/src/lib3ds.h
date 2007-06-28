@@ -77,16 +77,6 @@ typedef float Lib3dsRgba[4];
   
 #include <stdio.h>
                
-typedef enum Lib3dsObjectFlags {
-  LIB3DS_OBJECT_HIDDEN          =0x01, 
-  LIB3DS_OBJECT_VIS_LOFTER      =0x02, 
-  LIB3DS_OBJECT_DOESNT_CAST     =0x04, 
-  LIB3DS_OBJECT_MATTE           =0x08, 
-  LIB3DS_OBJECT_DONT_RCVSHADOW  =0x10, 
-  LIB3DS_OBJECT_FAST            =0x20, 
-  LIB3DS_OBJECT_FROZEN          =0x40 
-} Lib3dsObjectFlags;
-
 typedef union Lib3dsUserData {
     void *p;
     Lib3dsIntd i;
@@ -204,33 +194,6 @@ extern LIB3DSAPI Lib3dsBool lib3ds_io_write_float(Lib3dsIo *io, Lib3dsFloat l);
 extern LIB3DSAPI Lib3dsBool lib3ds_io_write_vector(Lib3dsIo *io, Lib3dsVector v);
 extern LIB3DSAPI Lib3dsBool lib3ds_io_write_rgb(Lib3dsIo *io, Lib3dsRgb rgb);
 extern LIB3DSAPI Lib3dsBool lib3ds_io_write_string(Lib3dsIo *io, const char *s);
-
-extern LIB3DSAPI Lib3dsFloat lib3ds_ease(Lib3dsFloat fp, Lib3dsFloat fc, 
-  Lib3dsFloat fn, Lib3dsFloat ease_from, Lib3dsFloat ease_to);
-
-typedef enum Lib3dsTcbFlags{
-  LIB3DS_USE_TENSION    =0x0001,
-  LIB3DS_USE_CONTINUITY =0x0002,
-  LIB3DS_USE_BIAS       =0x0004,
-  LIB3DS_USE_EASE_TO    =0x0008,
-  LIB3DS_USE_EASE_FROM  =0x0010
-} Lib3dsTcbFlags;
-
-typedef struct Lib3dsTcb {
-    Lib3dsIntd frame;
-    Lib3dsWord flags;
-    Lib3dsFloat tens;
-    Lib3dsFloat cont;
-    Lib3dsFloat bias;
-    Lib3dsFloat ease_to;
-    Lib3dsFloat ease_from;
-} Lib3dsTcb;
-
-extern LIB3DSAPI void lib3ds_tcb(Lib3dsTcb *p, Lib3dsTcb *pc, Lib3dsTcb *c,
-  Lib3dsTcb *nc, Lib3dsTcb *n, Lib3dsFloat *ksm, Lib3dsFloat *ksp,
-  Lib3dsFloat *kdm, Lib3dsFloat *kdp);
-extern LIB3DSAPI Lib3dsBool lib3ds_tcb_read(Lib3dsTcb *tcb, Lib3dsIo *io);
-extern LIB3DSAPI Lib3dsBool lib3ds_tcb_write(Lib3dsTcb *tcb, Lib3dsIo *io);
 
 /**
  * Fog atmosphere settings
@@ -581,6 +544,16 @@ extern LIB3DSAPI void lib3ds_material_dump(Lib3dsMaterial *material);
 extern LIB3DSAPI Lib3dsBool lib3ds_material_read(Lib3dsMaterial *material, Lib3dsIo *io);
 extern LIB3DSAPI Lib3dsBool lib3ds_material_write(Lib3dsMaterial *material, Lib3dsIo *io);
 
+typedef enum Lib3dsObjectFlags {
+    LIB3DS_OBJECT_HIDDEN          =0x01, 
+    LIB3DS_OBJECT_VIS_LOFTER      =0x02, 
+    LIB3DS_OBJECT_DOESNT_CAST     =0x04, 
+    LIB3DS_OBJECT_MATTE           =0x08, 
+    LIB3DS_OBJECT_DONT_RCVSHADOW  =0x10, 
+    LIB3DS_OBJECT_FAST            =0x20, 
+    LIB3DS_OBJECT_FROZEN          =0x40 
+} Lib3dsObjectFlags;
+
 /**
  * Camera object
  * \ingroup camera
@@ -764,176 +737,99 @@ extern LIB3DSAPI void lib3ds_mesh_dump(Lib3dsMesh *mesh);
 extern LIB3DSAPI Lib3dsBool lib3ds_mesh_read(Lib3dsMesh *mesh, Lib3dsIo *io);
 extern LIB3DSAPI Lib3dsBool lib3ds_mesh_write(Lib3dsMesh *mesh, Lib3dsIo *io);
 
-/**
- * Track flags
- * \ingroup tracks
- */
+extern LIB3DSAPI Lib3dsFloat lib3ds_ease(Lib3dsFloat fp, Lib3dsFloat fc, 
+                                         Lib3dsFloat fn, Lib3dsFloat ease_from, Lib3dsFloat ease_to);
+
+typedef enum Lib3dsTcbFlags{
+    LIB3DS_USE_TENSION    =0x0001,
+    LIB3DS_USE_CONTINUITY =0x0002,
+    LIB3DS_USE_BIAS       =0x0004,
+    LIB3DS_USE_EASE_TO    =0x0008,
+    LIB3DS_USE_EASE_FROM  =0x0010
+} Lib3dsTcbFlags;
+
+typedef struct Lib3dsTcb {
+    Lib3dsWord flags;
+    Lib3dsFloat tens;
+    Lib3dsFloat cont;
+    Lib3dsFloat bias;
+    Lib3dsFloat ease_to;
+    Lib3dsFloat ease_from;
+} Lib3dsTcb;
+
 typedef enum {
-  LIB3DS_REPEAT    =0x0001,
-  LIB3DS_SMOOTH    =0x0002,
-  LIB3DS_LOCK_X    =0x0008,
-  LIB3DS_LOCK_Y    =0x0010,
-  LIB3DS_LOCK_Z    =0x0020,
-  LIB3DS_UNLINK_X  =0x0100,
-  LIB3DS_UNLINK_Y  =0x0200,
-  LIB3DS_UNLINK_Z  =0x0400
+    LIB3DS_REPEAT    =0x0001,
+    LIB3DS_SMOOTH    =0x0002,
+    LIB3DS_LOCK_X    =0x0008,
+    LIB3DS_LOCK_Y    =0x0010,
+    LIB3DS_LOCK_Z    =0x0020,
+    LIB3DS_UNLINK_X  =0x0100,
+    LIB3DS_UNLINK_Y  =0x0200,
+    LIB3DS_UNLINK_Z  =0x0400
 } Lib3dsTrackFlags;
 
-/**
- * Boolean track key
- * \ingroup tracks
- */
-typedef struct Lib3dsBoolKey {
+typedef enum Lib3dsTrackType {
+    LIB3DS_TRACK_UNKNOWN =0,
+    LIB3DS_TRACK_BOOL    =1,
+    LIB3DS_TRACK_FLOAT   =2,
+    LIB3DS_TRACK_VECTOR  =3,
+    LIB3DS_TRACK_QUAT    =4,
+} Lib3dsTrackType;
+
+typedef struct Lib3dsKey {
+    Lib3dsIntd frame;
     Lib3dsTcb tcb;
-    struct Lib3dsBoolKey *next;
-} Lib3dsBoolKey;
+    union {
+        struct {
+            Lib3dsFloat value;
+            Lib3dsFloat dd;
+            Lib3dsFloat ds;
+        } f;
+        struct {
+            Lib3dsVector value;
+            Lib3dsVector dd;
+            Lib3dsVector ds;
+        } v;
+        struct {
+            Lib3dsFloat angle;
+            Lib3dsQuat axis;
+            Lib3dsQuat quad;
+            Lib3dsQuat a;
+            Lib3dsQuat b;
+        } q;
+        struct {
+            char name[64];
+        } m;
+    } data;
+} Lib3dsKey;
 
-/**
- * Boolean track
- * \ingroup tracks
- */
-typedef struct Lib3dsBoolTrack {
+typedef struct Lib3dsTrack {
     Lib3dsDword flags;
-    Lib3dsBoolKey *keyL;
-} Lib3dsBoolTrack;
+    Lib3dsTrackType type; 
+    Lib3dsDword nkeys;
+    Lib3dsKey *keys;   
+} Lib3dsTrack;
 
-/**
- * Floating-point track key
- * \ingroup tracks
- */
-typedef struct Lib3dsLin1Key {
-    Lib3dsTcb tcb;
-    struct Lib3dsLin1Key *next;
-    Lib3dsFloat value;
-    Lib3dsFloat dd;
-    Lib3dsFloat ds;
-} Lib3dsLin1Key;
-  
-/**
- * Floating-point track
- * \ingroup tracks
- */
-typedef struct Lib3dsLin1Track {
-    Lib3dsDword flags;
-    Lib3dsLin1Key *keyL;
-} Lib3dsLin1Track;
+extern LIB3DSAPI Lib3dsTrack* lib3ds_track_new(Lib3dsTrackType type, Lib3dsDword nkeys);
+extern LIB3DSAPI void lib3ds_track_free(Lib3dsTrack *track);
+extern LIB3DSAPI void lib3ds_track_resize(Lib3dsTrack *track, Lib3dsDword nkeys);
+extern LIB3DSAPI void lib3ds_track_setup(Lib3dsTrack *track);
+extern LIB3DSAPI void lib3ds_track_eval_bool(Lib3dsTrack *track, Lib3dsBool *value, Lib3dsFloat t);
+extern LIB3DSAPI void lib3ds_track_eval_float(Lib3dsTrack *track, Lib3dsFloat *value, Lib3dsFloat t);
+extern LIB3DSAPI void lib3ds_track_eval_vector(Lib3dsTrack *track, Lib3dsVector value, Lib3dsFloat t);
+extern LIB3DSAPI void lib3ds_track_eval_quat(Lib3dsTrack *track, Lib3dsQuat value, Lib3dsFloat t);
+extern LIB3DSAPI Lib3dsBool lib3ds_track_read(Lib3dsTrack *track, Lib3dsIo *io);
+extern LIB3DSAPI Lib3dsBool lib3ds_track_write(Lib3dsTrack *track, Lib3dsIo *io);
 
-/**
- * Vector track key
- * \ingroup tracks
- */
-typedef struct Lib3dsLin3Key {
-    Lib3dsTcb tcb;
-    struct Lib3dsLin3Key *next;  
-    Lib3dsVector value;
-    Lib3dsVector dd;
-    Lib3dsVector ds;
-} Lib3dsLin3Key;
-  
-/**
- * Vector track
- * \ingroup tracks
- */
-typedef struct Lib3dsLin3Track {
-    Lib3dsDword flags;
-    Lib3dsLin3Key *keyL;
-} Lib3dsLin3Track;
-
-/**
- * Rotation track key
- * \ingroup tracks
- */
-typedef struct Lib3dsQuatKey {
-    Lib3dsTcb tcb;
-    struct Lib3dsQuatKey *next;  
-    Lib3dsVector axis;
-    Lib3dsFloat angle;
-    Lib3dsQuat q;
-    Lib3dsQuat dd;
-    Lib3dsQuat ds;
-} Lib3dsQuatKey;
-  
-/**
- * Rotation track 
- * \ingroup tracks
- */
-typedef struct Lib3dsQuatTrack {
-    Lib3dsDword flags;
-    Lib3dsQuatKey *keyL;
-} Lib3dsQuatTrack;
-
-/**
- * Morph track key
- * \ingroup tracks
- */
-typedef struct Lib3dsMorphKey {
-    Lib3dsTcb tcb;
-    struct Lib3dsMorphKey *next;  
-    char name[64];
-} Lib3dsMorphKey;
-  
-/**
- * Morph track
- * \ingroup tracks
- */
-typedef struct Lib3dsMorphTrack {
-    Lib3dsDword flags;
-    Lib3dsMorphKey *keyL;
-} Lib3dsMorphTrack;
-
-extern LIB3DSAPI Lib3dsBoolKey* lib3ds_bool_key_new();
-extern LIB3DSAPI void lib3ds_bool_key_free(Lib3dsBoolKey* key);
-extern LIB3DSAPI void lib3ds_bool_track_free_keys(Lib3dsBoolTrack *track);
-extern LIB3DSAPI void lib3ds_bool_track_insert(Lib3dsBoolTrack *track, Lib3dsBoolKey* key);
-extern LIB3DSAPI void lib3ds_bool_track_remove(Lib3dsBoolTrack *track, Lib3dsIntd frame);
-extern LIB3DSAPI void lib3ds_bool_track_eval(Lib3dsBoolTrack *track, Lib3dsBool *p, Lib3dsFloat t);
-extern LIB3DSAPI Lib3dsBool lib3ds_bool_track_read(Lib3dsBoolTrack *track, Lib3dsIo *io);
-extern LIB3DSAPI Lib3dsBool lib3ds_bool_track_write(Lib3dsBoolTrack *track, Lib3dsIo *io);
-
-extern LIB3DSAPI Lib3dsLin1Key* lib3ds_lin1_key_new();
-extern LIB3DSAPI void lib3ds_lin1_key_free(Lib3dsLin1Key* key);
-extern LIB3DSAPI void lib3ds_lin1_track_free_keys(Lib3dsLin1Track *track);
-extern LIB3DSAPI void lib3ds_lin1_key_setup(Lib3dsLin1Key *p, Lib3dsLin1Key *cp, Lib3dsLin1Key *c,
-  Lib3dsLin1Key *cn, Lib3dsLin1Key *n);
-extern LIB3DSAPI void lib3ds_lin1_track_setup(Lib3dsLin1Track *track);
-extern LIB3DSAPI void lib3ds_lin1_track_insert(Lib3dsLin1Track *track, Lib3dsLin1Key *key);
-extern LIB3DSAPI void lib3ds_lin1_track_remove(Lib3dsLin1Track *track, Lib3dsIntd frame);
-extern LIB3DSAPI void lib3ds_lin1_track_eval(Lib3dsLin1Track *track, Lib3dsFloat *p, Lib3dsFloat t);
-extern LIB3DSAPI Lib3dsBool lib3ds_lin1_track_read(Lib3dsLin1Track *track, Lib3dsIo *io);
-extern LIB3DSAPI Lib3dsBool lib3ds_lin1_track_write(Lib3dsLin1Track *track, Lib3dsIo *io);
-
-extern LIB3DSAPI Lib3dsLin3Key* lib3ds_lin3_key_new();
-extern LIB3DSAPI void lib3ds_lin3_key_free(Lib3dsLin3Key* key);
-extern LIB3DSAPI void lib3ds_lin3_track_free_keys(Lib3dsLin3Track *track);
-extern LIB3DSAPI void lib3ds_lin3_key_setup(Lib3dsLin3Key *p, Lib3dsLin3Key *cp, Lib3dsLin3Key *c,
-  Lib3dsLin3Key *cn, Lib3dsLin3Key *n);
-extern LIB3DSAPI void lib3ds_lin3_track_setup(Lib3dsLin3Track *track);
-extern LIB3DSAPI void lib3ds_lin3_track_insert(Lib3dsLin3Track *track, Lib3dsLin3Key *key);
-extern LIB3DSAPI void lib3ds_lin3_track_remove(Lib3dsLin3Track *track, Lib3dsIntd frame);
-extern LIB3DSAPI void lib3ds_lin3_track_eval(Lib3dsLin3Track *track, Lib3dsVector p, Lib3dsFloat t);
-extern LIB3DSAPI Lib3dsBool lib3ds_lin3_track_read(Lib3dsLin3Track *track, Lib3dsIo *io);
-extern LIB3DSAPI Lib3dsBool lib3ds_lin3_track_write(Lib3dsLin3Track *track, Lib3dsIo *io);
-
-extern LIB3DSAPI Lib3dsQuatKey* lib3ds_quat_key_new();
-extern LIB3DSAPI void lib3ds_quat_key_free(Lib3dsQuatKey* key);
-extern LIB3DSAPI void lib3ds_quat_track_free_keys(Lib3dsQuatTrack *track);
-extern LIB3DSAPI void lib3ds_quat_key_setup(Lib3dsQuatKey *p, Lib3dsQuatKey *cp, Lib3dsQuatKey *c,
-  Lib3dsQuatKey *cn, Lib3dsQuatKey *n);
-extern LIB3DSAPI void lib3ds_quat_track_setup(Lib3dsQuatTrack *track);
-extern LIB3DSAPI void lib3ds_quat_track_insert(Lib3dsQuatTrack *track, Lib3dsQuatKey *key);
-extern LIB3DSAPI void lib3ds_quat_track_remove(Lib3dsQuatTrack *track, Lib3dsIntd frame);
-extern LIB3DSAPI void lib3ds_quat_track_eval(Lib3dsQuatTrack *track, Lib3dsQuat p, Lib3dsFloat t);
-extern LIB3DSAPI Lib3dsBool lib3ds_quat_track_read(Lib3dsQuatTrack *track, Lib3dsIo *io);
-extern LIB3DSAPI Lib3dsBool lib3ds_quat_track_write(Lib3dsQuatTrack *track, Lib3dsIo *io);
-
-extern LIB3DSAPI Lib3dsMorphKey* lib3ds_morph_key_new();
-extern LIB3DSAPI void lib3ds_morph_key_free(Lib3dsMorphKey* key);
-extern LIB3DSAPI void lib3ds_morph_track_free_keys(Lib3dsMorphTrack *track);
-extern LIB3DSAPI void lib3ds_morph_track_insert(Lib3dsMorphTrack *track, Lib3dsMorphKey *key);
-extern LIB3DSAPI void lib3ds_morph_track_remove(Lib3dsMorphTrack *track, Lib3dsIntd frame);
-extern LIB3DSAPI void lib3ds_morph_track_eval(Lib3dsMorphTrack *track, char *p, Lib3dsFloat t);
-extern LIB3DSAPI Lib3dsBool lib3ds_morph_track_read(Lib3dsMorphTrack *track, Lib3dsIo *io);
-extern LIB3DSAPI Lib3dsBool lib3ds_morph_track_write(Lib3dsMorphTrack *track, Lib3dsIo *io);
+typedef enum Lib3dsNodeTypes {
+    LIB3DS_UNKNOWN_NODE =0,
+    LIB3DS_AMBIENT_NODE =1,
+    LIB3DS_OBJECT_NODE  =2,
+    LIB3DS_CAMERA_NODE  =3,
+    LIB3DS_TARGET_NODE  =4,
+    LIB3DS_LIGHT_NODE   =5,
+    LIB3DS_SPOT_NODE    =6
+} Lib3dsNodeTypes;
 
 /**
  * Scene graph ambient color node data
@@ -941,7 +837,7 @@ extern LIB3DSAPI Lib3dsBool lib3ds_morph_track_write(Lib3dsMorphTrack *track, Li
  */
 typedef struct Lib3dsAmbientData {
     Lib3dsRgb col;
-    Lib3dsLin3Track col_track;
+    Lib3dsTrack *col_track;
 } Lib3dsAmbientData;
 
 /**
@@ -953,17 +849,17 @@ typedef struct Lib3dsObjectData {
     char instance[64];
     Lib3dsVector bbox_min;
     Lib3dsVector bbox_max;
+    Lib3dsBool hide;
     Lib3dsVector pos;
-    Lib3dsLin3Track pos_track;
     Lib3dsQuat rot;
-    Lib3dsQuatTrack rot_track;
     Lib3dsVector scl;
-    Lib3dsLin3Track scl_track;
     Lib3dsFloat morph_smooth;
     char morph[64];
-    Lib3dsMorphTrack morph_track;
-    Lib3dsBool hide;
-    Lib3dsBoolTrack hide_track;
+    Lib3dsTrack *pos_track;
+    Lib3dsTrack *rot_track;
+    Lib3dsTrack *scl_track;
+    Lib3dsTrack *morph_track;
+    Lib3dsTrack *hide_track;
 } Lib3dsObjectData;
 
 /**
@@ -972,11 +868,11 @@ typedef struct Lib3dsObjectData {
  */
 typedef struct Lib3dsCameraData {
     Lib3dsVector pos;
-    Lib3dsLin3Track pos_track;
     Lib3dsFloat fov;
-    Lib3dsLin1Track fov_track;
     Lib3dsFloat roll;
-    Lib3dsLin1Track roll_track;
+    Lib3dsTrack *pos_track;
+    Lib3dsTrack *fov_track;
+    Lib3dsTrack *roll_track;
 } Lib3dsCameraData;
 
 /**
@@ -985,7 +881,7 @@ typedef struct Lib3dsCameraData {
  */
 typedef struct Lib3dsTargetData {
     Lib3dsVector pos;
-    Lib3dsLin3Track pos_track;
+    Lib3dsTrack *pos_track;
 } Lib3dsTargetData;
 
 /**
@@ -994,15 +890,15 @@ typedef struct Lib3dsTargetData {
  */
 typedef struct Lib3dsLightData {
     Lib3dsVector pos;
-    Lib3dsLin3Track pos_track;
     Lib3dsRgb col;
-    Lib3dsLin3Track col_track;
     Lib3dsFloat hotspot;
-    Lib3dsLin1Track hotspot_track;
     Lib3dsFloat falloff;
-    Lib3dsLin1Track falloff_track;
     Lib3dsFloat roll;
-    Lib3dsLin1Track roll_track;
+    Lib3dsTrack *pos_track;
+    Lib3dsTrack *col_track;
+    Lib3dsTrack *hotspot_track;
+    Lib3dsTrack *falloff_track;
+    Lib3dsTrack *roll_track;
 } Lib3dsLightData;
 
 /**
@@ -1011,7 +907,7 @@ typedef struct Lib3dsLightData {
  */
 typedef struct Lib3dsSpotData {
     Lib3dsVector pos;
-    Lib3dsLin3Track pos_track;
+    Lib3dsTrack *pos_track;
 } Lib3dsSpotData;
 
 /**
@@ -1031,16 +927,6 @@ typedef union Lib3dsNodeData {
  * \ingroup node
  */
 #define LIB3DS_NO_PARENT 65535
-
-typedef enum Lib3dsNodeTypes {
-    LIB3DS_UNKNOWN_NODE =0,
-    LIB3DS_AMBIENT_NODE =1,
-    LIB3DS_OBJECT_NODE  =2,
-    LIB3DS_CAMERA_NODE  =3,
-    LIB3DS_TARGET_NODE  =4,
-    LIB3DS_LIGHT_NODE   =5,
-    LIB3DS_SPOT_NODE    =6
-} Lib3dsNodeTypes;
 
 /**
 * Node flags #1

@@ -273,7 +273,7 @@ load_model(void)
   }
 
   lib3ds_file_eval(file, 0.0f);
-  lib3ds_file_bounding_box_of_nodes(file, LIB3DS_TRUE, LIB3DS_FALSE, LIB3DS_FALSE, bmin, bmax);
+  lib3ds_file_bounding_box_of_nodes(file, TRUE, FALSE, FALSE, bmin, bmax);
   sx = bmax[0] - bmin[0];
   sy = bmax[1] - bmin[1];
   sz = bmax[2] - bmin[2];
@@ -461,7 +461,7 @@ render_node(Lib3dsNode *node)
 
       {
         unsigned p;
-        Lib3dsVector *normalL=malloc(3*sizeof(Lib3dsVector)*mesh->faces);
+        Lib3dsVector *normalL=malloc(3*sizeof(Lib3dsVector)*mesh->nvfaces);
         Lib3dsMaterial *oldmat = (Lib3dsMaterial *)-1;
         {
           Lib3dsMatrix M;
@@ -471,8 +471,8 @@ render_node(Lib3dsNode *node)
         }
         lib3ds_mesh_calculate_normals(mesh, normalL);
 
-        for (p=0; p<mesh->faces; ++p) {
-          Lib3dsFace *f=&mesh->faceL[p];
+        for (p=0; p<mesh->nvfaces; ++p) {
+          Lib3dsFace *f=&mesh->vfaces[p];
           Lib3dsMaterial *mat=0;
 #ifdef	USE_SDL
           Player_texture *pt = NULL;
@@ -621,11 +621,11 @@ render_node(Lib3dsNode *node)
               glNormal3fv(normalL[3*p+i]);
 
               if (tex_mode) {
-                glTexCoord2f(mesh->texelL[f->points[i]][1]*pt->scale_x,
-                  pt->scale_y - mesh->texelL[f->points[i]][0]*pt->scale_y);
+                glTexCoord2f(mesh->texcos[f->points[i]][1]*pt->scale_x,
+                  pt->scale_y - mesh->texcos[f->points[i]][0]*pt->scale_y);
               }
 
-              glVertex3fv(mesh->pointL[f->points[i]].pos);
+              glVertex3fv(mesh->vertices[f->points[i]]);
             }
             glEnd();
 
@@ -774,7 +774,7 @@ static void
 display(void)
 {
   Lib3dsNode *c,*t;
-  Lib3dsFloat fov, roll;
+  float fov, roll;
   float near, far, dist;
   float *campos;
   float *tgt;

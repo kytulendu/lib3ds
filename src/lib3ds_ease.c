@@ -30,20 +30,20 @@
 /*!
  * \ingroup ease
  */
-Lib3dsFloat
-lib3ds_ease(Lib3dsFloat fp, Lib3dsFloat fc, Lib3dsFloat fn,
-  Lib3dsFloat ease_from, Lib3dsFloat ease_to)
+float
+lib3ds_ease(float fp, float fc, float fn,
+  float ease_from, float ease_to)
 {
-  Lib3dsDouble s,step;
-  Lib3dsDouble tofrom;
-  Lib3dsDouble a;
+  double s,step;
+  double tofrom;
+  double a;
 
-  s=step=(Lib3dsFloat)(fc-fp)/(fn-fp);
+  s=step=(float)(fc-fp)/(fn-fp);
   tofrom=ease_to+ease_from;
   if (tofrom!=0.0) {
     if (tofrom>1.0) {
-      ease_to=(Lib3dsFloat)(ease_to/tofrom);
-      ease_from=(Lib3dsFloat)(ease_from/tofrom);
+      ease_to=(float)(ease_to/tofrom);
+      ease_from=(float)(ease_from/tofrom);
     }
     a=1.0/(2.0-(ease_to+ease_from));
 
@@ -58,5 +58,5 @@ lib3ds_ease(Lib3dsFloat fp, Lib3dsFloat fc, Lib3dsFloat fn,
       }
     }
   }
-  return((Lib3dsFloat)s);
+  return((float)s);
 }

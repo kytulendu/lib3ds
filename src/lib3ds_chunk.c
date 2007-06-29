@@ -31,8 +31,8 @@
  */
 
 
-static Lib3dsBool enable_dump=LIB3DS_FALSE;
-static Lib3dsBool enable_unknown=LIB3DS_FALSE;
+static Lib3dsBool enable_dump=FALSE;
+static Lib3dsBool enable_unknown=FALSE;
 static char lib3ds_chunk_level[128]="";
 
 
@@ -96,9 +96,9 @@ lib3ds_chunk_read(Lib3dsChunk *c, Lib3dsIo *io)
   c->end=c->cur+c->size;
   c->cur+=6;
   if (lib3ds_io_error(io) || (c->size<6)) {
-    return(LIB3DS_FALSE);
+    return(FALSE);
   }
-  return(LIB3DS_TRUE);
+  return(TRUE);
   
 }
 
@@ -112,7 +112,7 @@ lib3ds_chunk_read_start(Lib3dsChunk *c, Lib3dsWord chunk, Lib3dsIo *io)
   ASSERT(c);
   ASSERT(io);
   if (!lib3ds_chunk_read(c, io)) {
-    return(LIB3DS_FALSE);
+    return(FALSE);
   }
   lib3ds_chunk_debug_enter(c);
   return((chunk==0) || (c->chunk==chunk));
@@ -188,13 +188,13 @@ lib3ds_chunk_write(Lib3dsChunk *c, Lib3dsIo *io)
   ASSERT(c);
   if (!lib3ds_io_write_word(io, c->chunk)) {
     LIB3DS_ERROR_LOG;
-    return(LIB3DS_FALSE);
+    return(FALSE);
   }
   if (!lib3ds_io_write_dword(io, c->size)) {
     LIB3DS_ERROR_LOG;
-    return(LIB3DS_FALSE);
+    return(FALSE);
   }
-  return(LIB3DS_TRUE);
+  return(TRUE);
 }
 
 
@@ -208,12 +208,12 @@ lib3ds_chunk_write_start(Lib3dsChunk *c, Lib3dsIo *io)
   c->size=0;
   c->cur=lib3ds_io_tell(io);
   if (!lib3ds_io_write_word(io, c->chunk)) {
-    return(LIB3DS_FALSE);
+    return(FALSE);
   }
   if (!lib3ds_io_write_dword(io, c->size)) {
-    return(LIB3DS_FALSE);
+    return(FALSE);
   }
-  return(LIB3DS_TRUE);
+  return(TRUE);
 }
 
 
@@ -228,16 +228,16 @@ lib3ds_chunk_write_end(Lib3dsChunk *c, Lib3dsIo *io)
   lib3ds_io_seek(io, c->cur+2, LIB3DS_SEEK_SET);
   if (!lib3ds_io_write_dword(io, c->size)) {
     LIB3DS_ERROR_LOG;
-    return(LIB3DS_FALSE);
+    return(FALSE);
   }
 
   c->cur+=c->size;
   lib3ds_io_seek(io, c->cur, LIB3DS_SEEK_SET);
   if (lib3ds_io_error(io)) {
     LIB3DS_ERROR_LOG;
-    return(LIB3DS_FALSE);
+    return(FALSE);
   }
-  return(LIB3DS_TRUE);
+  return(TRUE);
 }
 
 

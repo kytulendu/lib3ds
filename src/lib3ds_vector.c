@@ -132,7 +132,7 @@ lib3ds_vector_sub(Lib3dsVector c, Lib3dsVector a, Lib3dsVector b)
  * \ingroup vector
  */
 void
-lib3ds_vector_scalar(Lib3dsVector c, Lib3dsFloat k)
+lib3ds_vector_scalar(Lib3dsVector c, float k)
 {
   int i;
   for (i=0; i<3; ++i) {
@@ -169,7 +169,7 @@ lib3ds_vector_cross(Lib3dsVector c, Lib3dsVector a, Lib3dsVector b)
  *
  * \ingroup vector
  */
-Lib3dsFloat
+float
 lib3ds_vector_dot(Lib3dsVector a, Lib3dsVector b)
 {
   return(a[0]*b[0] + a[1]*b[1] + a[2]*b[2]);
@@ -187,7 +187,7 @@ lib3ds_vector_dot(Lib3dsVector a, Lib3dsVector b)
  *
  * \ingroup vector
  */
-Lib3dsFloat
+float
 lib3ds_vector_squared(Lib3dsVector c)
 {
   return(c[0]*c[0] + c[1]*c[1] + c[2]*c[2]);
@@ -205,10 +205,10 @@ lib3ds_vector_squared(Lib3dsVector c)
  *
  * \ingroup vector
  */
-Lib3dsFloat
+float
 lib3ds_vector_length(Lib3dsVector c)
 {
-  return((Lib3dsFloat)sqrt(c[0]*c[0] + c[1]*c[1] + c[2]*c[2]));
+  return((float)sqrt(c[0]*c[0] + c[1]*c[1] + c[2]*c[2]));
 }
 
 
@@ -224,9 +224,9 @@ lib3ds_vector_length(Lib3dsVector c)
 void
 lib3ds_vector_normalize(Lib3dsVector c)
 {
-  Lib3dsFloat l,m;
+  float l,m;
 
-  l=(Lib3dsFloat)sqrt(c[0]*c[0] + c[1]*c[1] + c[2]*c[2]);
+  l=(float)sqrt(c[0]*c[0] + c[1]*c[1] + c[2]*c[2]);
   if (fabs(l)<LIB3DS_EPSILON) {
     if ((c[0]>=c[1]) && (c[0]>=c[2])) {
       c[0]=1.0f;
@@ -312,17 +312,17 @@ lib3ds_vector_transform(Lib3dsVector c, Lib3dsMatrix m, Lib3dsVector a)
  */
 void
 lib3ds_vector_cubic(Lib3dsVector c, Lib3dsVector a, Lib3dsVector p, Lib3dsVector q,
-  Lib3dsVector b, Lib3dsFloat t)
+  Lib3dsVector b, float t)
 {
-  Lib3dsDouble x,y,z,w;   
+  double x,y,z,w;   
 
   x=2*t*t*t - 3*t*t + 1;
   y=-2*t*t*t + 3*t*t;
   z=t*t*t - 2*t*t + t;
   w=t*t*t - t*t;
-  c[0]=(Lib3dsFloat)(x*a[0] + y*b[0] + z*p[0] + w*q[0]);
-  c[1]=(Lib3dsFloat)(x*a[1] + y*b[1] + z*p[1] + w*q[1]);
-  c[2]=(Lib3dsFloat)(x*a[2] + y*b[2] + z*p[2] + w*q[2]);
+  c[0]=(float)(x*a[0] + y*b[0] + z*p[0] + w*q[0]);
+  c[1]=(float)(x*a[1] + y*b[1] + z*p[1] + w*q[1]);
+  c[2]=(float)(x*a[2] + y*b[2] + z*p[2] + w*q[2]);
 }
 
 

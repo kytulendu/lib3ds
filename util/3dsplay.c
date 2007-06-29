@@ -479,7 +479,10 @@ render_node(Lib3dsNode *node)
           int tex_mode = 0;
 #endif
           if (f->material[0]) {
-            mat=lib3ds_file_material_by_name(file, f->material);
+            Lib3dsIntd matidx;
+            matidx=lib3ds_file_material_by_name(file, f->material);
+            if (matidx != -1)
+                mat = file->materials[matidx];
           }
 
           if( mat != oldmat ) {

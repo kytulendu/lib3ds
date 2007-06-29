@@ -4,13 +4,13 @@
 * All rights reserved.
 *
 * This program is  free  software;  you can redistribute it and/or modify it
-* under the terms of the  GNU Lesser General Public License  as published by 
-* the  Free Software Foundation;  either version 2.1 of the License,  or (at 
+* under the terms of the  GNU Lesser General Public License  as published by
+* the  Free Software Foundation;  either version 2.1 of the License,  or (at
 * your option) any later version.
 *
 * This  program  is  distributed in  the  hope that it will  be useful,  but
 * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-* or  FITNESS FOR A  PARTICULAR PURPOSE.  See the  GNU Lesser General Public  
+* or  FITNESS FOR A  PARTICULAR PURPOSE.  See the  GNU Lesser General Public
 * License for more details.
 *
 * You should  have received  a copy of the GNU Lesser General Public License
@@ -37,14 +37,11 @@
 #include <GL/glut.h>
 #endif
 
-#ifdef	USE_SDL
+#ifdef USE_SDL
 #include <SDL_image.h>
 #endif
 
-
-
-
-#define	MOUSE_SCALE	.1	/* degrees/pixel movement */
+#define MOUSE_SCALE .1 /* degrees/pixel movement */
 
 /*!
 \example player.c
@@ -59,55 +56,55 @@ Syntax: player filename
 */
 
 
-typedef	enum {ROTATING, WALKING} RunMode;
+typedef enum {ROTATING, WALKING} RunMode;
 
-static	RunMode runMode = ROTATING;
+static RunMode runMode = ROTATING;
 
-static const char* filepath=NULL;
+static const char* filepath = NULL;
 static char datapath[256];
 static char filename[256];
-static int dbuf=1;
-static int halt=0;
-static int flush=0;
-static int anti_alias=1;
+static int dbuf = 1;
+static int halt = 0;
+static int flush = 0;
+static int anti_alias = 1;
 
-static const char* camera=0;
-static Lib3dsFile *file=0;
-static float current_frame=0.0;
+static const char* camera = 0;
+static Lib3dsFile *file = 0;
+static float current_frame = 0.0;
 static int gl_width;
 static int gl_height;
-static int menu_id=0;
-static int show_object=1;
-static int show_bounds=0;
+static int menu_id = 0;
+static int show_object = 1;
+static int show_bounds = 0;
 static int rotating = 0;
 static int show_cameras = 0;
 static int show_lights = 0;
 
-static int cameraList, lightList;	/* Icon display lists */
+static int cameraList, lightList; /* Icon display lists */
 
 static Lib3dsVector bmin, bmax;
-static float	sx, sy, sz, size;	/* bounding box dimensions */
-static float	cx, cy, cz;		/* bounding box center */
+static float sx, sy, sz, size; /* bounding box dimensions */
+static float cx, cy, cz;  /* bounding box center */
 
-static	float	view_rotx = 0., view_roty = 0., view_rotz = 0.;
-static	float	anim_rotz = 0.;
+static float view_rotx = 0., view_roty = 0., view_rotz = 0.;
+static float anim_rotz = 0.;
 
-static	int	mx, my;
+static int mx, my;
 
-static const GLfloat white[4] = {1.,1.,1.,1.};
-static const GLfloat dgrey[4] = {.25,.25,.25,1.};
-static const GLfloat grey[4] = {.5,.5,.5,1.};
-static const GLfloat lgrey[4] = {.75,.75,.75,1.};
-static const GLfloat black[] = {0.,0.,0.,1.};
-static const GLfloat red[4] = {1.,0.,0.,1.};
-static const GLfloat green[4] = {0.,1.,0.,1.};
-static const GLfloat blue[4] = {0.,0.,1.,1.};
+static const GLfloat white[4] = {1., 1., 1., 1.};
+static const GLfloat dgrey[4] = {.25, .25, .25, 1.};
+static const GLfloat grey[4] = {.5, .5, .5, 1.};
+static const GLfloat lgrey[4] = {.75, .75, .75, 1.};
+static const GLfloat black[] = {0., 0., 0., 1.};
+static const GLfloat red[4] = {1., 0., 0., 1.};
+static const GLfloat green[4] = {0., 1., 0., 1.};
+static const GLfloat blue[4] = {0., 0., 1., 1.};
 
 
-static	void	solidBox(double bx, double by, double bz);
-static	void	solidCylinder(double r, double h, int slices);
-static	int	callback(void (*cb)(int m, int d, void *), void *client);
-static	void	call_callback(int idx, int data);
+static void solidBox(double bx, double by, double bz);
+static void solidCylinder(double r, double h, int slices);
+static int callback(void (*cb)(int m, int d, void *), void *client);
+static void call_callback(int idx, int data);
 
 static void solidBox(double bx, double by, double bz);
 static void solidCylinder(double r, double h, int slices);
@@ -115,39 +112,37 @@ static const char *Basename(const char *filename);
 
 
 // texture size: by now minimum standard
-#define	TEX_XSIZE	1024
-#define	TEX_YSIZE	1024
+#define TEX_XSIZE 1024
+#define TEX_YSIZE 1024
 
-struct _player_texture
-{
-  int valid; // was the loading attempt successful ? 
-#ifdef	USE_SDL
-  SDL_Surface *bitmap;
+struct _player_texture {
+    int valid; // was the loading attempt successful ?
+#ifdef USE_SDL
+    SDL_Surface *bitmap;
 #else
-  void *bitmap;
+    void *bitmap;
 #endif
-  GLuint tex_id; //OpenGL texture ID
-  float scale_x, scale_y; // scale the texcoords, as OpenGL thinks in TEX_XSIZE and TEX_YSIZE
+    GLuint tex_id; //OpenGL texture ID
+    float scale_x, scale_y; // scale the texcoords, as OpenGL thinks in TEX_XSIZE and TEX_YSIZE
 };
 
-typedef struct _player_texture Player_texture; 
-Player_texture *pt; 
-int tex_mode; // Texturing active ? 
+typedef struct _player_texture Player_texture;
+Player_texture *pt;
+int tex_mode; // Texturing active ?
 
-#define	NA(a)	(sizeof(a)/sizeof(a[0]))
+#define NA(a) (sizeof(a)/sizeof(a[0]))
 
-#ifndef	MIN
-#define	MIN(a,b) ((a)<(b)?(a):(b))
-#define	MAX(a,b) ((a)>(b)?(a):(b))
+#ifndef MIN
+#define MIN(a,b) ((a)<(b)?(a):(b))
+#define MAX(a,b) ((a)>(b)?(a):(b))
 #endif
 
 
 
 
-static	void
-menu_cb(int value)
-{
-  call_callback(value, 0);
+static void
+menu_cb(int value) {
+    call_callback(value, 0);
 }
 
 
@@ -155,23 +150,21 @@ menu_cb(int value)
 * Switch cameras based on user's menu choice.
 */
 static void
-camera_menu(int menu, int value, void *client)
-{
-  Lib3dsCamera *c = (Lib3dsCamera*)client;
-  view_rotx = view_roty = view_rotz = anim_rotz = 0.;
-  camera=c->name;
+camera_menu(int menu, int value, void *client) {
+    Lib3dsCamera *c = (Lib3dsCamera*)client;
+    view_rotx = view_roty = view_rotz = anim_rotz = 0.;
+    camera = c->name;
 }
 
 
 /*!
 * Toggle an arbitrary int (bool) variable
 */
-static	void
-toggle_bool(int menu, int value, void *client)
-{
-  int *var = client;
-  *var = !*var;
-  glutPostRedisplay();
+static void
+toggle_bool(int menu, int value, void *client) {
+    int *var = client;
+    *var = !*var;
+    glutPostRedisplay();
 }
 
 
@@ -180,48 +173,42 @@ toggle_bool(int menu, int value, void *client)
 * Build the menu
 */
 static void
-build_menu()
-{
-  int i;
-  menu_id=glutCreateMenu(menu_cb);
+build_menu() {
+    int i;
+    menu_id = glutCreateMenu(menu_cb);
 
-  for (i=0; i<file->ncameras; ++i)
-    glutAddMenuEntry(file->cameras[i]->name, callback(camera_menu, file->cameras[i]));
+    for (i = 0; i < file->ncameras; ++i)
+        glutAddMenuEntry(file->cameras[i]->name, callback(camera_menu, file->cameras[i]));
 
-  glutAddMenuEntry("Show cameras", callback(toggle_bool, &show_cameras));
-  glutAddMenuEntry("Show lights", callback(toggle_bool, &show_lights));
-  glutAddMenuEntry("Show bounds", callback(toggle_bool, &show_bounds));
+    glutAddMenuEntry("Show cameras", callback(toggle_bool, &show_cameras));
+    glutAddMenuEntry("Show lights", callback(toggle_bool, &show_lights));
+    glutAddMenuEntry("Show bounds", callback(toggle_bool, &show_bounds));
 }
 
 
 /*!
 * Time function, called every frame
 */
-static	void
-timer_cb(int value)
-{
-    /*
-  glutPostRedisplay();
-
-  if (!halt) {
-    view_rotz += anim_rotz;
-    //current_frame+=0.1;
-    //if (current_frame > file->frames)
-    //    current_frame = 1;
-    lib3ds_file_eval(file, current_frame);
-    glutTimerFunc(10, timer_cb, 0);
-  }
-  */
+static void
+timer_cb(int value) {
+    if (!halt) {
+        view_rotz += anim_rotz;
+        current_frame+=0.1;
+        if (current_frame > file->frames)
+            current_frame = 0;
+        lib3ds_file_eval(file, current_frame);
+        glutTimerFunc(10, timer_cb, 0);
+    }
+    glutPostRedisplay();
 }
 
-static	void
-set_halt(int h)
-{
-  if( h != halt ) {
-    halt = h;
-    if( !halt )
-      glutTimerFunc(10, timer_cb, 0);
-  }
+static void
+set_halt(int h) {
+    if (h != halt) {
+        halt = h;
+        if (!halt)
+            glutTimerFunc(10, timer_cb, 0);
+    }
 }
 
 
@@ -230,18 +217,17 @@ set_halt(int h)
 * Initialize OpenGL
 */
 static void
-init(void)
-{
-  glClearColor(0.5, 0.5, 0.5, 1.0);
-  glShadeModel(GL_SMOOTH);
-  glEnable(GL_LIGHTING);
-  glEnable(GL_LIGHT0);
-  glDisable(GL_LIGHT1);
-  glDepthFunc(GL_LEQUAL);
-  glEnable(GL_DEPTH_TEST);
-  glCullFace(GL_BACK);
-  //glDisable(GL_NORMALIZE);
-  //glPolygonOffset(1.0, 2);
+init(void) {
+    glClearColor(0.5, 0.5, 0.5, 1.0);
+    glShadeModel(GL_SMOOTH);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+    glDisable(GL_LIGHT1);
+    glDepthFunc(GL_LEQUAL);
+    glEnable(GL_DEPTH_TEST);
+    glCullFace(GL_BACK);
+    //glDisable(GL_NORMALIZE);
+    //glPolygonOffset(1.0, 2);
 }
 
 
@@ -249,140 +235,138 @@ init(void)
 * Load the model from .3ds file.
 */
 static void
-load_model(void)
-{
-  file=lib3ds_file_load(filepath);
-  if (!file) {
-    puts("3dsplayer: Error: Loading 3DS file failed.\n");
-    exit(1);
-  }
-
-  /* No nodes?  Fabricate nodes to display all the meshes. */
-  if( !file->nodes )
-  {
-    Lib3dsNode *node;
-    int i;
-    for (i=0; i<file->nmeshes; ++i)
-    {
-      Lib3dsMesh *mesh = file->meshes[i];
-      node = lib3ds_node_new(LIB3DS_OBJECT_NODE);
-      strcpy(node->name, mesh->name);
-      node->parent_id = LIB3DS_NO_PARENT;
-      lib3ds_file_insert_node(file, node);
+load_model(void) {
+    file = lib3ds_file_load(filepath);
+    if (!file) {
+        puts("3dsplayer: Error: Loading 3DS file failed.\n");
+        exit(1);
     }
-  }
 
-  lib3ds_file_eval(file, 0.0f);
-  lib3ds_file_bounding_box_of_nodes(file, TRUE, FALSE, FALSE, bmin, bmax);
-  sx = bmax[0] - bmin[0];
-  sy = bmax[1] - bmin[1];
-  sz = bmax[2] - bmin[2];
-  size = MAX(sx, sy); size = MAX(size, sz);
-  cx = (bmin[0] + bmax[0])/2;
-  cy = (bmin[1] + bmax[1])/2;
-  cz = (bmin[2] + bmax[2])/2;
+    /* No nodes?  Fabricate nodes to display all the meshes. */
+    if (!file->nodes) {
+        Lib3dsNode *node;
+        int i;
+        for (i = 0; i < file->nmeshes; ++i) {
+            Lib3dsMesh *mesh = file->meshes[i];
+            node = lib3ds_node_new(LIB3DS_OBJECT_NODE);
+            strcpy(node->name, mesh->name);
+            node->parent_id = LIB3DS_NO_PARENT;
+            lib3ds_file_insert_node(file, node);
+        }
+    }
+
+    lib3ds_file_eval(file, 0.0f);
+    lib3ds_file_bounding_box_of_nodes(file, TRUE, FALSE, FALSE, bmin, bmax);
+    sx = bmax[0] - bmin[0];
+    sy = bmax[1] - bmin[1];
+    sz = bmax[2] - bmin[2];
+    size = MAX(sx, sy);
+    size = MAX(size, sz);
+    cx = (bmin[0] + bmax[0]) / 2;
+    cy = (bmin[1] + bmax[1]) / 2;
+    cz = (bmin[2] + bmax[2]) / 2;
 
 
-  /* No cameras in the file?  Add four */
+    /* No cameras in the file?  Add four */
 
-  if (!file->ncameras) {
+    if (!file->ncameras) {
 
-    /* Add some cameras that encompass the bounding box */
+        /* Add some cameras that encompass the bounding box */
 
-    Lib3dsCamera *camera = lib3ds_camera_new("Camera_X");
-    camera->target[0] = cx;
-    camera->target[1] = cy;
-    camera->target[2] = cz;
-    memcpy(camera->position, camera->target, sizeof(camera->position));
-    camera->position[0] = bmax[0] + 1.5 * MAX(sy,sz);
-    camera->near_range = ( camera->position[0] - bmax[0] ) * .5;
-    camera->far_range = ( camera->position[0] - bmin[0] ) * 2;
-    lib3ds_file_camera_insert(file, camera, -1);
+        Lib3dsCamera *camera = lib3ds_camera_new("Camera_X");
+        camera->target[0] = cx;
+        camera->target[1] = cy;
+        camera->target[2] = cz;
+        memcpy(camera->position, camera->target, sizeof(camera->position));
+        camera->position[0] = bmax[0] + 1.5 * MAX(sy, sz);
+        camera->near_range = (camera->position[0] - bmax[0]) * .5;
+        camera->far_range = (camera->position[0] - bmin[0]) * 2;
+        lib3ds_file_camera_insert(file, camera, -1);
 
-    /* Since lib3ds considers +Y to be into the screen, we'll put
-    * this camera on the -Y axis, looking in the +Y direction.
-    */
-    camera = lib3ds_camera_new("Camera_Y");
-    camera->target[0] = cx;
-    camera->target[1] = cy;
-    camera->target[2] = cz;
-    memcpy(camera->position, camera->target, sizeof(camera->position));
-    camera->position[1] = bmin[1] - 1.5 * MAX(sx,sz);
-    camera->near_range = ( bmin[1] - camera->position[1] ) * .5;
-    camera->far_range = ( bmax[1] - camera->position[1] ) * 2;
-    lib3ds_file_camera_insert(file, camera, -1);
+        /* Since lib3ds considers +Y to be into the screen, we'll put
+        * this camera on the -Y axis, looking in the +Y direction.
+        */
+        camera = lib3ds_camera_new("Camera_Y");
+        camera->target[0] = cx;
+        camera->target[1] = cy;
+        camera->target[2] = cz;
+        memcpy(camera->position, camera->target, sizeof(camera->position));
+        camera->position[1] = bmin[1] - 1.5 * MAX(sx, sz);
+        camera->near_range = (bmin[1] - camera->position[1]) * .5;
+        camera->far_range = (bmax[1] - camera->position[1]) * 2;
+        lib3ds_file_camera_insert(file, camera, -1);
 
-    camera = lib3ds_camera_new("Camera_Z");
-    camera->target[0] = cx;
-    camera->target[1] = cy;
-    camera->target[2] = cz;
-    memcpy(camera->position, camera->target, sizeof(camera->position));
-    camera->position[2] = bmax[2] + 1.5 * MAX(sx,sy);
-    camera->near_range = ( camera->position[2] - bmax[2] ) * .5;
-    camera->far_range = ( camera->position[2] - bmin[2] ) * 2;
-    lib3ds_file_camera_insert(file, camera, -1);
+        camera = lib3ds_camera_new("Camera_Z");
+        camera->target[0] = cx;
+        camera->target[1] = cy;
+        camera->target[2] = cz;
+        memcpy(camera->position, camera->target, sizeof(camera->position));
+        camera->position[2] = bmax[2] + 1.5 * MAX(sx, sy);
+        camera->near_range = (camera->position[2] - bmax[2]) * .5;
+        camera->far_range = (camera->position[2] - bmin[2]) * 2;
+        lib3ds_file_camera_insert(file, camera, -1);
 
-    camera = lib3ds_camera_new("Camera_ISO");
-    camera->target[0] = cx;
-    camera->target[1] = cy;
-    camera->target[2] = cz;
-    memcpy(camera->position, camera->target, sizeof(camera->position));
-    camera->position[0] = bmax[0] + .75 * size;
-    camera->position[1] = bmin[1] - .75 * size;
-    camera->position[2] = bmax[2] + .75 * size;
-    camera->near_range = ( camera->position[0] - bmax[0] ) * .5;
-    camera->far_range = ( camera->position[0] - bmin[0] ) * 3;
-    lib3ds_file_camera_insert(file, camera, -1);
-  }
+        camera = lib3ds_camera_new("Camera_ISO");
+        camera->target[0] = cx;
+        camera->target[1] = cy;
+        camera->target[2] = cz;
+        memcpy(camera->position, camera->target, sizeof(camera->position));
+        camera->position[0] = bmax[0] + .75 * size;
+        camera->position[1] = bmin[1] - .75 * size;
+        camera->position[2] = bmax[2] + .75 * size;
+        camera->near_range = (camera->position[0] - bmax[0]) * .5;
+        camera->far_range = (camera->position[0] - bmin[0]) * 3;
+        lib3ds_file_camera_insert(file, camera, -1);
+    }
 
-  /* No lights in the file?  Add some. */
+    /* No lights in the file?  Add some. */
 
-  if (!file->nlights) {
-    Lib3dsLight *light;
+    if (!file->nlights) {
+        Lib3dsLight *light;
 
-    light = lib3ds_light_new("light0");
-    light->spot_light = 0;
-    light->see_cone = 0;
-    light->color[0] = light->color[1] = light->color[2] = .6;
-    light->position[0] = cx + size * .75;
-    light->position[1] = cy - size * 1.;
-    light->position[2] = cz + size * 1.5;
-    light->position[3] = 0.;
-    light->outer_range = 100;
-    light->inner_range = 10;
-    light->multiplier = 1;
-    lib3ds_file_light_insert(file, light, -1);
+        light = lib3ds_light_new("light0");
+        light->spot_light = 0;
+        light->see_cone = 0;
+        light->color[0] = light->color[1] = light->color[2] = .6;
+        light->position[0] = cx + size * .75;
+        light->position[1] = cy - size * 1.;
+        light->position[2] = cz + size * 1.5;
+        light->position[3] = 0.;
+        light->outer_range = 100;
+        light->inner_range = 10;
+        light->multiplier = 1;
+        lib3ds_file_light_insert(file, light, -1);
 
-    light = lib3ds_light_new("light1");
-    light->spot_light = 0;
-    light->see_cone = 0;
-    light->color[0] = light->color[1] = light->color[2] = .3;
-    light->position[0] = cx - size;
-    light->position[1] = cy - size;
-    light->position[2] = cz + size * .75;
-    light->position[3] = 0.;
-    light->outer_range = 100;
-    light->inner_range = 10;
-    light->multiplier = 1;
-    lib3ds_file_light_insert(file, light, -1);
+        light = lib3ds_light_new("light1");
+        light->spot_light = 0;
+        light->see_cone = 0;
+        light->color[0] = light->color[1] = light->color[2] = .3;
+        light->position[0] = cx - size;
+        light->position[1] = cy - size;
+        light->position[2] = cz + size * .75;
+        light->position[3] = 0.;
+        light->outer_range = 100;
+        light->inner_range = 10;
+        light->multiplier = 1;
+        lib3ds_file_light_insert(file, light, -1);
 
-    light = lib3ds_light_new("light2");
-    light->spot_light = 0;
-    light->see_cone = 0;
-    light->color[0] = light->color[1] = light->color[2] = .3;
-    light->position[0] = cx;
-    light->position[1] = cy + size;
-    light->position[2] = cz + size;
-    light->position[3] = 0.;
-    light->outer_range = 100;
-    light->inner_range = 10;
-    light->multiplier = 1;
-    lib3ds_file_light_insert(file, light, -1);
-  }
+        light = lib3ds_light_new("light2");
+        light->spot_light = 0;
+        light->see_cone = 0;
+        light->color[0] = light->color[1] = light->color[2] = .3;
+        light->position[0] = cx;
+        light->position[1] = cy + size;
+        light->position[2] = cz + size;
+        light->position[3] = 0.;
+        light->outer_range = 100;
+        light->inner_range = 10;
+        light->multiplier = 1;
+        lib3ds_file_light_insert(file, light, -1);
+    }
 
-  camera = file->cameras[0]->name;
+    camera = file->cameras[0]->name;
 
-  lib3ds_file_eval(file, 0);
+    lib3ds_file_eval(file, 0);
 }
 
 
@@ -393,29 +377,27 @@ load_model(void)
 *
 * Written by Gernot < gz@lysator.liu.se >
 */
-void *convert_to_RGB_Surface(SDL_Surface *bitmap)
-{
-  unsigned char *pixel = (unsigned char *)malloc(sizeof(char) * 4 * bitmap->h * bitmap->w); 
-  int soff = 0;   
-  int doff = 0;   
-  int x, y;
-  unsigned char *spixels = (unsigned char *)bitmap->pixels;
-  SDL_Palette *pal = bitmap->format->palette; 
+void *convert_to_RGB_Surface(SDL_Surface *bitmap) {
+    unsigned char *pixel = (unsigned char *)malloc(sizeof(char) * 4 * bitmap->h * bitmap->w);
+    int soff = 0;
+    int doff = 0;
+    int x, y;
+    unsigned char *spixels = (unsigned char *)bitmap->pixels;
+    SDL_Palette *pal = bitmap->format->palette;
 
-  for (y = 0; y < bitmap->h; y++)
-    for (x = 0; x < bitmap->w; x++)
-    {
-      SDL_Color* col = &pal->colors[spixels[soff]];
+    for (y = 0; y < bitmap->h; y++)
+        for (x = 0; x < bitmap->w; x++) {
+            SDL_Color* col = &pal->colors[spixels[soff]];
 
-      pixel[doff] = col->r; 
-      pixel[doff+1] = col->g; 
-      pixel[doff+2] = col->b; 
-      pixel[doff+3] = 255; 
-      doff += 4; 
-      soff++;
-    }
+            pixel[doff] = col->r;
+            pixel[doff+1] = col->g;
+            pixel[doff+2] = col->b;
+            pixel[doff+3] = 255;
+            doff += 4;
+            soff++;
+        }
 
-    return (void *)pixel; 
+    return (void *)pixel;
 }
 #endif
 
@@ -427,233 +409,239 @@ void *convert_to_RGB_Surface(SDL_Surface *bitmap)
 * Each node receives its own OpenGL display list.
 */
 static void
-render_node(Lib3dsNode *node)
-{
-  assert(file);
+render_node(Lib3dsNode *node) {
+    assert(file);
 
-  {
-    Lib3dsNode *p;
-    for (p=node->childs; p!=0; p=p->next) {
-      render_node(p);
-    }
-  }
-  if (node->type==LIB3DS_OBJECT_NODE) {
-    Lib3dsIntd index;
-    Lib3dsMesh *mesh;
-
-    if (strcmp(node->name,"$$$DUMMY")==0) {
-      return;
-    }
-
-    index = lib3ds_file_mesh_by_name(file, node->data.object.morph);
-    if ( index < 0 )
-      index = lib3ds_file_mesh_by_name(file, node->name);
-    if (index < 0) {
-        return;
-    }
-    mesh = file->meshes[index];
-
-    if (!mesh->user.d) {
-      assert(mesh);
-
-      mesh->user.d=glGenLists(1);
-      glNewList(mesh->user.d, GL_COMPILE);
-
-      {
-        unsigned p;
-        Lib3dsVector *normalL=malloc(3*sizeof(Lib3dsVector)*mesh->nvfaces);
-        Lib3dsMaterial *oldmat = (Lib3dsMaterial *)-1;
-        {
-          Lib3dsMatrix M;
-          lib3ds_matrix_copy(M, mesh->matrix);
-          lib3ds_matrix_inv(M);
-          glMultMatrixf(&M[0][0]);
+    {
+        Lib3dsNode *p;
+        for (p = node->childs; p != 0; p = p->next) {
+            render_node(p);
         }
-        lib3ds_mesh_calculate_normals(mesh, normalL);
+    }
+    if (node->type == LIB3DS_OBJECT_NODE) {
+        Lib3dsIntd index;
+        Lib3dsMesh *mesh;
 
-        for (p=0; p<mesh->nvfaces; ++p) {
-          Lib3dsFace *f=&mesh->vfaces[p];
-          Lib3dsMaterial *mat=0;
-#ifdef	USE_SDL
-          Player_texture *pt = NULL;
-          int tex_mode = 0;
+        if (strcmp(node->name, "$$$DUMMY") == 0) {
+            return;
+        }
+
+        index = lib3ds_file_mesh_by_name(file, node->data.object.morph);
+        if (index < 0)
+            index = lib3ds_file_mesh_by_name(file, node->name);
+        if (index < 0) {
+            return;
+        }
+        mesh = file->meshes[index];
+
+        if (!mesh->user.d) {
+            assert(mesh);
+
+            mesh->user.d = glGenLists(1);
+            glNewList(mesh->user.d, GL_COMPILE);
+
+            {
+                unsigned p;
+                Lib3dsVector *normalL = malloc(3 * sizeof(Lib3dsVector) * mesh->nfaces);
+                Lib3dsMaterial *oldmat = (Lib3dsMaterial *) - 1;
+                {
+                    Lib3dsMatrix M;
+                    lib3ds_matrix_copy(M, mesh->matrix);
+                    lib3ds_matrix_inv(M);
+                    glMultMatrixf(&M[0][0]);
+                }
+                lib3ds_mesh_calculate_normals(mesh, normalL);
+
+                for (p = 0; p < mesh->nfaces; ++p) {
+                    Lib3dsFace *f = &mesh->faces[p];
+                    Lib3dsMaterial *mat = 0;
+#ifdef USE_SDL
+                    Player_texture *pt = NULL;
+                    int tex_mode = 0;
 #endif
-          if (f->material[0]) {
-            Lib3dsIntd matidx;
-            matidx=lib3ds_file_material_by_name(file, f->material);
-            if (matidx != -1)
-                mat = file->materials[matidx];
-          }
+                    if (f->material > 0) {
+                        mat = file->materials[f->material];
+                    }
 
-          if( mat != oldmat ) {
-            if (mat) {
-              if( mat->two_sided )
-                glDisable(GL_CULL_FACE);
-              else
-                glEnable(GL_CULL_FACE);
+                    if (mat != oldmat) {
+                        if (mat) {
+                            if (mat->two_sided)
+                                glDisable(GL_CULL_FACE);
+                            else
+                                glEnable(GL_CULL_FACE);
 
-              glDisable(GL_CULL_FACE);
+                            glDisable(GL_CULL_FACE);
 
-              /* Texturing added by Gernot < gz@lysator.liu.se > */
+                            /* Texturing added by Gernot < gz@lysator.liu.se > */
 
-              if (mat->texture1_map.name[0]) {		/* texture map? */
-                Lib3dsTextureMap *tex = &mat->texture1_map;
-                if (!tex->user.p) {		/* no player texture yet? */
-                  char texname[1024];
-                  pt = malloc(sizeof(*pt));
-                  tex->user.p = pt;
-                  //snprintf(texname, sizeof(texname), "%s/%s", datapath, tex->name);
-                  strcpy(texname, datapath);
-                  strcat(texname, "/");
-                  strcat(texname, tex->name);
-#ifdef	DEBUG
-                  printf("Loading texture map, name %s\n", texname);
-#endif	/* DEBUG */
-#ifdef	USE_SDL
+                            if (mat->texture1_map.name[0]) {  /* texture map? */
+                                Lib3dsTextureMap *tex = &mat->texture1_map;
+                                if (!tex->user.p) {  /* no player texture yet? */
+                                    char texname[1024];
+                                    pt = malloc(sizeof(*pt));
+                                    tex->user.p = pt;
+                                    //snprintf(texname, sizeof(texname), "%s/%s", datapath, tex->name);
+                                    strcpy(texname, datapath);
+                                    strcat(texname, "/");
+                                    strcat(texname, tex->name);
+#ifdef DEBUG
+                                    printf("Loading texture map, name %s\n", texname);
+#endif /* DEBUG */
+#ifdef USE_SDL
 #ifdef  USE_SDL_IMG_load
-                  pt->bitmap = IMG_load(texname);
+                                    pt->bitmap = IMG_load(texname);
 #else
-                  pt->bitmap = IMG_Load(texname);
+                                    pt->bitmap = IMG_Load(texname);
 #endif /* IMG_Load */
 
 #else /* USE_SDL */
-                  pt->bitmap = NULL;
-                  fputs("3dsplayer: Warning: No image loading support, skipping texture.\n", stderr);
+                                    pt->bitmap = NULL;
+                                    fputs("3dsplayer: Warning: No image loading support, skipping texture.\n", stderr);
 #endif /* USE_SDL */
-                  if (pt->bitmap) {	/* could image be loaded ? */
-                    /* this OpenGL texupload code is incomplete format-wise!
-                    * to make it complete, examine SDL_surface->format and
-                    * tell us @lib3ds.sf.net about your improvements :-)
-                    */
-                    int upload_format = GL_RED; /* safe choice, shows errors */
+                                    if (pt->bitmap) { /* could image be loaded ? */
+                                        /* this OpenGL texupload code is incomplete format-wise!
+                                        * to make it complete, examine SDL_surface->format and
+                                        * tell us @lib3ds.sf.net about your improvements :-)
+                                        */
+                                        int upload_format = GL_RED; /* safe choice, shows errors */
 #ifdef USE_SDL
-                    int bytespp = pt->bitmap->format->BytesPerPixel;
-                    void *pixel = NULL;
-                    glGenTextures(1, &pt->tex_id);
-#ifdef	DEBUG
-                    printf("Uploading texture to OpenGL, id %d, at %d bytepp\n",
-                      pt->tex_id, bytespp);
-#endif	/* DEBUG */
-                    if (pt->bitmap->format->palette) {
-                      pixel = convert_to_RGB_Surface(pt->bitmap);
-                      upload_format = GL_RGBA;
-                    }
-                    else {
-                      pixel = pt->bitmap->pixels;
-                      /* e.g. this could also be a color palette */
-                      if (bytespp == 1) upload_format = GL_LUMINANCE;
-                      else if (bytespp == 3) upload_format = GL_RGB;
-                      else if (bytespp == 4) upload_format = GL_RGBA;
-                    }
-                    glBindTexture(GL_TEXTURE_2D, pt->tex_id);
-                    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
-                      TEX_XSIZE, TEX_YSIZE, 0,
-                      GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-                    glTexParameteri(GL_TEXTURE_2D,
-                      GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-                    glTexParameteri(GL_TEXTURE_2D,
-                      GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-                    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-                    glTexSubImage2D(GL_TEXTURE_2D,
-                      0, 0, 0, pt->bitmap->w, pt->bitmap->h,
-                      upload_format, GL_UNSIGNED_BYTE, pixel);
-                    pt->scale_x = (float)pt->bitmap->w/(float)TEX_XSIZE;
-                    pt->scale_y = (float)pt->bitmap->h/(float)TEX_YSIZE;
+                                        int bytespp = pt->bitmap->format->BytesPerPixel;
+                                        void *pixel = NULL;
+                                        glGenTextures(1, &pt->tex_id);
+#ifdef DEBUG
+                                        printf("Uploading texture to OpenGL, id %d, at %d bytepp\n",
+                                               pt->tex_id, bytespp);
+#endif /* DEBUG */
+                                        if (pt->bitmap->format->palette) {
+                                            pixel = convert_to_RGB_Surface(pt->bitmap);
+                                            upload_format = GL_RGBA;
+                                        } else {
+                                            pixel = pt->bitmap->pixels;
+                                            /* e.g. this could also be a color palette */
+                                            if (bytespp == 1) upload_format = GL_LUMINANCE;
+                                            else if (bytespp == 3) upload_format = GL_RGB;
+                                            else if (bytespp == 4) upload_format = GL_RGBA;
+                                        }
+                                        glBindTexture(GL_TEXTURE_2D, pt->tex_id);
+                                        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
+                                                     TEX_XSIZE, TEX_YSIZE, 0,
+                                                     GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+                                        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+                                        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+                                        glTexParameteri(GL_TEXTURE_2D,
+                                                        GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                                        glTexParameteri(GL_TEXTURE_2D,
+                                                        GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                                        glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+                                        glTexSubImage2D(GL_TEXTURE_2D,
+                                                        0, 0, 0, pt->bitmap->w, pt->bitmap->h,
+                                                        upload_format, GL_UNSIGNED_BYTE, pixel);
+                                        pt->scale_x = (float)pt->bitmap->w / (float)TEX_XSIZE;
+                                        pt->scale_y = (float)pt->bitmap->h / (float)TEX_YSIZE;
 #endif /* USE_SDL */
-                    pt->valid = 1;
-                  }
-                  else {
-                    fprintf(stderr,
-                      "Load of texture %s did not succeed "
-                      "(format not supported !)\n",
-                      texname);
-                    pt->valid = 0;
-                  }
+                                        pt->valid = 1;
+                                    } else {
+                                        fprintf(stderr,
+                                                "Load of texture %s did not succeed "
+                                                "(format not supported !)\n",
+                                                texname);
+                                        pt->valid = 0;
+                                    }
+                                } else {
+                                    pt = (Player_texture *)tex->user.p;
+                                }
+                                tex_mode = pt->valid;
+                            } else {
+                                tex_mode = 0;
+                            }
+                            glMaterialfv(GL_FRONT, GL_AMBIENT, mat->ambient);
+                            glMaterialfv(GL_FRONT, GL_DIFFUSE, mat->diffuse);
+                            glMaterialfv(GL_FRONT, GL_SPECULAR, mat->specular);
+                            glMaterialf(GL_FRONT, GL_SHININESS, pow(2, 10.0*mat->shininess));
+                        } else {
+                            static const Lib3dsRgba a = {0.7, 0.7, 0.7, 1.0};
+                            static const Lib3dsRgba d = {0.7, 0.7, 0.7, 1.0};
+                            static const Lib3dsRgba s = {1.0, 1.0, 1.0, 1.0};
+                            glMaterialfv(GL_FRONT, GL_AMBIENT, a);
+                            glMaterialfv(GL_FRONT, GL_DIFFUSE, d);
+                            glMaterialfv(GL_FRONT, GL_SPECULAR, s);
+                            glMaterialf(GL_FRONT, GL_SHININESS, pow(2, 10.0*0.5));
+                        }
+                        oldmat = mat;
+                    }
+
+                    else if (mat != NULL && mat->texture1_map.name[0]) {
+                        Lib3dsTextureMap *tex = &mat->texture1_map;
+                        if (tex != NULL && tex->user.p != NULL) {
+                            pt = (Player_texture *)tex->user.p;
+                            tex_mode = pt->valid;
+                        }
+                    }
+
+
+                    {
+                        int i;
+
+                        if (tex_mode) {
+                            //printf("Binding texture %d\n", pt->tex_id);
+                            glEnable(GL_TEXTURE_2D);
+                            glBindTexture(GL_TEXTURE_2D, pt->tex_id);
+                        }
+
+#if 0
+                        {
+                            Lib3dsVector v1, n, v2;
+                            glBegin(GL_LINES);
+                            for (i = 0; i < 3; ++i) {
+                                lib3ds_vector_copy(v1, mesh->vertices[f->points[i]]);
+                                glVertex3fv(v1);
+                                lib3ds_vector_copy(n, normalL[3*p+i]);
+                                lib3ds_vector_scalar(n, 10.f);
+                                lib3ds_vector_add(v2, v1, n);
+                                glVertex3fv(v2);
+                            }
+                            glEnd();
+                        }
+#endif
+
+                        glBegin(GL_TRIANGLES);
+                        for (i = 0; i < 3; ++i) {
+                            glNormal3fv(normalL[3*p+i]);
+
+                            if (tex_mode) {
+                                glTexCoord2f(mesh->texcos[f->index[i]][1]*pt->scale_x,
+                                             pt->scale_y - mesh->texcos[f->index[i]][0]*pt->scale_y);
+                            }
+
+                            glVertex3fv(mesh->vertices[f->index[i]]);
+                        }
+                        glEnd();
+
+                        if (tex_mode)
+                            glDisable(GL_TEXTURE_2D);
+                    }
                 }
-                else {
-                  pt = (Player_texture *)tex->user.p;
-                }
-                tex_mode = pt->valid;
-              }
-              else {
-                tex_mode = 0;
-              }
-              glMaterialfv(GL_FRONT, GL_AMBIENT, mat->ambient);
-              glMaterialfv(GL_FRONT, GL_DIFFUSE, mat->diffuse);
-              glMaterialfv(GL_FRONT, GL_SPECULAR, mat->specular);
-              glMaterialf(GL_FRONT, GL_SHININESS, pow(2, 10.0*mat->shininess));
-            }
-            else {
-              static const Lib3dsRgba a={0.7, 0.7, 0.7, 1.0};
-              static const Lib3dsRgba d={0.7, 0.7, 0.7, 1.0};
-              static const Lib3dsRgba s={1.0, 1.0, 1.0, 1.0};
-              glMaterialfv(GL_FRONT, GL_AMBIENT, a);
-              glMaterialfv(GL_FRONT, GL_DIFFUSE, d);
-              glMaterialfv(GL_FRONT, GL_SPECULAR, s);
-              glMaterialf(GL_FRONT, GL_SHININESS, pow(2, 10.0*0.5));
-            }
-            oldmat = mat;
-          }
 
-          else if (mat != NULL && mat->texture1_map.name[0]) {
-            Lib3dsTextureMap *tex = &mat->texture1_map;
-            if (tex != NULL && tex->user.p != NULL) {
-              pt = (Player_texture *)tex->user.p;
-              tex_mode = pt->valid;
-            }
-          }
-
-
-          {
-            int i;
-
-            if (tex_mode) {
-              //printf("Binding texture %d\n", pt->tex_id);
-              glEnable(GL_TEXTURE_2D);
-              glBindTexture(GL_TEXTURE_2D, pt->tex_id);
+                free(normalL);
             }
 
-            glBegin(GL_TRIANGLES);
-            glNormal3fv(f->normal);
-            for (i=0; i<3; ++i) {
-              glNormal3fv(normalL[3*p+i]);
-
-              if (tex_mode) {
-                glTexCoord2f(mesh->texcos[f->points[i]][1]*pt->scale_x,
-                  pt->scale_y - mesh->texcos[f->points[i]][0]*pt->scale_y);
-              }
-
-              glVertex3fv(mesh->vertices[f->points[i]]);
-            }
-            glEnd();
-
-            if (tex_mode)
-              glDisable(GL_TEXTURE_2D);
-          }
+            glEndList();
         }
 
-        free(normalL);
-      }
+        if (mesh->user.d) {
+            Lib3dsObjectData *d;
 
-      glEndList();
+            glPushMatrix();
+            d = &node->data.object;
+            glMultMatrixf(&node->matrix[0][0]);
+            glTranslatef(-d->pivot[0], -d->pivot[1], -d->pivot[2]);
+            glCallList(mesh->user.d);
+            /* glutSolidSphere(50.0, 20,20); */
+            glPopMatrix();
+            if (flush)
+                glFlush();
+        }
     }
-
-    if (mesh->user.d) {
-      Lib3dsObjectData *d;
-
-      glPushMatrix();
-      d=&node->data.object;
-      glMultMatrixf(&node->matrix[0][0]);
-      glTranslatef(-d->pivot[0], -d->pivot[1], -d->pivot[2]);
-      glCallList(mesh->user.d);
-      /* glutSolidSphere(50.0, 20,20); */
-      glPopMatrix();
-      if( flush )
-        glFlush();
-    }
-  }
 }
 
 
@@ -665,104 +653,105 @@ render_node(Lib3dsNode *node)
 */
 
 static void
-light_update(Lib3dsLight *l)
-{
-  Lib3dsNode *ln, *sn;
+light_update(Lib3dsLight *l) {
+    Lib3dsNode *ln, *sn;
 
-  ln = lib3ds_file_node_by_name(file, l->name, LIB3DS_LIGHT_NODE);
-  sn = lib3ds_file_node_by_name(file, l->name, LIB3DS_SPOT_NODE);
+    ln = lib3ds_file_node_by_name(file, l->name, LIB3DS_LIGHT_NODE);
+    sn = lib3ds_file_node_by_name(file, l->name, LIB3DS_SPOT_NODE);
 
-  if( ln != NULL ) {
-    memcpy(l->color, ln->data.light.col, sizeof(Lib3dsRgb));
-    memcpy(l->position, ln->data.light.pos, sizeof(Lib3dsVector));
-  }
+    if (ln != NULL) {
+        memcpy(l->color, ln->data.light.col, sizeof(Lib3dsRgb));
+        memcpy(l->position, ln->data.light.pos, sizeof(Lib3dsVector));
+    }
 
-  if( sn != NULL )
-    memcpy(l->spot, sn->data.spot.pos, sizeof(Lib3dsVector));
+    if (sn != NULL)
+        memcpy(l->spot, sn->data.spot.pos, sizeof(Lib3dsVector));
 }
 
 
 
 
-static	void
-draw_bounds(Lib3dsVector tgt)
-{
-  double cx,cy,cz;
-  double lx,ly,lz;
+static void
+draw_bounds(Lib3dsVector tgt) {
+    double cx, cy, cz;
+    double lx, ly, lz;
 
-  lx = sx / 10.; ly = sy / 10.; lz = sz / 10.;
-  cx = tgt[0]; cy = tgt[1]; cz = tgt[2];
+    lx = sx / 10.;
+    ly = sy / 10.;
+    lz = sz / 10.;
+    cx = tgt[0];
+    cy = tgt[1];
+    cz = tgt[2];
 
-  glDisable(GL_LIGHTING);
-  glColor4fv(white);
-  glBegin(GL_LINES);
-  glVertex3f(bmin[0],bmin[1],bmin[2]);
-  glVertex3f(bmax[0],bmin[1],bmin[2]);
-  glVertex3f(bmin[0],bmax[1],bmin[2]);
-  glVertex3f(bmax[0],bmax[1],bmin[2]);
-  glVertex3f(bmin[0],bmin[1],bmax[2]);
-  glVertex3f(bmax[0],bmin[1],bmax[2]);
-  glVertex3f(bmin[0],bmax[1],bmax[2]);
-  glVertex3f(bmax[0],bmax[1],bmax[2]);
+    glDisable(GL_LIGHTING);
+    glColor4fv(white);
+    glBegin(GL_LINES);
+    glVertex3f(bmin[0], bmin[1], bmin[2]);
+    glVertex3f(bmax[0], bmin[1], bmin[2]);
+    glVertex3f(bmin[0], bmax[1], bmin[2]);
+    glVertex3f(bmax[0], bmax[1], bmin[2]);
+    glVertex3f(bmin[0], bmin[1], bmax[2]);
+    glVertex3f(bmax[0], bmin[1], bmax[2]);
+    glVertex3f(bmin[0], bmax[1], bmax[2]);
+    glVertex3f(bmax[0], bmax[1], bmax[2]);
 
-  glVertex3f(bmin[0],bmin[1],bmin[2]);
-  glVertex3f(bmin[0],bmax[1],bmin[2]);
-  glVertex3f(bmax[0],bmin[1],bmin[2]);
-  glVertex3f(bmax[0],bmax[1],bmin[2]);
-  glVertex3f(bmin[0],bmin[1],bmax[2]);
-  glVertex3f(bmin[0],bmax[1],bmax[2]);
-  glVertex3f(bmax[0],bmin[1],bmax[2]);
-  glVertex3f(bmax[0],bmax[1],bmax[2]);
+    glVertex3f(bmin[0], bmin[1], bmin[2]);
+    glVertex3f(bmin[0], bmax[1], bmin[2]);
+    glVertex3f(bmax[0], bmin[1], bmin[2]);
+    glVertex3f(bmax[0], bmax[1], bmin[2]);
+    glVertex3f(bmin[0], bmin[1], bmax[2]);
+    glVertex3f(bmin[0], bmax[1], bmax[2]);
+    glVertex3f(bmax[0], bmin[1], bmax[2]);
+    glVertex3f(bmax[0], bmax[1], bmax[2]);
 
-  glVertex3f(bmin[0],bmin[1],bmin[2]);
-  glVertex3f(bmin[0],bmin[1],bmax[2]);
-  glVertex3f(bmax[0],bmin[1],bmin[2]);
-  glVertex3f(bmax[0],bmin[1],bmax[2]);
-  glVertex3f(bmin[0],bmax[1],bmin[2]);
-  glVertex3f(bmin[0],bmax[1],bmax[2]);
-  glVertex3f(bmax[0],bmax[1],bmin[2]);
-  glVertex3f(bmax[0],bmax[1],bmax[2]);
+    glVertex3f(bmin[0], bmin[1], bmin[2]);
+    glVertex3f(bmin[0], bmin[1], bmax[2]);
+    glVertex3f(bmax[0], bmin[1], bmin[2]);
+    glVertex3f(bmax[0], bmin[1], bmax[2]);
+    glVertex3f(bmin[0], bmax[1], bmin[2]);
+    glVertex3f(bmin[0], bmax[1], bmax[2]);
+    glVertex3f(bmax[0], bmax[1], bmin[2]);
+    glVertex3f(bmax[0], bmax[1], bmax[2]);
 
-  glVertex3f(cx-size/32, cy, cz);
-  glVertex3f(cx+size/32, cy, cz);
-  glVertex3f(cx, cy-size/32, cz);
-  glVertex3f(cx, cy+size/32, cz);
-  glVertex3f(cx, cy, cz-size/32);
-  glVertex3f(cx, cy, cz+size/32);
-  glEnd();
+    glVertex3f(cx - size / 32, cy, cz);
+    glVertex3f(cx + size / 32, cy, cz);
+    glVertex3f(cx, cy - size / 32, cz);
+    glVertex3f(cx, cy + size / 32, cz);
+    glVertex3f(cx, cy, cz - size / 32);
+    glVertex3f(cx, cy, cz + size / 32);
+    glEnd();
 
 
-  glColor4fv(red);
-  glBegin(GL_LINES);
-  glVertex3f(0.,0.,0.);
-  glVertex3f(lx,0.,0.);
-  glEnd();
+    glColor4fv(red);
+    glBegin(GL_LINES);
+    glVertex3f(0., 0., 0.);
+    glVertex3f(lx, 0., 0.);
+    glEnd();
 
-  glColor4fv(green);
-  glBegin(GL_LINES);
-  glVertex3f(0.,0.,0.);
-  glVertex3f(0.,ly,0.);
-  glEnd();
+    glColor4fv(green);
+    glBegin(GL_LINES);
+    glVertex3f(0., 0., 0.);
+    glVertex3f(0., ly, 0.);
+    glEnd();
 
-  glColor4fv(blue);
-  glBegin(GL_LINES);
-  glVertex3f(0.,0.,0.);
-  glVertex3f(0.,0.,lz);
-  glEnd();
+    glColor4fv(blue);
+    glBegin(GL_LINES);
+    glVertex3f(0., 0., 0.);
+    glVertex3f(0., 0., lz);
+    glEnd();
 
-  glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHTING);
 }
 
 
 static void
-draw_light(const GLfloat *pos, const GLfloat *color)
-{
-  glMaterialfv(GL_FRONT, GL_EMISSION, color);
-  glPushMatrix();
-  glTranslatef(pos[0], pos[1], pos[2]);
-  glScalef(size/20, size/20, size/20);
-  glCallList(lightList);
-  glPopMatrix();
+draw_light(const GLfloat *pos, const GLfloat *color) {
+    glMaterialfv(GL_FRONT, GL_EMISSION, color);
+    glPushMatrix();
+    glTranslatef(pos[0], pos[1], pos[2]);
+    glScalef(size / 20, size / 20, size / 20);
+    glCallList(lightList);
+    glPopMatrix();
 }
 
 
@@ -771,179 +760,175 @@ draw_light(const GLfloat *pos, const GLfloat *color)
 * Main display function; called whenever the scene needs to be redrawn.
 */
 static void
-display(void)
-{
-  Lib3dsNode *c,*t;
-  float fov, roll;
-  float near, far, dist;
-  float *campos;
-  float *tgt;
-  Lib3dsMatrix M;
-  Lib3dsIntd camidx;
-  Lib3dsCamera *cam;
-  Lib3dsVector v;
-  Lib3dsNode *p;
+display(void) {
+    Lib3dsNode *c, *t;
+    float fov, roll;
+    float near, far, dist;
+    float *campos;
+    float *tgt;
+    Lib3dsMatrix M;
+    Lib3dsIntd camidx;
+    Lib3dsCamera *cam;
+    Lib3dsVector v;
+    Lib3dsNode *p;
 
-  if( file != NULL && file->background.solid.use )
-    glClearColor(file->background.solid.col[0],
-    file->background.solid.col[1],
-    file->background.solid.col[2], 1.);
+    if (file != NULL && file->background.solid.use)
+        glClearColor(file->background.solid.col[0],
+                     file->background.solid.col[1],
+                     file->background.solid.col[2], 1.);
 
-  /* TODO: fog */
+    /* TODO: fog */
 
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  if( anti_alias )
-    glEnable(GL_POLYGON_SMOOTH);
-  else
-    glDisable(GL_POLYGON_SMOOTH);
+    if (anti_alias)
+        glEnable(GL_POLYGON_SMOOTH);
+    else
+        glDisable(GL_POLYGON_SMOOTH);
 
 
-  if (!file) {
-    return;
-  }
-
-  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, file->ambient);
-
-  c = lib3ds_file_node_by_name(file, camera, LIB3DS_CAMERA_NODE);
-  t = lib3ds_file_node_by_name(file, camera, LIB3DS_TARGET_NODE);
-
-  if( t != NULL )
-    tgt = t->data.target.pos;
-
-  if( c != NULL ) {
-    fov = c->data.camera.fov;
-    roll = c->data.camera.roll;
-    campos = c->data.camera.pos;
-  }
-
-  if ((camidx = lib3ds_file_camera_by_name(file, camera)) == -1)
-    return;
-  cam = file->cameras[camidx];
-
-  near = cam->near_range;
-  far = cam->far_range;
-
-  if (c == NULL || t == NULL) {
-    if( c == NULL ) {
-      fov = cam->fov;
-      roll = cam->roll;
-      campos = cam->position;
+    if (!file) {
+        return;
     }
-    if( t == NULL )
-      tgt = cam->target;
-  }
 
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, file->ambient);
 
-  /* KLUDGE alert:  OpenGL can't handle a near clip plane of zero,
-  * so if the camera's near plane is zero, we give it a small number.
-  * In addition, many .3ds files I've seen have a far plane that's
-  * much too close and the model gets clipped away.  I haven't found
-  * a way to tell OpenGL not to clip the far plane, so we move it
-  * further away.  A factor of 10 seems to make all the models I've
-  * seen visible.
-  */
-  if( near <= 0. ) near = far * .001;
+    c = lib3ds_file_node_by_name(file, camera, LIB3DS_CAMERA_NODE);
+    t = lib3ds_file_node_by_name(file, camera, LIB3DS_TARGET_NODE);
 
-  gluPerspective( fov, 1.0*gl_width/gl_height, near, far);
+    if (t != NULL)
+        tgt = t->data.target.pos;
 
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-  glRotatef(-90, 1.0,0,0);
-
-  /* User rotates the view about the target point */
-
-  lib3ds_vector_sub(v, tgt, campos);
-  dist = lib3ds_vector_length(v);
-
-  glTranslatef(0.,dist, 0.);
-  glRotatef(view_rotx, 1., 0., 0.);
-  glRotatef(view_roty, 0., 1., 0.);
-  glRotatef(view_rotz, 0., 0., 1.);
-  glTranslatef(0.,-dist, 0.);
-
-  lib3ds_matrix_camera(M, campos, tgt, roll);
-  glMultMatrixf(&M[0][0]);
-
-  /* Lights.  Set them from light nodes if possible.  If not, use the
-  * light objects directly.
-  */
-  {
-    static const GLfloat a[] = {0.0f, 0.0f, 0.0f, 1.0f};
-    static GLfloat c[] = {1.0f, 1.0f, 1.0f, 1.0f};
-    static GLfloat p[] = {0.0f, 0.0f, 0.0f, 1.0f};
-    Lib3dsLight *l;
-    int i;
-
-    int li=GL_LIGHT0;
-    for (i=0; i<file->nlights; ++i) {
-      l = file->lights[i];
-      glEnable(li);
-      light_update(l);
-
-      c[0] = l->color[0];
-      c[1] = l->color[1];
-      c[2] = l->color[2];
-      glLightfv(li, GL_AMBIENT, a);
-      glLightfv(li, GL_DIFFUSE, c);
-      glLightfv(li, GL_SPECULAR, c);
-
-      p[0] = l->position[0];
-      p[1] = l->position[1];
-      p[2] = l->position[2];
-      glLightfv(li, GL_POSITION, p);
-
-      if (l->spot_light) {
-        p[0] = l->spot[0] - l->position[0];
-        p[1] = l->spot[1] - l->position[1];
-        p[2] = l->spot[2] - l->position[2];
-        glLightfv(li, GL_SPOT_DIRECTION, p);
-      }
-      ++li;
+    if (c != NULL) {
+        fov = c->data.camera.fov;
+        roll = c->data.camera.roll;
+        campos = c->data.camera.pos;
     }
-  }
 
-  if( show_object )
-  {
-    for (p=file->nodes; p!=0; p=p->next) {
-      render_node(p);
+    if ((camidx = lib3ds_file_camera_by_name(file, camera)) == -1)
+        return;
+    cam = file->cameras[camidx];
+
+    near = cam->near_range;
+    far = cam->far_range;
+
+    if (c == NULL || t == NULL) {
+        if (c == NULL) {
+            fov = cam->fov;
+            roll = cam->roll;
+            campos = cam->position;
+        }
+        if (t == NULL)
+            tgt = cam->target;
     }
-  }
 
-  if( show_bounds )
-    draw_bounds(tgt);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
 
-  if( show_cameras )
-  {
-    int i;
-    for (i=0; i<file->ncameras; ++i) {
-      cam = file->cameras[i];
-      lib3ds_matrix_camera(M, cam->position, cam->target, cam->roll);
-      lib3ds_matrix_inv(M);
+    /* KLUDGE alert:  OpenGL can't handle a near clip plane of zero,
+    * so if the camera's near plane is zero, we give it a small number.
+    * In addition, many .3ds files I've seen have a far plane that's
+    * much too close and the model gets clipped away.  I haven't found
+    * a way to tell OpenGL not to clip the far plane, so we move it
+    * further away.  A factor of 10 seems to make all the models I've
+    * seen visible.
+    */
+    if (near <= 0.) near = far * .001;
 
-      glPushMatrix();
-      glMultMatrixf(&M[0][0]);
-      glScalef(size/20, size/20, size/20);
-      glCallList(cameraList);
-      glPopMatrix();
+    gluPerspective(fov, 1.0*gl_width / gl_height, near, far);
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glRotatef(-90, 1.0, 0, 0);
+
+    /* User rotates the view about the target point */
+
+    lib3ds_vector_sub(v, tgt, campos);
+    dist = lib3ds_vector_length(v);
+
+    glTranslatef(0., dist, 0.);
+    glRotatef(view_rotx, 1., 0., 0.);
+    glRotatef(view_roty, 0., 1., 0.);
+    glRotatef(view_rotz, 0., 0., 1.);
+    glTranslatef(0., -dist, 0.);
+
+    lib3ds_matrix_camera(M, campos, tgt, roll);
+    glMultMatrixf(&M[0][0]);
+
+    /* Lights.  Set them from light nodes if possible.  If not, use the
+    * light objects directly.
+    */
+    {
+        static const GLfloat a[] = {0.0f, 0.0f, 0.0f, 1.0f};
+        static GLfloat c[] = {1.0f, 1.0f, 1.0f, 1.0f};
+        static GLfloat p[] = {0.0f, 0.0f, 0.0f, 1.0f};
+        Lib3dsLight *l;
+        int i;
+
+        int li = GL_LIGHT0;
+        for (i = 0; i < file->nlights; ++i) {
+            l = file->lights[i];
+            glEnable(li);
+            light_update(l);
+
+            c[0] = l->color[0];
+            c[1] = l->color[1];
+            c[2] = l->color[2];
+            glLightfv(li, GL_AMBIENT, a);
+            glLightfv(li, GL_DIFFUSE, c);
+            glLightfv(li, GL_SPECULAR, c);
+
+            p[0] = l->position[0];
+            p[1] = l->position[1];
+            p[2] = l->position[2];
+            glLightfv(li, GL_POSITION, p);
+
+            if (l->spot_light) {
+                p[0] = l->spot[0] - l->position[0];
+                p[1] = l->spot[1] - l->position[1];
+                p[2] = l->spot[2] - l->position[2];
+                glLightfv(li, GL_SPOT_DIRECTION, p);
+            }
+            ++li;
+        }
     }
-  }
 
-  if( show_lights )
-  {
-    Lib3dsLight *light;
-    int i;
-    for(i=0; i<file->nlights; ++i) {
-      light = file->lights[i];
-      draw_light(light->position, light->color);
+    if (show_object) {
+        for (p = file->nodes; p != 0; p = p->next) {
+            render_node(p);
+        }
     }
-    glMaterialfv(GL_FRONT, GL_EMISSION, black);
-  }
+
+    if (show_bounds)
+        draw_bounds(tgt);
+
+    if (show_cameras) {
+        int i;
+        for (i = 0; i < file->ncameras; ++i) {
+            cam = file->cameras[i];
+            lib3ds_matrix_camera(M, cam->position, cam->target, cam->roll);
+            lib3ds_matrix_inv(M);
+
+            glPushMatrix();
+            glMultMatrixf(&M[0][0]);
+            glScalef(size / 20, size / 20, size / 20);
+            glCallList(cameraList);
+            glPopMatrix();
+        }
+    }
+
+    if (show_lights) {
+        Lib3dsLight *light;
+        int i;
+        for (i = 0; i < file->nlights; ++i) {
+            light = file->lights[i];
+            draw_light(light->position, light->color);
+        }
+        glMaterialfv(GL_FRONT, GL_EMISSION, black);
+    }
 
 
-  glutSwapBuffers();
+    glutSwapBuffers();
 }
 
 
@@ -951,11 +936,10 @@ display(void)
 *
 */
 static void
-reshape (int w, int h)
-{
-  gl_width=w;
-  gl_height=h;
-  glViewport(0,0,w,h);
+reshape(int w, int h) {
+    gl_width = w;
+    gl_height = h;
+    glViewport(0, 0, w, h);
 }
 
 
@@ -963,70 +947,64 @@ reshape (int w, int h)
 *
 */
 static void
-keyboard(unsigned char key, int x, int y)
-{
-  switch (key) {
-case 27:
-  exit(0);
-  break;
-case 'h':
-  set_halt(!halt);
-  break;
-case 'a':
-  anim_rotz += .05;
-  break;
-case 'A':
-  anim_rotz -= .05;
-  break;
-case 'r':
-  view_rotx = view_roty = view_rotz = anim_rotz = 0.;
-  break;
-case 'z':
-  view_roty += 5.;
-  break;
-case 'Z':
-  view_roty -= 5.;
-  break;
-case 'b':
-  show_bounds = !show_bounds;
-  break;
-case 'o':
-  show_object = !show_object;
-  break;
-case '\001':
-  anti_alias = !anti_alias;
-  break;
-case '+':
-    current_frame+= 1;
-    printf("%f=\n", current_frame);
-    break;
-case '-':
-    current_frame-= 1;
-    printf("%f=\n", current_frame);
-    break;
-  }
-  lib3ds_file_eval(file, current_frame);
-  glutPostRedisplay();
+keyboard(unsigned char key, int x, int y) {
+    switch (key) {
+        case 27:
+            exit(0);
+            break;
+        case 'h':
+            set_halt(!halt);
+            break;
+        case 'a':
+            anim_rotz += .05;
+            break;
+        case 'A':
+            anim_rotz -= .05;
+            break;
+        case 'r':
+            view_rotx = view_roty = view_rotz = anim_rotz = 0.;
+            break;
+        case 'z':
+            view_roty += 5.;
+            break;
+        case 'Z':
+            view_roty -= 5.;
+            break;
+        case 'b':
+            show_bounds = !show_bounds;
+            break;
+        case 'o':
+            show_object = !show_object;
+            break;
+        case '\001':
+            anti_alias = !anti_alias;
+            break;
+    }
+    lib3ds_file_eval(file, current_frame);
+    glutPostRedisplay();
 }
 
 
 /*!
 * Respond to mouse buttons.  Action depends on current operating mode.
 */
-static	void
-mouse_cb(int button, int state, int x, int y)
-{
-  mx = x; my = y;
-  switch( button ) {
-case GLUT_LEFT_BUTTON:
-  switch( runMode ) {
-case ROTATING: rotating = state == GLUT_DOWN; break;
-default: break;
-  }
-  break;
-default:
-  break;
-  }
+static void
+mouse_cb(int button, int state, int x, int y) {
+    mx = x;
+    my = y;
+    switch (button) {
+        case GLUT_LEFT_BUTTON:
+            switch (runMode) {
+                case ROTATING:
+                    rotating = state == GLUT_DOWN;
+                    break;
+                default:
+                    break;
+            }
+            break;
+        default:
+            break;
+    }
 }
 
 
@@ -1035,15 +1013,14 @@ default:
 * other action according to current operating mode.
 */
 static void
-drag_cb(int x, int y)
-{
-  if( rotating ) {
-    view_rotz += MOUSE_SCALE * (x - mx);
-    view_rotx += MOUSE_SCALE * (y - my);
-    mx = x;
-    my = y;
-    glutPostRedisplay();
-  }
+drag_cb(int x, int y) {
+    if (rotating) {
+        view_rotz += MOUSE_SCALE * (x - mx);
+        view_rotx += MOUSE_SCALE * (y - my);
+        mx = x;
+        my = y;
+        glutPostRedisplay();
+    }
 }
 
 
@@ -1051,69 +1028,66 @@ drag_cb(int x, int y)
 * Create camera and light icons
 */
 static void
-create_icons()
-{
-  GLUquadricObj *qobj;
+create_icons() {
+    GLUquadricObj *qobj;
 
-#define	CBX	.25	// camera body dimensions
-#define	CBY	1.5
-#define	CBZ	1.
+#define CBX .25 // camera body dimensions
+#define CBY 1.5
+#define CBZ 1.
 
-  qobj = gluNewQuadric();
-  gluQuadricDrawStyle(qobj, GLU_FILL);
-  gluQuadricNormals(qobj, GLU_SMOOTH);
+    qobj = gluNewQuadric();
+    gluQuadricDrawStyle(qobj, GLU_FILL);
+    gluQuadricNormals(qobj, GLU_SMOOTH);
 
-  cameraList = glGenLists(1);
-  glNewList(cameraList, GL_COMPILE);
-  glMaterialfv(GL_FRONT, GL_AMBIENT, dgrey);
-  glMaterialfv(GL_FRONT, GL_DIFFUSE, lgrey);
-  glMaterialfv(GL_FRONT, GL_SPECULAR, black);
-  glEnable(GL_CULL_FACE);
-  solidBox(CBX,CBY,CBZ);
-  glPushMatrix();
-  glTranslatef(0.,.9,1.8);
-  glRotatef(90., 0.,1.,0.);
-  solidCylinder(1., CBX*2, 12);
-  glTranslatef(0.,-1.8,0.);
-  solidCylinder(1., CBX*2, 12);
-  glPopMatrix();
-  glDisable(GL_CULL_FACE);
-  glPushMatrix();
-  glTranslated(0.,CBY,0.);
-  glRotated(-90., 1.,0.,0.);
-  gluCylinder(qobj, .2, .5, 1., 12, 1);
-  glPopMatrix();
-  glEndList();
+    cameraList = glGenLists(1);
+    glNewList(cameraList, GL_COMPILE);
+    glMaterialfv(GL_FRONT, GL_AMBIENT, dgrey);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, lgrey);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, black);
+    glEnable(GL_CULL_FACE);
+    solidBox(CBX, CBY, CBZ);
+    glPushMatrix();
+    glTranslatef(0., .9, 1.8);
+    glRotatef(90., 0., 1., 0.);
+    solidCylinder(1., CBX*2, 12);
+    glTranslatef(0., -1.8, 0.);
+    solidCylinder(1., CBX*2, 12);
+    glPopMatrix();
+    glDisable(GL_CULL_FACE);
+    glPushMatrix();
+    glTranslated(0., CBY, 0.);
+    glRotated(-90., 1., 0., 0.);
+    gluCylinder(qobj, .2, .5, 1., 12, 1);
+    glPopMatrix();
+    glEndList();
 
-  lightList = glGenLists(1);
-  glNewList(lightList, GL_COMPILE);
-  glPushMatrix();
-  glMaterialfv(GL_FRONT, GL_AMBIENT, dgrey);
-  glMaterialfv(GL_FRONT, GL_DIFFUSE, dgrey);
-  glMaterialfv(GL_FRONT, GL_SPECULAR, grey);
-  glEnable(GL_CULL_FACE);
-  gluSphere(qobj, .5, 12., 6.);
-  glRotated(180.,1.,0.,0.);
-  glMaterialfv(GL_FRONT, GL_EMISSION, dgrey);
-  gluCylinder(qobj, .2, .2, 1., 12, 1);
-  glPopMatrix();
-  glEndList();
+    lightList = glGenLists(1);
+    glNewList(lightList, GL_COMPILE);
+    glPushMatrix();
+    glMaterialfv(GL_FRONT, GL_AMBIENT, dgrey);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, dgrey);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, grey);
+    glEnable(GL_CULL_FACE);
+    gluSphere(qobj, .5, 12., 6.);
+    glRotated(180., 1., 0., 0.);
+    glMaterialfv(GL_FRONT, GL_EMISSION, dgrey);
+    gluCylinder(qobj, .2, .2, 1., 12, 1);
+    glPopMatrix();
+    glEndList();
 }
 
 
-void decompose_datapath(const char *fn)
-{
-  const char *ptr = strrchr(fn, '/');
+void decompose_datapath(const char *fn) {
+    const char *ptr = strrchr(fn, '/');
 
-  if (ptr == NULL) {
-    strcpy(datapath, ".");
-    strcpy(filename, fn);
-  }
-  else {
-    strcpy(filename, ptr+1);
-    strcpy(datapath, fn);
-    datapath[ptr - fn] = '\0';
-  }
+    if (ptr == NULL) {
+        strcpy(datapath, ".");
+        strcpy(filename, fn);
+    } else {
+        strcpy(filename, ptr + 1);
+        strcpy(datapath, fn);
+        datapath[ptr - fn] = '\0';
+    }
 }
 
 
@@ -1121,60 +1095,56 @@ void decompose_datapath(const char *fn)
 *
 */
 int
-main(int argc, char** argv)
-{
-  char *progname = argv[0];
+main(int argc, char** argv) {
+    char *progname = argv[0];
 
-  glutInit(&argc, argv);
+    glutInit(&argc, argv);
 
-  for(++argv; --argc > 0; ++argv)
-  {
-    if( strcmp(*argv, "-help") ==  0 || strcmp(*argv, "--help") == 0 )
-    {
-      fputs("View a 3DS model file using OpenGL.\n", stderr);
-      fputs("Usage: 3dsplayer [-nodb|-aa|-flush] <filename>\n", stderr);
+    for (++argv; --argc > 0; ++argv) {
+        if (strcmp(*argv, "-help") ==  0 || strcmp(*argv, "--help") == 0) {
+            fputs("View a 3DS model file using OpenGL.\n", stderr);
+            fputs("Usage: 3dsplayer [-nodb|-aa|-flush] <filename>\n", stderr);
 #ifndef USE_SDL
-      fputs("Texture rendering is not available; install SDL_image and recompile.\n", stderr);
+            fputs("Texture rendering is not available; install SDL_image and recompile.\n", stderr);
 #endif
-      exit(0);
+            exit(0);
+        } else if (strcmp(*argv, "-nodb") == 0)
+            dbuf = 0;
+        else if (strcmp(*argv, "-aa") == 0)
+            anti_alias = 1;
+        else if (strcmp(*argv, "-flush") == 0)
+            flush = 1;
+        else {
+            filepath = *argv;
+            decompose_datapath(filepath);
+        }
     }
-    else if( strcmp(*argv, "-nodb") == 0 )
-      dbuf = 0;
-    else if( strcmp(*argv, "-aa") == 0 )
-      anti_alias = 1;
-    else if( strcmp(*argv, "-flush") == 0 )
-      flush = 1;
-    else {
-      filepath = *argv;
-      decompose_datapath(filepath);
+
+    if (filepath == NULL) {
+        fputs("3dsplayer: Error: No 3DS file specified\n", stderr);
+        exit(1);
     }
-  }
 
-  if (filepath == NULL) {
-    fputs("3dsplayer: Error: No 3DS file specified\n", stderr);
-    exit(1);
-  }
+    glutInitDisplayMode(GLUT_DEPTH | GLUT_RGB | (dbuf ? GLUT_DOUBLE : 0));
+    glutInitWindowSize(500, 500);
+    glutInitWindowPosition(100, 100);
+    glutCreateWindow(filepath != NULL ? Basename(filepath) : progname);
 
-  glutInitDisplayMode(GLUT_DEPTH | GLUT_RGB | (dbuf ? GLUT_DOUBLE:0) );
-  glutInitWindowSize(500, 500);
-  glutInitWindowPosition(100, 100);
-  glutCreateWindow(filepath != NULL ? Basename(filepath) : progname);
+    init();
+    create_icons();
+    load_model();
 
-  init();
-  create_icons();
-  load_model();
+    build_menu();
+    glutAttachMenu(2);
 
-  build_menu();
-  glutAttachMenu(2);
-
-  glutDisplayFunc(display);
-  glutReshapeFunc(reshape);
-  glutKeyboardFunc(keyboard);
-  glutMouseFunc(mouse_cb);
-  glutMotionFunc(drag_cb);
-  glutTimerFunc(10, timer_cb, 0);
-  glutMainLoop();
-  return(0);
+    glutDisplayFunc(display);
+    glutReshapeFunc(reshape);
+    glutKeyboardFunc(keyboard);
+    glutMouseFunc(mouse_cb);
+    glutMotionFunc(drag_cb);
+    glutTimerFunc(10, timer_cb, 0);
+    glutMainLoop();
+    return(0);
 }
 
 
@@ -1193,50 +1163,49 @@ main(int argc, char** argv)
 * Box may be rendered with face culling enabled.
 */
 static void
-solidBox(double bx, double by, double bz)
-{
-  glBegin(GL_POLYGON);
-  glNormal3d(0.,0.,1.);
-  glVertex3d(bx,by,bz);
-  glVertex3d(-bx,by,bz);
-  glVertex3d(-bx,-by,bz);
-  glVertex3d(bx,-by,bz);
-  glEnd();
-  glBegin(GL_POLYGON);
-  glNormal3d(0.,0.,-1.);
-  glVertex3d(-bx,by,-bz);
-  glVertex3d(bx,by,-bz);
-  glVertex3d(bx,-by,-bz);
-  glVertex3d(-bx,-by,-bz);
-  glEnd();
-  glBegin(GL_POLYGON);
-  glNormal3d(0.,-1.,0.);
-  glVertex3d(-bx,by,bz);
-  glVertex3d(bx,by,bz);
-  glVertex3d(bx,by,-bz);
-  glVertex3d(-bx,by,-bz);
-  glEnd();
-  glBegin(GL_POLYGON);
-  glNormal3d(0.,-1.,0.);
-  glVertex3d(bx,-by,bz);
-  glVertex3d(-bx,-by,bz);
-  glVertex3d(-bx,-by,-bz);
-  glVertex3d(bx,-by,-bz);
-  glEnd();
-  glBegin(GL_POLYGON);
-  glNormal3d(1.,0.,0.);
-  glVertex3d(bx,by,bz);
-  glVertex3d(bx,-by,bz);
-  glVertex3d(bx,-by,-bz);
-  glVertex3d(bx,by,-bz);
-  glEnd();
-  glBegin(GL_POLYGON);
-  glNormal3d(-1.,0.,0.);
-  glVertex3d(-bx,by,-bz);
-  glVertex3d(-bx,-by,-bz);
-  glVertex3d(-bx,-by,bz);
-  glVertex3d(-bx,by,bz);
-  glEnd();
+solidBox(double bx, double by, double bz) {
+    glBegin(GL_POLYGON);
+    glNormal3d(0., 0., 1.);
+    glVertex3d(bx, by, bz);
+    glVertex3d(-bx, by, bz);
+    glVertex3d(-bx, -by, bz);
+    glVertex3d(bx, -by, bz);
+    glEnd();
+    glBegin(GL_POLYGON);
+    glNormal3d(0., 0., -1.);
+    glVertex3d(-bx, by, -bz);
+    glVertex3d(bx, by, -bz);
+    glVertex3d(bx, -by, -bz);
+    glVertex3d(-bx, -by, -bz);
+    glEnd();
+    glBegin(GL_POLYGON);
+    glNormal3d(0., -1., 0.);
+    glVertex3d(-bx, by, bz);
+    glVertex3d(bx, by, bz);
+    glVertex3d(bx, by, -bz);
+    glVertex3d(-bx, by, -bz);
+    glEnd();
+    glBegin(GL_POLYGON);
+    glNormal3d(0., -1., 0.);
+    glVertex3d(bx, -by, bz);
+    glVertex3d(-bx, -by, bz);
+    glVertex3d(-bx, -by, -bz);
+    glVertex3d(bx, -by, -bz);
+    glEnd();
+    glBegin(GL_POLYGON);
+    glNormal3d(1., 0., 0.);
+    glVertex3d(bx, by, bz);
+    glVertex3d(bx, -by, bz);
+    glVertex3d(bx, -by, -bz);
+    glVertex3d(bx, by, -bz);
+    glEnd();
+    glBegin(GL_POLYGON);
+    glNormal3d(-1., 0., 0.);
+    glVertex3d(-bx, by, -bz);
+    glVertex3d(-bx, -by, -bz);
+    glVertex3d(-bx, -by, bz);
+    glVertex3d(-bx, by, bz);
+    glEnd();
 }
 
 
@@ -1247,30 +1216,28 @@ solidBox(double bx, double by, double bz)
 * Cylinder may be rendered with face culling enabled.
 */
 static void
-solidCylinder(double r, double h, int slices)
-{
-  GLUquadricObj *qobj = gluNewQuadric();
-  gluQuadricDrawStyle(qobj, GLU_FILL);
-  gluQuadricNormals(qobj, GLU_SMOOTH);
+solidCylinder(double r, double h, int slices) {
+    GLUquadricObj *qobj = gluNewQuadric();
+    gluQuadricDrawStyle(qobj, GLU_FILL);
+    gluQuadricNormals(qobj, GLU_SMOOTH);
 
-  glPushMatrix();
-  glTranslated(0., 0., -h/2);
-  gluCylinder( qobj, r, r, h, slices, 1 );
-  glPushMatrix();
-  glRotated(180., 1.,0.,0.);
-  gluDisk( qobj, 0., r, slices, 1 );
-  glPopMatrix();
-  glTranslated(0., 0., h);
-  gluDisk( qobj, 0., r, slices, 1 );
-  glPopMatrix();
+    glPushMatrix();
+    glTranslated(0., 0., -h / 2);
+    gluCylinder(qobj, r, r, h, slices, 1);
+    glPushMatrix();
+    glRotated(180., 1., 0., 0.);
+    gluDisk(qobj, 0., r, slices, 1);
+    glPopMatrix();
+    glTranslated(0., 0., h);
+    gluDisk(qobj, 0., r, slices, 1);
+    glPopMatrix();
 }
 
 
 static const char *
-Basename(const char *filename)
-{
-  char *ptr = strrchr(filename, '/');
-  return ptr != NULL ? ptr+1 : filename;
+Basename(const char *filename) {
+    char *ptr = strrchr(filename, '/');
+    return ptr != NULL ? ptr + 1 : filename;
 }
 
 
@@ -1282,16 +1249,16 @@ Basename(const char *filename)
 
 #include <stdio.h>
 
-#define	MAX_CALLBACKS	100
+#define MAX_CALLBACKS 100
 
 typedef struct {
-  void (*cb)(int, int, void *);
-  void	*client;
+    void (*cb)(int, int, void *);
+    void *client;
 } Callback;
 
 
-static	Callback	callbacks[MAX_CALLBACKS];
-static	int		ncb = 0;
+static Callback callbacks[MAX_CALLBACKS];
+static int  ncb = 0;
 
 /*!
 * Register a callback, returning an integer value suitable for
@@ -1303,22 +1270,19 @@ static	int		ncb = 0;
 * \return integer callback id
 */
 static int
-callback(void (*cb)(int, int, void *client), void *client)
-{
-  if( ncb == 0 )
-  {
-    int i;
-    for(i=0; i < NA(callbacks); ++i)
-      callbacks[i].cb = NULL;
-  }
-  else if( ncb >= NA(callbacks) ) {
-    fprintf(stderr,
-      "callback() out of callbacks, try changing MAX_CALLBACKS\n");
-  }
+callback(void (*cb)(int, int, void *client), void *client) {
+    if (ncb == 0) {
+        int i;
+        for (i = 0; i < NA(callbacks); ++i)
+            callbacks[i].cb = NULL;
+    } else if (ncb >= NA(callbacks)) {
+        fprintf(stderr,
+                "callback() out of callbacks, try changing MAX_CALLBACKS\n");
+    }
 
-  callbacks[ncb].cb = cb;
-  callbacks[ncb].client = client;
-  return ncb++;
+    callbacks[ncb].cb = cb;
+    callbacks[ncb].client = client;
+    return ncb++;
 }
 
 
@@ -1329,8 +1293,7 @@ callback(void (*cb)(int, int, void *client), void *client)
 * \param data Data to be passed to the callback
 */
 static void
-call_callback(int idx, int data)
-{
-  if( idx >= 0 && idx < NA(callbacks) && callbacks[idx].cb != NULL )
-    callbacks[idx].cb(idx, data, callbacks[idx].client);
+call_callback(int idx, int data) {
+    if (idx >= 0 && idx < NA(callbacks) && callbacks[idx].cb != NULL)
+        callbacks[idx].cb(idx, data, callbacks[idx].client);
 }

@@ -182,12 +182,11 @@ toggle_bool(int menu, int value, void *client)
 static void
 build_menu()
 {
-  Lib3dsCamera *c;
   int i;
   menu_id=glutCreateMenu(menu_cb);
 
-  for (c=file->cameras,i=0; c; c=c->next,++i)
-    glutAddMenuEntry(c->name, callback(camera_menu, c));
+  for (i=0; i<file->ncameras; ++i)
+    glutAddMenuEntry(file->cameras[i]->name, callback(camera_menu, file->cameras[i]));
 
   glutAddMenuEntry("Show cameras", callback(toggle_bool, &show_cameras));
   glutAddMenuEntry("Show lights", callback(toggle_bool, &show_lights));
@@ -201,17 +200,18 @@ build_menu()
 static	void
 timer_cb(int value)
 {
+    /*
   glutPostRedisplay();
 
   if (!halt) {
     view_rotz += anim_rotz;
-    current_frame+=1.0;
-    if (current_frame>file->frames) {
-      current_frame=0;
-    }
+    //current_frame+=0.1;
+    //if (current_frame > file->frames)
+    //    current_frame = 1;
     lib3ds_file_eval(file, current_frame);
     glutTimerFunc(10, timer_cb, 0);
   }
+  */
 }
 
 static	void
@@ -260,19 +260,19 @@ load_model(void)
   /* No nodes?  Fabricate nodes to display all the meshes. */
   if( !file->nodes )
   {
-    Lib3dsMesh *mesh;
     Lib3dsNode *node;
-
-    for(mesh = file->meshes; mesh != NULL; mesh = mesh->next)
+    int i;
+    for (i=0; i<file->nmeshes; ++i)
     {
-      node = lib3ds_node_new_object();
+      Lib3dsMesh *mesh = file->meshes[i];
+      node = lib3ds_node_new(LIB3DS_OBJECT_NODE);
       strcpy(node->name, mesh->name);
       node->parent_id = LIB3DS_NO_PARENT;
       lib3ds_file_insert_node(file, node);
     }
   }
 
-  lib3ds_file_eval(file, 1.0f);
+  lib3ds_file_eval(file, 0.0f);
   lib3ds_file_bounding_box_of_nodes(file, LIB3DS_TRUE, LIB3DS_FALSE, LIB3DS_FALSE, bmin, bmax);
   sx = bmax[0] - bmin[0];
   sy = bmax[1] - bmin[1];
@@ -285,7 +285,7 @@ load_model(void)
 
   /* No cameras in the file?  Add four */
 
-  if( !file->cameras ) {
+  if (!file->ncameras) {
 
     /* Add some cameras that encompass the bounding box */
 
@@ -297,7 +297,7 @@ load_model(void)
     camera->position[0] = bmax[0] + 1.5 * MAX(sy,sz);
     camera->near_range = ( camera->position[0] - bmax[0] ) * .5;
     camera->far_range = ( camera->position[0] - bmin[0] ) * 2;
-    lib3ds_file_insert_camera(file, camera);
+    lib3ds_file_camera_insert(file, camera, -1);
 
     /* Since lib3ds considers +Y to be into the screen, we'll put
     * this camera on the -Y axis, looking in the +Y direction.
@@ -310,7 +310,7 @@ load_model(void)
     camera->position[1] = bmin[1] - 1.5 * MAX(sx,sz);
     camera->near_range = ( bmin[1] - camera->position[1] ) * .5;
     camera->far_range = ( bmax[1] - camera->position[1] ) * 2;
-    lib3ds_file_insert_camera(file, camera);
+    lib3ds_file_camera_insert(file, camera, -1);
 
     camera = lib3ds_camera_new("Camera_Z");
     camera->target[0] = cx;
@@ -320,7 +320,7 @@ load_model(void)
     camera->position[2] = bmax[2] + 1.5 * MAX(sx,sy);
     camera->near_range = ( camera->position[2] - bmax[2] ) * .5;
     camera->far_range = ( camera->position[2] - bmin[2] ) * 2;
-    lib3ds_file_insert_camera(file, camera);
+    lib3ds_file_camera_insert(file, camera, -1);
 
     camera = lib3ds_camera_new("Camera_ISO");
     camera->target[0] = cx;
@@ -332,14 +332,12 @@ load_model(void)
     camera->position[2] = bmax[2] + .75 * size;
     camera->near_range = ( camera->position[0] - bmax[0] ) * .5;
     camera->far_range = ( camera->position[0] - bmin[0] ) * 3;
-    lib3ds_file_insert_camera(file, camera);
+    lib3ds_file_camera_insert(file, camera, -1);
   }
-
 
   /* No lights in the file?  Add some. */
 
-  if (file->lights == NULL)
-  {
+  if (!file->nlights) {
     Lib3dsLight *light;
 
     light = lib3ds_light_new("light0");
@@ -353,7 +351,7 @@ load_model(void)
     light->outer_range = 100;
     light->inner_range = 10;
     light->multiplier = 1;
-    lib3ds_file_insert_light(file, light);
+    lib3ds_file_light_insert(file, light, -1);
 
     light = lib3ds_light_new("light1");
     light->spot_light = 0;
@@ -366,7 +364,7 @@ load_model(void)
     light->outer_range = 100;
     light->inner_range = 10;
     light->multiplier = 1;
-    lib3ds_file_insert_light(file, light);
+    lib3ds_file_light_insert(file, light, -1);
 
     light = lib3ds_light_new("light2");
     light->spot_light = 0;
@@ -379,21 +377,12 @@ load_model(void)
     light->outer_range = 100;
     light->inner_range = 10;
     light->multiplier = 1;
-    lib3ds_file_insert_light(file, light);
-
+    lib3ds_file_light_insert(file, light, -1);
   }
 
-  if (!file->cameras) {
-    fputs("3dsplayer: Error: No Camera found.\n", stderr);
-    lib3ds_file_free(file);
-    file=0;
-    exit(1);
-  }
-  if (!camera) {
-    camera=file->cameras->name;
-  }
+  camera = file->cameras[0]->name;
 
-  lib3ds_file_eval(file,0.);
+  lib3ds_file_eval(file, 0);
 }
 
 
@@ -449,21 +438,23 @@ render_node(Lib3dsNode *node)
     }
   }
   if (node->type==LIB3DS_OBJECT_NODE) {
+    Lib3dsIntd index;
     Lib3dsMesh *mesh;
 
     if (strcmp(node->name,"$$$DUMMY")==0) {
       return;
     }
 
-    mesh = lib3ds_file_mesh_by_name(file, node->data.object.morph);
-    if( mesh == NULL )
-      mesh = lib3ds_file_mesh_by_name(file, node->name);
+    index = lib3ds_file_mesh_by_name(file, node->data.object.morph);
+    if ( index < 0 )
+      index = lib3ds_file_mesh_by_name(file, node->name);
+    if (index < 0) {
+        return;
+    }
+    mesh = file->meshes[index];
 
     if (!mesh->user.d) {
       assert(mesh);
-      if (!mesh) {
-        return;
-      }
 
       mesh->user.d=glGenLists(1);
       glNewList(mesh->user.d, GL_COMPILE);
@@ -785,6 +776,7 @@ display(void)
   float *campos;
   float *tgt;
   Lib3dsMatrix M;
+  Lib3dsIntd camidx;
   Lib3dsCamera *cam;
   Lib3dsVector v;
   Lib3dsNode *p;
@@ -810,8 +802,8 @@ display(void)
 
   glLightModelfv(GL_LIGHT_MODEL_AMBIENT, file->ambient);
 
-  c=lib3ds_file_node_by_name(file, camera, LIB3DS_CAMERA_NODE);
-  t=lib3ds_file_node_by_name(file, camera, LIB3DS_TARGET_NODE);
+  c = lib3ds_file_node_by_name(file, camera, LIB3DS_CAMERA_NODE);
+  t = lib3ds_file_node_by_name(file, camera, LIB3DS_TARGET_NODE);
 
   if( t != NULL )
     tgt = t->data.target.pos;
@@ -822,8 +814,9 @@ display(void)
     campos = c->data.camera.pos;
   }
 
-  if ((cam = lib3ds_file_camera_by_name(file, camera)) == NULL)
+  if ((camidx = lib3ds_file_camera_by_name(file, camera)) == -1)
     return;
+  cam = file->cameras[camidx];
 
   near = cam->near_range;
   far = cam->far_range;
@@ -879,11 +872,12 @@ display(void)
     static GLfloat c[] = {1.0f, 1.0f, 1.0f, 1.0f};
     static GLfloat p[] = {0.0f, 0.0f, 0.0f, 1.0f};
     Lib3dsLight *l;
+    int i;
 
     int li=GL_LIGHT0;
-    for (l=file->lights; l; l=l->next) {
+    for (i=0; i<file->nlights; ++i) {
+      l = file->lights[i];
       glEnable(li);
-
       light_update(l);
 
       c[0] = l->color[0];
@@ -908,9 +902,6 @@ display(void)
     }
   }
 
-
-
-
   if( show_object )
   {
     for (p=file->nodes; p!=0; p=p->next) {
@@ -923,8 +914,9 @@ display(void)
 
   if( show_cameras )
   {
-    for( cam = file->cameras; cam != NULL; cam = cam->next )
-    {
+    int i;
+    for (i=0; i<file->ncameras; ++i) {
+      cam = file->cameras[i];
       lib3ds_matrix_camera(M, cam->position, cam->target, cam->roll);
       lib3ds_matrix_inv(M);
 
@@ -939,8 +931,11 @@ display(void)
   if( show_lights )
   {
     Lib3dsLight *light;
-    for( light = file->lights; light != NULL; light = light->next )
+    int i;
+    for(i=0; i<file->nlights; ++i) {
+      light = file->lights[i];
       draw_light(light->position, light->color);
+    }
     glMaterialfv(GL_FRONT, GL_EMISSION, black);
   }
 
@@ -998,7 +993,17 @@ case 'o':
 case '\001':
   anti_alias = !anti_alias;
   break;
+case '+':
+    current_frame+= 1;
+    printf("%f=\n", current_frame);
+    break;
+case '-':
+    current_frame-= 1;
+    printf("%f=\n", current_frame);
+    break;
   }
+  lib3ds_file_eval(file, current_frame);
+  glutPostRedisplay();
 }
 
 

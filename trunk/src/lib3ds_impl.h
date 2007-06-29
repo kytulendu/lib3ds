@@ -1,6 +1,6 @@
 /* -*- c -*- */
-#ifndef INCLUDED_LIB3DS_CHUNK_H
-#define INCLUDED_LIB3DS_CHUNK_H
+#ifndef INCLUDED_LIB3DS_IMPL_H
+#define INCLUDED_LIB3DS_IMPL_H
 /*
  * The 3D Studio File Format Library
  * Copyright (C) 1996-2007 by Jan Eric Kyprianidis <www.kyprianidis.com>
@@ -29,6 +29,10 @@
 #include <string.h>
 #include <math.h>
 #include <float.h>
+
+#ifdef _MSC_VER
+#pragma warning ( disable : 4996 )
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -297,6 +301,63 @@ extern Lib3dsBool lib3ds_chunk_write_switch(Lib3dsWord chunk, Lib3dsIo *io);
 extern const char* lib3ds_chunk_name(Lib3dsWord chunk);
 extern void lib3ds_chunk_unknown(Lib3dsWord chunk);
 extern void lib3ds_chunk_dump_info(const char *format, ...);
+
+//extern void lib3ds_array_resize(void **array, Lib3dsDword size)
+
+extern Lib3dsBool lib3ds_io_error(Lib3dsIo *io);
+extern long lib3ds_io_seek(Lib3dsIo *io, long offset, Lib3dsIoSeek origin);
+extern long lib3ds_io_tell(Lib3dsIo *io);
+extern size_t lib3ds_io_read(Lib3dsIo *io, void *buffer, size_t size);
+extern size_t lib3ds_io_write(Lib3dsIo *io, const void *buffer, size_t size);
+
+extern Lib3dsByte lib3ds_io_read_byte(Lib3dsIo *io);
+extern Lib3dsWord lib3ds_io_read_word(Lib3dsIo *io);
+extern Lib3dsDword lib3ds_io_read_dword(Lib3dsIo *io);
+extern Lib3dsIntb lib3ds_io_read_intb(Lib3dsIo *io);
+extern Lib3dsIntw lib3ds_io_read_intw(Lib3dsIo *io);
+extern Lib3dsIntd lib3ds_io_read_intd(Lib3dsIo *io);
+extern Lib3dsFloat lib3ds_io_read_float(Lib3dsIo *io);
+extern Lib3dsBool lib3ds_io_read_vector(Lib3dsIo *io, Lib3dsVector v);
+extern Lib3dsBool lib3ds_io_read_rgb(Lib3dsIo *io, Lib3dsRgb rgb);
+extern Lib3dsBool lib3ds_io_read_string(Lib3dsIo *io, char *s, int buflen);
+
+extern Lib3dsBool lib3ds_io_write_byte(Lib3dsIo *io, Lib3dsByte b);
+extern Lib3dsBool lib3ds_io_write_word(Lib3dsIo *io, Lib3dsWord w);
+extern Lib3dsBool lib3ds_io_write_dword(Lib3dsIo *io, Lib3dsDword d);
+extern Lib3dsBool lib3ds_io_write_intb(Lib3dsIo *io, Lib3dsIntb b);
+extern Lib3dsBool lib3ds_io_write_intw(Lib3dsIo *io, Lib3dsIntw w);
+extern Lib3dsBool lib3ds_io_write_intd(Lib3dsIo *io, Lib3dsIntd d);
+extern Lib3dsBool lib3ds_io_write_float(Lib3dsIo *io, Lib3dsFloat l);
+extern Lib3dsBool lib3ds_io_write_vector(Lib3dsIo *io, Lib3dsVector v);
+extern Lib3dsBool lib3ds_io_write_rgb(Lib3dsIo *io, Lib3dsRgb rgb);
+extern Lib3dsBool lib3ds_io_write_string(Lib3dsIo *io, const char *s);
+
+extern Lib3dsBool lib3ds_atmosphere_read(Lib3dsAtmosphere *atmosphere, Lib3dsIo *io);
+extern Lib3dsBool lib3ds_atmosphere_write(Lib3dsAtmosphere *atmosphere, Lib3dsIo *io);
+extern Lib3dsBool lib3ds_background_read(Lib3dsBackground *background, Lib3dsIo *io);
+extern Lib3dsBool lib3ds_background_write(Lib3dsBackground *background, Lib3dsIo *io);
+extern Lib3dsBool lib3ds_shadow_read(Lib3dsShadow *shadow, Lib3dsIo *io);
+extern Lib3dsBool lib3ds_shadow_write(Lib3dsShadow *shadow, Lib3dsIo *io);
+extern Lib3dsBool lib3ds_viewport_read(Lib3dsViewport *viewport, Lib3dsIo *io);
+extern Lib3dsBool lib3ds_viewport_write(Lib3dsViewport *viewport, Lib3dsIo *io);
+extern Lib3dsBool lib3ds_material_read(Lib3dsMaterial *material, Lib3dsIo *io);
+extern Lib3dsBool lib3ds_material_write(Lib3dsMaterial *material, Lib3dsIo *io);
+extern Lib3dsBool lib3ds_camera_read(Lib3dsCamera *camera, Lib3dsIo *io);
+extern Lib3dsBool lib3ds_camera_write(Lib3dsCamera *camera, Lib3dsIo *io);
+extern Lib3dsBool lib3ds_light_read(Lib3dsLight *light, Lib3dsIo *io);
+extern Lib3dsBool lib3ds_light_write(Lib3dsLight *light, Lib3dsIo *io);
+extern Lib3dsBool lib3ds_mesh_read(Lib3dsMesh *mesh, Lib3dsIo *io);
+extern Lib3dsBool lib3ds_mesh_write(Lib3dsMesh *mesh, Lib3dsIo *io);
+extern Lib3dsBool lib3ds_track_read(Lib3dsTrack *track, Lib3dsIo *io);
+extern Lib3dsBool lib3ds_track_write(Lib3dsTrack *track, Lib3dsIo *io);
+extern Lib3dsBool lib3ds_node_read(Lib3dsNode *node, Lib3dsFile *file, Lib3dsIo *io);
+extern Lib3dsBool lib3ds_node_write(Lib3dsNode *node, Lib3dsFile *file, Lib3dsIo *io);
+
+typedef void (*Lib3dsFreeFunc)(void *ptr);
+
+extern void lib3ds_util_reserve_array(void ***ptr, Lib3dsIntd *n, Lib3dsIntd *size, Lib3dsIntd new_size, Lib3dsBool force, Lib3dsFreeFunc free_func);
+extern void lib3ds_util_insert_array(void ***ptr, Lib3dsIntd *n, Lib3dsIntd *size, void *element, Lib3dsIntd index);
+extern void lib3ds_util_remove_array(void ***ptr, Lib3dsIntd *n, Lib3dsIntd index, Lib3dsFreeFunc free_func);
 
 #ifdef __cplusplus
 }

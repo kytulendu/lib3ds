@@ -23,6 +23,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef _MSC_VER
+#pragma warning ( disable : 4996 )
+#endif
 
 /*!
 \example 3dsdump.c
@@ -93,124 +96,149 @@ static Lib3dsDword flags=0;
 static void
 parse_args(int argc, char **argv)
 {
-  int i;
-  
-  for (i=1; i<argc; ++i) {
-    if (argv[i][0]=='-') {
-      if ((strcmp(argv[i],"-h")==0) || (strcmp(argv[i],"--help")==0)) {
-        help();
-      }
-      else
-      if ((strcmp(argv[i],"-s")==0) || (strcmp(argv[i],"--structure")==0)) {
-        flags|=LIB3DSDUMP_STRUCTURE;
-      }
-      else
-      if ((strcmp(argv[i],"-u")==0) || (strcmp(argv[i],"--unknown")==0)) {
-        flags|=LIB3DSDUMP_UNKNOWN;
-      }
-      else
-      if ((strcmp(argv[i],"-m")==0) || (strcmp(argv[i],"--material")==0)) {
-        flags|=LIB3DSDUMP_MATERIALS;
-      }
-      else
-      if ((strcmp(argv[i],"-t")==0) || (strcmp(argv[i],"--trimesh")==0)) {
-        flags|=LIB3DSDUMP_TRIMESHES;
-      }
-      else
-      if ((strcmp(argv[i],"-i")==0) || (strcmp(argv[i],"--instance")==0)) {
-        flags|=LIB3DSDUMP_INSTANCES;
-      }
-      else
-      if ((strcmp(argv[i],"-c")==0) || (strcmp(argv[i],"--camera")==0)) {
-        flags|=LIB3DSDUMP_CAMERAS;
-      }
-      else
-      if ((strcmp(argv[i],"-l")==0) || (strcmp(argv[i],"--light")==0)) {
-        flags|=LIB3DSDUMP_LIGHTS;
-      }
-      else
-      if ((strcmp(argv[i],"-n")==0) || (strcmp(argv[i],"--nodes")==0)) {
-        flags|=LIB3DSDUMP_NODES;
-      }
-      else
-      if ((strcmp(argv[i],"-w")==0) || (strcmp(argv[i],"--write")==0)) {
-        flags|=LIB3DSDUMP_WRITE_3DS;
-        ++i;
-        if (i>=argc) {
-          help();
+    int i;
+
+    for (i=1; i<argc; ++i) {
+        if (argv[i][0]=='-') {
+            if ((strcmp(argv[i],"-h")==0) || (strcmp(argv[i],"--help")==0)) {
+                help();
+            }
+            else
+            if ((strcmp(argv[i],"-s")==0) || (strcmp(argv[i],"--structure")==0)) {
+                flags|=LIB3DSDUMP_STRUCTURE;
+            }
+            else
+            if ((strcmp(argv[i],"-u")==0) || (strcmp(argv[i],"--unknown")==0)) {
+                flags|=LIB3DSDUMP_UNKNOWN;
+            }
+            else
+            if ((strcmp(argv[i],"-m")==0) || (strcmp(argv[i],"--material")==0)) {
+                flags|=LIB3DSDUMP_MATERIALS;
+            }
+            else
+            if ((strcmp(argv[i],"-t")==0) || (strcmp(argv[i],"--trimesh")==0)) {
+                flags|=LIB3DSDUMP_TRIMESHES;
+            }
+            else
+            if ((strcmp(argv[i],"-i")==0) || (strcmp(argv[i],"--instance")==0)) {
+                flags|=LIB3DSDUMP_INSTANCES;
+            }
+            else
+            if ((strcmp(argv[i],"-c")==0) || (strcmp(argv[i],"--camera")==0)) {
+                flags|=LIB3DSDUMP_CAMERAS;
+            }
+            else
+            if ((strcmp(argv[i],"-l")==0) || (strcmp(argv[i],"--light")==0)) {
+                flags|=LIB3DSDUMP_LIGHTS;
+            }
+            else
+            if ((strcmp(argv[i],"-n")==0) || (strcmp(argv[i],"--nodes")==0)) {
+                flags|=LIB3DSDUMP_NODES;
+            }
+            else
+            if ((strcmp(argv[i],"-w")==0) || (strcmp(argv[i],"--write")==0)) {
+                flags|=LIB3DSDUMP_WRITE_3DS;
+                ++i;
+                if (i>=argc) {
+                    help();
+                }
+                output=argv[i];
+            }
+            else {
+                help();
+            }
         }
-        output=argv[i];
-      }
-      else {
-        help();
-      }
+        else {
+            if (filename) {
+                help();
+            }
+            filename=argv[i];
+        }
     }
-    else {
-      if (filename) {
+    if (!filename) {
         help();
-      }
-      filename=argv[i];
     }
-  }
-  if (!filename) {
-    help();
-  }
-  if (!flags) {
-    flags=0xFFFFFFFF;
-  }
+    if (!flags) {
+        flags=0xFFFFFFFF;
+    }
+}
+
+
+static void
+dump_instances(Lib3dsNode *node, const char* parent)
+{
+    Lib3dsNode *p;
+    char name[255];
+
+    strcpy(name, parent);
+    strcat(name, ".");
+    strcat(name, node->name);
+    if (node->type == LIB3DS_OBJECT_NODE) {
+        printf("  %s : %s\n", name, node->data.object.instance);
+    }
+    for (p=node->childs; p!=0; p=p->next) {
+        dump_instances(p, parent);
+    }
 }
 
 
 int
 main(int argc, char **argv)
 {
-  Lib3dsFile *f=0;
+    Lib3dsFile *f=0;
+    int i;
 
-  parse_args(argc, argv);
+    parse_args(argc, argv);
 
-  lib3ds_file_enable_dump(flags&LIB3DSDUMP_STRUCTURE, flags&LIB3DSDUMP_UNKNOWN);
-  f=lib3ds_file_load(filename);
-  if (!f) {
-    fprintf(stderr, "***ERROR***\nLoading file %s failed\n", filename);
-    exit(1);
-  }
-
-  if (flags&LIB3DSDUMP_MATERIALS) {
-    printf("Dumping materials:\n");
-    lib3ds_file_dump_materials(f);
-    printf("\n");
-  }
-  if (flags&LIB3DSDUMP_TRIMESHES) {
-    printf("Dumping meshes:\n");
-    lib3ds_file_dump_meshes(f);
-    printf("\n");
-  }
-  if (flags&LIB3DSDUMP_INSTANCES) {
-    printf("Dumping instances:\n");
-    lib3ds_file_dump_instances(f);
-    printf("\n");
-  }
-  if (flags&LIB3DSDUMP_CAMERAS) {
-    printf("Dumping cameras:\n");
-    lib3ds_file_dump_cameras(f);
-    printf("\n");
-  }
-  if (flags&LIB3DSDUMP_LIGHTS) {  
-    printf("Dumping lights:\n");
-    lib3ds_file_dump_lights(f);
-    printf("\n");
-  }
-  if (flags&LIB3DSDUMP_NODES) {
-    printf("Dumping node hierarchy:\n");
-    lib3ds_file_dump_nodes(f);
-    printf("\n");
-  }
-  if (output && (flags&LIB3DSDUMP_WRITE_3DS)) {
-    if (!lib3ds_file_save(f, output)) {
-      printf("***ERROR**** Writing %s\n", output);
+    lib3ds_file_enable_dump(flags & LIB3DSDUMP_STRUCTURE, flags & LIB3DSDUMP_UNKNOWN);
+    f = lib3ds_file_load(filename);
+    if (!f) {
+        fprintf(stderr, "***ERROR***\nLoading file %s failed\n", filename);
+        exit(1);
     }
-  }
 
-  lib3ds_file_free(f);
-  return(0);
+    if (flags & LIB3DSDUMP_MATERIALS) {
+        printf("Dumping materials:\n");
+        //lib3ds_file_dump_materials(f);
+        printf("\n");
+    }
+    if (flags & LIB3DSDUMP_TRIMESHES) {
+        printf("Dumping meshes:\n");
+        for (i=0; i<f->nmeshes; ++i) lib3ds_mesh_dump(f->meshes[i]);
+        printf("\n");
+    }
+    if (flags & LIB3DSDUMP_INSTANCES) {
+        Lib3dsNode *p;
+        printf("Dumping instances:\n");
+        for (p=f->nodes; p!=0; p=p->next) {
+            dump_instances(p,"");
+        }
+        printf("\n");
+    }
+    if (flags & LIB3DSDUMP_CAMERAS) {
+        printf("Dumping cameras:\n");
+        for (i=0; i<f->ncameras; ++i) lib3ds_camera_dump(f->cameras[i]);
+        printf("\n");
+    }
+    if (flags & LIB3DSDUMP_LIGHTS) {  
+        printf("Dumping lights:\n");
+        for (i=0; i<f->nlights; ++i) lib3ds_light_dump(f->lights[i]);
+        printf("\n");
+    }
+    if (flags & LIB3DSDUMP_NODES) {
+        Lib3dsNode *p;
+        printf("Dumping node hierarchy:\n");
+        for (p=f->nodes; p!=0; p=p->next) {
+            lib3ds_node_dump(p,1);
+        }
+        printf("\n");
+    }
+    if (output && (flags & LIB3DSDUMP_WRITE_3DS)) {
+        if (!lib3ds_file_save(f, output)) {
+            printf("***ERROR**** Writing %s\n", output);
+        }
+    }
+
+    lib3ds_file_free(f);
+    return(0);
 }

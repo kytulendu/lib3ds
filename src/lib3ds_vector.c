@@ -4,13 +4,13 @@
  * All rights reserved.
  *
  * This program is  free  software;  you can redistribute it and/or modify it
- * under the terms of the  GNU Lesser General Public License  as published by 
- * the  Free Software Foundation;  either version 2.1 of the License,  or (at 
+ * under the terms of the  GNU Lesser General Public License  as published by
+ * the  Free Software Foundation;  either version 2.1 of the License,  or (at
  * your option) any later version.
  *
  * This  program  is  distributed in  the  hope that it will  be useful,  but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or  FITNESS FOR A  PARTICULAR PURPOSE.  See the  GNU Lesser General Public  
+ * or  FITNESS FOR A  PARTICULAR PURPOSE.  See the  GNU Lesser General Public
  * License for more details.
  *
  * You should  have received  a copy of the GNU Lesser General Public License
@@ -41,12 +41,11 @@
  * \ingroup vector
  */
 void
-lib3ds_vector_zero(Lib3dsVector c)
-{
-  int i;
-  for (i=0; i<3; ++i) {
-    c[i]=0.0f;
-  }
+lib3ds_vector_zero(Lib3dsVector c) {
+    int i;
+    for (i = 0; i < 3; ++i) {
+        c[i] = 0.0f;
+    }
 }
 
 
@@ -59,12 +58,11 @@ lib3ds_vector_zero(Lib3dsVector c)
  * \ingroup vector
  */
 void
-lib3ds_vector_copy(Lib3dsVector dest, Lib3dsVector src)
-{
-  int i;
-  for (i=0; i<3; ++i) {
-    dest[i]=src[i];
-  }
+lib3ds_vector_copy(Lib3dsVector dest, Lib3dsVector src) {
+    int i;
+    for (i = 0; i < 3; ++i) {
+        dest[i] = src[i];
+    }
 }
 
 
@@ -76,12 +74,11 @@ lib3ds_vector_copy(Lib3dsVector dest, Lib3dsVector src)
  * \ingroup vector
  */
 void
-lib3ds_vector_neg(Lib3dsVector c)
-{
-  int i;
-  for (i=0; i<3; ++i) {
-    c[i]=-c[i];
-  }
+lib3ds_vector_neg(Lib3dsVector c) {
+    int i;
+    for (i = 0; i < 3; ++i) {
+        c[i] = -c[i];
+    }
 }
 
 
@@ -95,12 +92,11 @@ lib3ds_vector_neg(Lib3dsVector c)
  * \ingroup vector
  */
 void
-lib3ds_vector_add(Lib3dsVector c, Lib3dsVector a, Lib3dsVector b)
-{
-  int i;
-  for (i=0; i<3; ++i) {
-    c[i]=a[i]+b[i];
-  }
+lib3ds_vector_add(Lib3dsVector c, Lib3dsVector a, Lib3dsVector b) {
+    int i;
+    for (i = 0; i < 3; ++i) {
+        c[i] = a[i] + b[i];
+    }
 }
 
 
@@ -114,12 +110,11 @@ lib3ds_vector_add(Lib3dsVector c, Lib3dsVector a, Lib3dsVector b)
  * \ingroup vector
  */
 void
-lib3ds_vector_sub(Lib3dsVector c, Lib3dsVector a, Lib3dsVector b)
-{
-  int i;
-  for (i=0; i<3; ++i) {
-    c[i]=a[i]-b[i];
-  }
+lib3ds_vector_sub(Lib3dsVector c, Lib3dsVector a, Lib3dsVector b) {
+    int i;
+    for (i = 0; i < 3; ++i) {
+        c[i] = a[i] - b[i];
+    }
 }
 
 
@@ -132,12 +127,11 @@ lib3ds_vector_sub(Lib3dsVector c, Lib3dsVector a, Lib3dsVector b)
  * \ingroup vector
  */
 void
-lib3ds_vector_scalar(Lib3dsVector c, float k)
-{
-  int i;
-  for (i=0; i<3; ++i) {
-    c[i]*=k;
-  }
+lib3ds_vector_scalar(Lib3dsVector c, float k) {
+    int i;
+    for (i = 0; i < 3; ++i) {
+        c[i] *= k;
+    }
 }
 
 
@@ -151,11 +145,10 @@ lib3ds_vector_scalar(Lib3dsVector c, float k)
  * \ingroup vector
  */
 void
-lib3ds_vector_cross(Lib3dsVector c, Lib3dsVector a, Lib3dsVector b)
-{
-  c[0]=a[1]*b[2] - a[2]*b[1];
-  c[1]=a[2]*b[0] - a[0]*b[2];
-  c[2]=a[0]*b[1] - a[1]*b[0];
+lib3ds_vector_cross(Lib3dsVector c, Lib3dsVector a, Lib3dsVector b) {
+    c[0] = a[1] * b[2] - a[2] * b[1];
+    c[1] = a[2] * b[0] - a[0] * b[2];
+    c[2] = a[0] * b[1] - a[1] * b[0];
 }
 
 
@@ -170,9 +163,8 @@ lib3ds_vector_cross(Lib3dsVector c, Lib3dsVector a, Lib3dsVector b)
  * \ingroup vector
  */
 float
-lib3ds_vector_dot(Lib3dsVector a, Lib3dsVector b)
-{
-  return(a[0]*b[0] + a[1]*b[1] + a[2]*b[2]);
+lib3ds_vector_dot(Lib3dsVector a, Lib3dsVector b) {
+    return(a[0]*b[0] + a[1]*b[1] + a[2]*b[2]);
 }
 
 
@@ -188,9 +180,8 @@ lib3ds_vector_dot(Lib3dsVector a, Lib3dsVector b)
  * \ingroup vector
  */
 float
-lib3ds_vector_squared(Lib3dsVector c)
-{
-  return(c[0]*c[0] + c[1]*c[1] + c[2]*c[2]);
+lib3ds_vector_squared(Lib3dsVector c) {
+    return(c[0]*c[0] + c[1]*c[1] + c[2]*c[2]);
 }
 
 
@@ -206,9 +197,8 @@ lib3ds_vector_squared(Lib3dsVector c)
  * \ingroup vector
  */
 float
-lib3ds_vector_length(Lib3dsVector c)
-{
-  return((float)sqrt(c[0]*c[0] + c[1]*c[1] + c[2]*c[2]));
+lib3ds_vector_length(Lib3dsVector c) {
+    return((float)sqrt(c[0]*c[0] + c[1]*c[1] + c[2]*c[2]));
 }
 
 
@@ -222,32 +212,28 @@ lib3ds_vector_length(Lib3dsVector c)
  * \ingroup vector
  */
 void
-lib3ds_vector_normalize(Lib3dsVector c)
-{
-  float l,m;
+lib3ds_vector_normalize(Lib3dsVector c) {
+    float l, m;
 
-  l=(float)sqrt(c[0]*c[0] + c[1]*c[1] + c[2]*c[2]);
-  if (fabs(l)<LIB3DS_EPSILON) {
-    if ((c[0]>=c[1]) && (c[0]>=c[2])) {
-      c[0]=1.0f;
-      c[1]=c[2]=0.0f;
+    l = (float)sqrt(c[0] * c[0] + c[1] * c[1] + c[2] * c[2]);
+    if (fabs(l) < LIB3DS_EPSILON) {
+        if ((c[0] >= c[1]) && (c[0] >= c[2])) {
+            c[0] = 1.0f;
+            c[1] = c[2] = 0.0f;
+        } else
+            if (c[1] >= c[2]) {
+                c[1] = 1.0f;
+                c[0] = c[2] = 0.0f;
+            } else {
+                c[2] = 1.0f;
+                c[0] = c[1] = 0.0f;
+            }
+    } else {
+        m = 1.0f / l;
+        c[0] *= m;
+        c[1] *= m;
+        c[2] *= m;
     }
-    else
-    if (c[1]>=c[2]) {
-      c[1]=1.0f;
-      c[0]=c[2]=0.0f;
-    }
-    else {
-      c[2]=1.0f;
-      c[0]=c[1]=0.0f;
-    }
-  }
-  else {
-    m=1.0f/l;
-    c[0]*=m;
-    c[1]*=m;
-    c[2]*=m;
-  }
 }
 
 
@@ -264,14 +250,13 @@ lib3ds_vector_normalize(Lib3dsVector c)
  * \ingroup vector
  */
 void
-lib3ds_vector_normal(Lib3dsVector n, Lib3dsVector a, Lib3dsVector b, Lib3dsVector c)
-{
-  Lib3dsVector p,q;
+lib3ds_vector_normal(Lib3dsVector n, Lib3dsVector a, Lib3dsVector b, Lib3dsVector c) {
+    Lib3dsVector p, q;
 
-  lib3ds_vector_sub(p,c,b);
-  lib3ds_vector_sub(q,a,b);
-  lib3ds_vector_cross(n,p,q);
-  lib3ds_vector_normalize(n);
+    lib3ds_vector_sub(p, c, b);
+    lib3ds_vector_sub(q, a, b);
+    lib3ds_vector_cross(n, p, q);
+    lib3ds_vector_normalize(n);
 }
 
 
@@ -288,11 +273,10 @@ lib3ds_vector_normal(Lib3dsVector n, Lib3dsVector a, Lib3dsVector b, Lib3dsVecto
  * \ingroup vector
  */
 void
-lib3ds_vector_transform(Lib3dsVector c, Lib3dsMatrix m, Lib3dsVector a)
-{
-  c[0]= m[0][0]*a[0] + m[1][0]*a[1] + m[2][0]*a[2] + m[3][0];
-  c[1]= m[0][1]*a[0] + m[1][1]*a[1] + m[2][1]*a[2] + m[3][1];
-  c[2]= m[0][2]*a[0] + m[1][2]*a[1] + m[2][2]*a[2] + m[3][2];
+lib3ds_vector_transform(Lib3dsVector c, Lib3dsMatrix m, Lib3dsVector a) {
+    c[0] = m[0][0] * a[0] + m[1][0] * a[1] + m[2][0] * a[2] + m[3][0];
+    c[1] = m[0][1] * a[0] + m[1][1] * a[1] + m[2][1] * a[2] + m[3][1];
+    c[2] = m[0][2] * a[0] + m[1][2] * a[1] + m[2][2] * a[2] + m[3][2];
 }
 
 
@@ -312,17 +296,16 @@ lib3ds_vector_transform(Lib3dsVector c, Lib3dsMatrix m, Lib3dsVector a)
  */
 void
 lib3ds_vector_cubic(Lib3dsVector c, Lib3dsVector a, Lib3dsVector p, Lib3dsVector q,
-  Lib3dsVector b, float t)
-{
-  double x,y,z,w;   
+                    Lib3dsVector b, float t) {
+    double x, y, z, w;
 
-  x=2*t*t*t - 3*t*t + 1;
-  y=-2*t*t*t + 3*t*t;
-  z=t*t*t - 2*t*t + t;
-  w=t*t*t - t*t;
-  c[0]=(float)(x*a[0] + y*b[0] + z*p[0] + w*q[0]);
-  c[1]=(float)(x*a[1] + y*b[1] + z*p[1] + w*q[1]);
-  c[2]=(float)(x*a[2] + y*b[2] + z*p[2] + w*q[2]);
+    x = 2 * t * t * t - 3 * t * t + 1;
+    y = -2 * t * t * t + 3 * t * t;
+    z = t * t * t - 2 * t * t + t;
+    w = t * t * t - t * t;
+    c[0] = (float)(x * a[0] + y * b[0] + z * p[0] + w * q[0]);
+    c[1] = (float)(x * a[1] + y * b[1] + z * p[1] + w * q[1]);
+    c[2] = (float)(x * a[2] + y * b[2] + z * p[2] + w * q[2]);
 }
 
 
@@ -333,15 +316,14 @@ lib3ds_vector_cubic(Lib3dsVector c, Lib3dsVector a, Lib3dsVector p, Lib3dsVector
  *
  * \ingroup vector
  */
-void 
-lib3ds_vector_min(Lib3dsVector c, Lib3dsVector a)
-{
-  int i;
-  for (i=0; i<3; ++i) {
-    if (a[i]<c[i]) {
-      c[i] = a[i];
+void
+lib3ds_vector_min(Lib3dsVector c, Lib3dsVector a) {
+    int i;
+    for (i = 0; i < 3; ++i) {
+        if (a[i] < c[i]) {
+            c[i] = a[i];
+        }
     }
-  }
 }
 
 
@@ -352,15 +334,14 @@ lib3ds_vector_min(Lib3dsVector c, Lib3dsVector a)
  *
  * \ingroup vector
  */
-void 
-lib3ds_vector_max(Lib3dsVector c, Lib3dsVector a)
-{
-  int i;
-  for (i=0; i<3; ++i) {
-    if (a[i]>c[i]) {
-      c[i] = a[i];
+void
+lib3ds_vector_max(Lib3dsVector c, Lib3dsVector a) {
+    int i;
+    for (i = 0; i < 3; ++i) {
+        if (a[i] > c[i]) {
+            c[i] = a[i];
+        }
     }
-  }
 }
 
 
@@ -368,8 +349,7 @@ lib3ds_vector_max(Lib3dsVector c, Lib3dsVector a)
  * \ingroup vector
  */
 void
-lib3ds_vector_dump(Lib3dsVector c)
-{
-  fprintf(stderr, "%f %f %f\n", c[0], c[1], c[2]);
+lib3ds_vector_dump(Lib3dsVector c) {
+    fprintf(stderr, "%f %f %f\n", c[0], c[1], c[2]);
 }
 

@@ -159,7 +159,6 @@ typedef enum Lib3dsIoSeek {
 } Lib3dsIoSeek;
 
 typedef struct Lib3dsIo Lib3dsIo;
-
 typedef Lib3dsBool (*Lib3dsIoErrorFunc)(void *self);
 typedef long (*Lib3dsIoSeekFunc)(void *self, long offset, Lib3dsIoSeek origin);
 typedef long (*Lib3dsIoTellFunc)(void *self);
@@ -463,12 +462,11 @@ typedef enum Lib3dsMaterialShading {
  */
 typedef struct Lib3dsMaterial {
     Lib3dsUserData user;		/*! Arbitrary user data */
-    struct Lib3dsMaterial *next;
-    char name[64];			/*! Material name */
+    char name[64];			    /*! Material name */
     Lib3dsRgba ambient;			/*! Material ambient reflectivity */
     Lib3dsRgba diffuse;			/*! Material diffuse reflectivity */
     Lib3dsRgba specular;		/*! Material specular reflectivity */
-    float shininess;		/*! Material specular exponent */
+    float shininess;		    /*! Material specular exponent */
     float shin_strength;
     Lib3dsBool use_blur;
     float blur;
@@ -524,7 +522,7 @@ typedef enum Lib3dsObjectFlags {
  * \ingroup camera
  */
 typedef struct Lib3dsCamera {
-    struct Lib3dsCamera *next;
+    Lib3dsUserData user;
     char name[64];
     Lib3dsDword object_flags; /*< @see Lib3dsObjectFlags */ 
     Lib3dsVector position;
@@ -545,7 +543,7 @@ extern LIB3DSAPI void lib3ds_camera_dump(Lib3dsCamera *camera);
  * \ingroup light
  */
 typedef struct Lib3dsLight {
-    struct Lib3dsLight *next;
+    Lib3dsUserData user;
     char name[64];
     Lib3dsDword object_flags; /*< @see Lib3dsObjectFlags */ 
     Lib3dsBool spot_light;
@@ -585,12 +583,10 @@ extern LIB3DSAPI void lib3ds_light_dump(Lib3dsLight *light);
  * \sa Lib3dsFaceFlag
  */
 typedef struct Lib3dsFace {
-    Lib3dsUserData user;	/*! Arbitrary user data */
-    char material[64];		/*! Material name */
-    Lib3dsWord points[3];	/*! Indices into mesh points list */
+    Lib3dsIntd material;    /*! Material index */
+    Lib3dsWord index[3];	/*! Indices into mesh points list */
     Lib3dsWord flags;		/*! See Lib3dsFaceFlag, below */
     Lib3dsDword smoothing;	/*! Bitmask; each bit identifies a group */
-    Lib3dsVector normal;
 } Lib3dsFace;
 
 /**
@@ -666,28 +662,23 @@ typedef struct Lib3dsMesh {
     Lib3dsWord *flags;		    /*< Per-point flags list */
     Lib3dsDword ntexcos;		/*< Number of U-V texture coordinates */
     Lib3dsTexco *texcos;	    /*< U-V texture coordinates */
-    Lib3dsDword nvfaces;	    /*< Number of faces in face list */
-    Lib3dsFace *vfaces;		    /*< Face list */
+    Lib3dsDword nfaces;	        /*< Number of faces in face list */
+    Lib3dsFace *faces;		    /*< Face list */
     Lib3dsBoxMap box_map;
     Lib3dsMapData map_data;
 } Lib3dsMesh; 
 
 extern LIB3DSAPI Lib3dsMesh* lib3ds_mesh_new(const char *name);
 extern LIB3DSAPI void lib3ds_mesh_free(Lib3dsMesh *mesh);
-extern LIB3DSAPI Lib3dsBool lib3ds_mesh_new_point_list(Lib3dsMesh *mesh, Lib3dsDword nvertices);
-extern LIB3DSAPI void lib3ds_mesh_free_point_list(Lib3dsMesh *mesh);
-extern LIB3DSAPI Lib3dsBool lib3ds_mesh_new_flag_list(Lib3dsMesh *mesh, Lib3dsDword flags);
-extern LIB3DSAPI void lib3ds_mesh_free_flag_list(Lib3dsMesh *mesh);
-extern LIB3DSAPI Lib3dsBool lib3ds_mesh_new_texel_list(Lib3dsMesh *mesh, Lib3dsDword texels);
-extern LIB3DSAPI void lib3ds_mesh_free_texel_list(Lib3dsMesh *mesh);
-extern LIB3DSAPI Lib3dsBool lib3ds_mesh_new_face_list(Lib3dsMesh *mesh, Lib3dsDword flags);
-extern LIB3DSAPI void lib3ds_mesh_free_face_list(Lib3dsMesh *mesh);
+extern LIB3DSAPI void lib3ds_mesh_alloc_vertices(Lib3dsMesh *mesh, Lib3dsDword nvertices);
+extern LIB3DSAPI void lib3ds_mesh_alloc_flags(Lib3dsMesh *mesh, Lib3dsDword nflags);
+extern LIB3DSAPI void lib3ds_mesh_alloc_texcos(Lib3dsMesh *mesh, Lib3dsDword ntexcos);
+extern LIB3DSAPI void lib3ds_mesh_alloc_faces(Lib3dsMesh *mesh, Lib3dsDword nfaces);
 extern LIB3DSAPI void lib3ds_mesh_bounding_box(Lib3dsMesh *mesh, Lib3dsVector bmin, Lib3dsVector bmax);
 extern LIB3DSAPI void lib3ds_mesh_calculate_normals(Lib3dsMesh *mesh, Lib3dsVector *normalL);
 extern LIB3DSAPI void lib3ds_mesh_dump(Lib3dsMesh *mesh);
 
-extern LIB3DSAPI float lib3ds_ease(float fp, float fc, 
-                                         float fn, float ease_from, float ease_to);
+extern LIB3DSAPI float lib3ds_ease(float fp, float fc, float fn, float ease_from, float ease_to);
 
 typedef enum Lib3dsTcbFlags{
     LIB3DS_USE_TENSION    =0x0001,
@@ -937,6 +928,7 @@ extern LIB3DSAPI void lib3ds_node_dump(Lib3dsNode *node, Lib3dsIntd level);
  * \ingroup file
  */
 typedef struct Lib3dsFile {
+    Lib3dsUserData user;
     Lib3dsDword mesh_version;
     Lib3dsWord keyf_revision;
     char name[12+1];

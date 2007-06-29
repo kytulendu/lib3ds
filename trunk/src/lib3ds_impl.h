@@ -29,6 +29,7 @@
 #include <string.h>
 #include <math.h>
 #include <float.h>
+#include <assert.h>
 
 #ifdef _MSC_VER
 #pragma warning ( disable : 4996 )
@@ -40,7 +41,6 @@ extern "C" {
 
 #ifdef _DEBUG
 #ifndef ASSERT
-#include <assert.h>
 #define ASSERT(__expr) assert(__expr)
 #endif
 #define LIB3DS_ERROR_LOG \

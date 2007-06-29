@@ -253,7 +253,7 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\lib3ds_tracks.c"
+			RelativePath="..\..\src\lib3ds_track.c"
 			>
 		</File>
 		<File

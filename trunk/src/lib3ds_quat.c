@@ -80,12 +80,12 @@ lib3ds_quat_copy(Lib3dsQuat dest, Lib3dsQuat src)
  * \ingroup quat
  */
 void
-lib3ds_quat_axis_angle(Lib3dsQuat c, Lib3dsVector axis, Lib3dsFloat angle)
+lib3ds_quat_axis_angle(Lib3dsQuat c, Lib3dsVector axis, float angle)
 {
-  Lib3dsDouble omega,s;
-  Lib3dsDouble l;
+  double omega,s;
+  double l;
 
-  l=sqrt(axis[0]*axis[0] + axis[1]*axis[1] + axis[2]*axis[2]);
+  l = sqrt(axis[0]*axis[0] + axis[1]*axis[1] + axis[2]*axis[2]);
   if (l<LIB3DS_EPSILON) {
     c[0]=c[1]=c[2]=0.0f;
     c[3]=1.0f;
@@ -93,10 +93,10 @@ lib3ds_quat_axis_angle(Lib3dsQuat c, Lib3dsVector axis, Lib3dsFloat angle)
   else {
     omega=-0.5*angle;
     s=sin(omega)/l;
-    c[0]=(Lib3dsFloat)s*axis[0];
-    c[1]=(Lib3dsFloat)s*axis[1];
-    c[2]=(Lib3dsFloat)s*axis[2];
-    c[3]=(Lib3dsFloat)cos(omega);
+    c[0]=(float)s*axis[0];
+    c[1]=(float)s*axis[1];
+    c[2]=(float)s*axis[2];
+    c[3]=(float)cos(omega);
   }
 }
 
@@ -126,7 +126,7 @@ lib3ds_quat_abs(Lib3dsQuat c)
 {
   int i;
   for (i=0; i<4; ++i) {
-    c[i]=(Lib3dsFloat)fabs(c[i]);
+    c[i]=(float)fabs(c[i]);
   }
 }
 
@@ -169,7 +169,7 @@ lib3ds_quat_mul(Lib3dsQuat c, Lib3dsQuat a, Lib3dsQuat b)
  * \ingroup quat
  */
 void
-lib3ds_quat_scalar(Lib3dsQuat c, Lib3dsFloat k)
+lib3ds_quat_scalar(Lib3dsQuat c, float k)
 {
   int i;
   for (i=0; i<4; ++i) {
@@ -186,7 +186,7 @@ lib3ds_quat_scalar(Lib3dsQuat c, Lib3dsFloat k)
 void
 lib3ds_quat_normalize(Lib3dsQuat c)
 {
-  Lib3dsDouble l,m;
+  double l,m;
 
   l=sqrt(c[0]*c[0] + c[1]*c[1] + c[2]*c[2] + c[3]*c[3]);
   if (fabs(l)<LIB3DS_EPSILON) {
@@ -197,7 +197,7 @@ lib3ds_quat_normalize(Lib3dsQuat c)
     int i;
     m=1.0f/l;
     for (i=0; i<4; ++i) {
-      c[i]=(Lib3dsFloat)(c[i]*m);
+      c[i]=(float)(c[i]*m);
     }
   }
 }
@@ -211,7 +211,7 @@ lib3ds_quat_normalize(Lib3dsQuat c)
 void
 lib3ds_quat_inv(Lib3dsQuat c)
 {
-  Lib3dsDouble l,m;
+  double l,m;
 
   l=sqrt(c[0]*c[0] + c[1]*c[1] + c[2]*c[2] + c[3]*c[3]);
   if (fabs(l)<LIB3DS_EPSILON) {
@@ -220,10 +220,10 @@ lib3ds_quat_inv(Lib3dsQuat c)
   }
   else {  
     m=1.0f/l;
-    c[0]=(Lib3dsFloat)(-c[0]*m);
-    c[1]=(Lib3dsFloat)(-c[1]*m);
-    c[2]=(Lib3dsFloat)(-c[2]*m);
-    c[3]=(Lib3dsFloat)(c[3]*m);
+    c[0]=(float)(-c[0]*m);
+    c[1]=(float)(-c[1]*m);
+    c[2]=(float)(-c[2]*m);
+    c[3]=(float)(c[3]*m);
   }
 }
 
@@ -233,7 +233,7 @@ lib3ds_quat_inv(Lib3dsQuat c)
  *
  * \ingroup quat
  */
-Lib3dsFloat
+float
 lib3ds_quat_dot(Lib3dsQuat a, Lib3dsQuat b)
 {
   return(a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3]);
@@ -243,7 +243,7 @@ lib3ds_quat_dot(Lib3dsQuat a, Lib3dsQuat b)
 /*!
  * \ingroup quat
  */
-Lib3dsFloat
+float
 lib3ds_quat_squared(Lib3dsQuat c)
 {
   return(c[0]*c[0] + c[1]*c[1] + c[2]*c[2] + c[3]*c[3]);
@@ -253,10 +253,10 @@ lib3ds_quat_squared(Lib3dsQuat c)
 /*!
  * \ingroup quat
  */
-Lib3dsFloat
+float
 lib3ds_quat_length(Lib3dsQuat c)
 {
-  return((Lib3dsFloat)sqrt(c[0]*c[0] + c[1]*c[1] + c[2]*c[2] + c[3]*c[3]));
+  return((float)sqrt(c[0]*c[0] + c[1]*c[1] + c[2]*c[2] + c[3]*c[3]));
 }
 
 
@@ -266,7 +266,7 @@ lib3ds_quat_length(Lib3dsQuat c)
 void
 lib3ds_quat_ln(Lib3dsQuat c)
 {
-  Lib3dsDouble om,s,t;
+  double om,s,t;
 
   s=sqrt(c[0]*c[0] + c[1]*c[1] + c[2]*c[2]);
   om=atan2(s,c[3]);
@@ -279,7 +279,7 @@ lib3ds_quat_ln(Lib3dsQuat c)
   {
     int i;
     for (i=0; i<3; ++i) {
-      c[i]=(Lib3dsFloat)(c[i]*t);
+      c[i]=(float)(c[i]*t);
     }
     c[3]=0.0f;
   }
@@ -307,7 +307,7 @@ lib3ds_quat_ln_dif(Lib3dsQuat c, Lib3dsQuat a, Lib3dsQuat b)
 void
 lib3ds_quat_exp(Lib3dsQuat c)
 {
-  Lib3dsDouble om,sinom;
+  double om,sinom;
 
   om=sqrt(c[0]*c[0] + c[1]*c[1] + c[2]*c[2]);
   if (fabs(om)<LIB3DS_EPSILON) {
@@ -319,9 +319,9 @@ lib3ds_quat_exp(Lib3dsQuat c)
   {
     int i;
     for (i=0; i<3; ++i) {
-      c[i]=(Lib3dsFloat)(c[i]*sinom);
+      c[i]=(float)(c[i]*sinom);
     }
-    c[3]=(Lib3dsFloat)cos(om);
+    c[3]=(float)cos(om);
   }
 }
 
@@ -330,11 +330,11 @@ lib3ds_quat_exp(Lib3dsQuat c)
  * \ingroup quat
  */
 void
-lib3ds_quat_slerp(Lib3dsQuat c, Lib3dsQuat a, Lib3dsQuat b, Lib3dsFloat t)
+lib3ds_quat_slerp(Lib3dsQuat c, Lib3dsQuat a, Lib3dsQuat b, float t)
 {
-  Lib3dsDouble l;
-  Lib3dsDouble om,sinom;
-  Lib3dsDouble sp,sq;
+  double l;
+  double om,sinom;
+  double sp,sq;
   Lib3dsQuat q;
 
   l=a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3];
@@ -350,10 +350,10 @@ lib3ds_quat_slerp(Lib3dsQuat c, Lib3dsQuat a, Lib3dsQuat b, Lib3dsFloat t)
       sp=1.0f-t;
       sq=t;
     }
-    c[0]=(Lib3dsFloat)(sp*a[0] + sq*b[0]);
-    c[1]=(Lib3dsFloat)(sp*a[1] + sq*b[1]);
-    c[2]=(Lib3dsFloat)(sp*a[2] + sq*b[2]);
-    c[3]=(Lib3dsFloat)(sp*a[3] + sq*b[3]);
+    c[0]=(float)(sp*a[0] + sq*b[0]);
+    c[1]=(float)(sp*a[1] + sq*b[1]);
+    c[2]=(float)(sp*a[2] + sq*b[2]);
+    c[3]=(float)(sp*a[3] + sq*b[3]);
   }
   else {
     q[0]=-a[1];
@@ -362,10 +362,10 @@ lib3ds_quat_slerp(Lib3dsQuat c, Lib3dsQuat a, Lib3dsQuat b, Lib3dsFloat t)
     q[3]=a[2];
     sp=sin((1.0-t)*LIB3DS_HALFPI);
     sq=sin(t*LIB3DS_HALFPI);
-    c[0]=(Lib3dsFloat)(sp*a[0] + sq*q[0]);
-    c[1]=(Lib3dsFloat)(sp*a[1] + sq*q[1]);
-    c[2]=(Lib3dsFloat)(sp*a[2] + sq*q[2]);
-    c[3]=(Lib3dsFloat)(sp*a[3] + sq*q[3]);
+    c[0]=(float)(sp*a[0] + sq*q[0]);
+    c[1]=(float)(sp*a[1] + sq*q[1]);
+    c[2]=(float)(sp*a[2] + sq*q[2]);
+    c[3]=(float)(sp*a[3] + sq*q[3]);
   }
 }
 
@@ -375,7 +375,7 @@ lib3ds_quat_slerp(Lib3dsQuat c, Lib3dsQuat a, Lib3dsQuat b, Lib3dsFloat t)
  */
 void
 lib3ds_quat_squad(Lib3dsQuat c, Lib3dsQuat a, Lib3dsQuat p, Lib3dsQuat q,
-  Lib3dsQuat b, Lib3dsFloat t)
+  Lib3dsQuat b, float t)
 {
   Lib3dsQuat ab;
   Lib3dsQuat pq;

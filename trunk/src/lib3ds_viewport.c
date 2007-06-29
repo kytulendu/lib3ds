@@ -171,7 +171,7 @@ lib3ds_viewport_read(Lib3dsViewport *viewport, Lib3dsIo *io)
     }
 
     lib3ds_chunk_read_end(&c, io);
-    return(LIB3DS_TRUE);
+    return(TRUE);
 }
 
 
@@ -330,7 +330,7 @@ lib3ds_viewport_write(Lib3dsViewport *viewport, Lib3dsIo *io)
 
         lib3ds_chunk_write_end(&c, io);
     }
-    return(LIB3DS_TRUE);
+    return(TRUE);
 }
 
 

@@ -36,7 +36,7 @@ lib3ds_shadow_read(Lib3dsShadow *shadow, Lib3dsIo *io)
   Lib3dsChunk c;
 
   if (!lib3ds_chunk_read(&c, io)) {
-    return(LIB3DS_FALSE);
+    return(FALSE);
   }
   
   switch (c.chunk) {
@@ -77,7 +77,7 @@ lib3ds_shadow_read(Lib3dsShadow *shadow, Lib3dsIo *io)
       break;
   }
   
-  return(LIB3DS_TRUE);
+  return(TRUE);
 }
 
 
@@ -141,6 +141,6 @@ lib3ds_shadow_write(Lib3dsShadow *shadow, Lib3dsIo *io)
     lib3ds_chunk_write(&c,io);
     lib3ds_io_write_float(io, shadow->ray_bias);
   }
-  return(LIB3DS_TRUE);
+  return(TRUE);
 }
 

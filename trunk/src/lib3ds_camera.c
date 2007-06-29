@@ -121,7 +121,7 @@ lib3ds_camera_read(Lib3dsCamera *camera, Lib3dsIo *io)
   Lib3dsWord chunk;
 
   if (!lib3ds_chunk_read_start(&c, LIB3DS_N_CAMERA, io)) {
-    return(LIB3DS_FALSE);
+    return(FALSE);
   }
   {
     int i;
@@ -149,7 +149,7 @@ lib3ds_camera_read(Lib3dsCamera *camera, Lib3dsIo *io)
     switch (chunk) {
       case LIB3DS_CAM_SEE_CONE:
         {
-          camera->see_cone=LIB3DS_TRUE;
+          camera->see_cone=TRUE;
         }
         break;
       case LIB3DS_CAM_RANGES:
@@ -164,7 +164,7 @@ lib3ds_camera_read(Lib3dsCamera *camera, Lib3dsIo *io)
   }
   
   lib3ds_chunk_read_end(&c, io);
-  return(LIB3DS_TRUE);
+  return(TRUE);
 }
 
 
@@ -190,7 +190,7 @@ lib3ds_camera_write(Lib3dsCamera *camera, Lib3dsIo *io)
 
   c.chunk=LIB3DS_N_CAMERA;
   if (!lib3ds_chunk_write_start(&c,io)) {
-    return(LIB3DS_FALSE);
+    return(FALSE);
   }
 
   lib3ds_io_write_vector(io, camera->position);
@@ -219,8 +219,8 @@ lib3ds_camera_write(Lib3dsCamera *camera, Lib3dsIo *io)
   }
 
   if (!lib3ds_chunk_write_end(&c,io)) {
-    return(LIB3DS_FALSE);
+    return(FALSE);
   }
-  return(LIB3DS_TRUE);
+  return(TRUE);
 }
 

@@ -63,7 +63,7 @@ static void float_key_setup(Lib3dsKey *pp, Lib3dsKey *pc, Lib3dsKey *pn)
 {
     float tm,cm,cp,bm,bp,tmcm,tmcp,ksm,ksp,kdm,kdp,c;
     float dt,fp,fn;
-    Lib3dsFloat delm, delp;
+    float delm, delp;
 
     assert(pc);
     fp = fn = 1.0f;
@@ -145,8 +145,8 @@ static void pos_key_setup(Lib3dsKey *pp, Lib3dsKey *pc, Lib3dsKey *pn)
 
 static void rot_key_setup(Lib3dsKey *prev, Lib3dsKey *cur, Lib3dsKey *next)
 {
-    Lib3dsFloat tm,cm,cp,bm,bp,tmcm,tmcp,ksm,ksp,kdm,kdp,c;
-    Lib3dsFloat dt,fp,fn;
+    float tm,cm,cp,bm,bp,tmcm,tmcp,ksm,ksp,kdm,kdp,c;
+    float dt,fp,fn;
     Lib3dsQuat q,qm,qp,qa,qb;
     int i;
 
@@ -273,23 +273,23 @@ void lib3ds_track_setup(Lib3dsTrack *track)
 }
 
 
-static Lib3dsFloat
-lib3ds_float_cubic(Lib3dsFloat a, Lib3dsFloat p, Lib3dsFloat q, Lib3dsFloat b, Lib3dsFloat t)
+static float
+lib3ds_float_cubic(float a, float p, float q, float b, float t)
 {
-    Lib3dsDouble x,y,z,w;   
+    double x,y,z,w;   
 
-    x=2*t*t*t - 3*t*t + 1;
-    y=-2*t*t*t + 3*t*t;
-    z=t*t*t - 2*t*t + t;
-    w=t*t*t - t*t;
-    return((Lib3dsFloat)(x*a + y*b + z*p + w*q));
+    x = 2*t*t*t - 3*t*t + 1;
+    y = -2*t*t*t + 3*t*t;
+    z = t*t*t - 2*t*t + t;
+    w = t*t*t - t*t;
+    return((float)(x*a + y*b + z*p + w*q));
 }
 
 
-static int find_index(Lib3dsTrack *track, Lib3dsFloat t, Lib3dsFloat *u)
+static int find_index(Lib3dsTrack *track, float t, float *u)
 {
     unsigned i;
-    Lib3dsFloat nt;
+    float nt;
     Lib3dsIntd t0, t1;
 
     assert(track);
@@ -298,7 +298,7 @@ static int find_index(Lib3dsTrack *track, Lib3dsFloat t, Lib3dsFloat *u)
     t0 = track->keys[0].frame;
     t1 = track->keys[track->nkeys-1].frame;
     if (track->flags & LIB3DS_REPEAT) {
-        nt = (Lib3dsFloat)fmod(t - t0, t1 - t0) + t0;
+        nt = (float)fmod(t - t0, t1 - t0) + t0;
     } else {
         nt = t;
     }
@@ -315,25 +315,25 @@ static int find_index(Lib3dsTrack *track, Lib3dsFloat t, Lib3dsFloat *u)
             break;
     }
 
-    *u = nt - (Lib3dsFloat)track->keys[i-1].frame;
-    *u /= (Lib3dsFloat)(track->keys[i].frame - track->keys[i-1].frame);
+    *u = nt - (float)track->keys[i-1].frame;
+    *u /= (float)(track->keys[i].frame - track->keys[i-1].frame);
 
     assert((*u >= 0.0f) && (*u <= 1.0f));
     return i;
 }
 
 
-void lib3ds_track_eval_bool(Lib3dsTrack *track, Lib3dsBool *b, Lib3dsFloat t)
+void lib3ds_track_eval_bool(Lib3dsTrack *track, Lib3dsBool *b, float t)
 {
     unsigned index;
-    Lib3dsFloat u;
+    float u;
 
-    *b = LIB3DS_FALSE;
+    *b = FALSE;
     if (!track) return;
 
     index = find_index(track, t, &u);
     if (index < 0) {
-        *b = LIB3DS_FALSE;
+        *b = FALSE;
         return;
     }
     if (index >= track->nkeys ) {
@@ -344,10 +344,10 @@ void lib3ds_track_eval_bool(Lib3dsTrack *track, Lib3dsBool *b, Lib3dsFloat t)
 }
 
 
-void lib3ds_track_eval_float(Lib3dsTrack *track, Lib3dsFloat *f, Lib3dsFloat t)
+void lib3ds_track_eval_float(Lib3dsTrack *track, float *f, float t)
 {
     unsigned index;
-    Lib3dsFloat u;
+    float u;
 
     *f = 0;
     if (!track) return;
@@ -371,10 +371,10 @@ void lib3ds_track_eval_float(Lib3dsTrack *track, Lib3dsFloat *f, Lib3dsFloat t)
 }
 
 
-void lib3ds_track_eval_vector(Lib3dsTrack *track, Lib3dsVector p, Lib3dsFloat t)
+void lib3ds_track_eval_vector(Lib3dsTrack *track, Lib3dsVector p, float t)
 {
     unsigned index;
-    Lib3dsFloat u;
+    float u;
 
     lib3ds_vector_zero(p);
     if (!track) return;
@@ -399,10 +399,10 @@ void lib3ds_track_eval_vector(Lib3dsTrack *track, Lib3dsVector p, Lib3dsFloat t)
 }
 
 
-void lib3ds_track_eval_quat(Lib3dsTrack *track, Lib3dsQuat q, Lib3dsFloat t)
+void lib3ds_track_eval_quat(Lib3dsTrack *track, Lib3dsQuat q, float t)
 {
     int index;
-    Lib3dsFloat u;
+    float u;
 
     lib3ds_quat_identity(q);
     if (!track) return;
@@ -427,10 +427,10 @@ void lib3ds_track_eval_quat(Lib3dsTrack *track, Lib3dsQuat q, Lib3dsFloat t)
 }
 
 
-void lib3ds_track_eval_morph(Lib3dsTrack *track, char *name, Lib3dsFloat t)
+void lib3ds_track_eval_morph(Lib3dsTrack *track, char *name, float t)
 {
     int index;
-    Lib3dsFloat u;
+    float u;
 
     strcpy(name, "");
     if (!track) return;
@@ -526,7 +526,7 @@ Lib3dsBool lib3ds_track_read(Lib3dsTrack *track, Lib3dsIo *io)
     }
 
     lib3ds_track_setup(track);
-    return LIB3DS_TRUE;
+    return TRUE;
 }
 
 
@@ -602,5 +602,5 @@ Lib3dsBool lib3ds_track_write(Lib3dsTrack *track, Lib3dsIo *io)
             }
             break;
     }
-    return(LIB3DS_TRUE);
+    return(TRUE);
 }

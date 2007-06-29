@@ -112,7 +112,7 @@ lib3ds_matrix_abs(Lib3dsMatrix m)
 
   for (j=0; j<4; j++) {
     for (i=0; i<4; i++) {
-      m[j][i]=(Lib3dsFloat)fabs(m[j][i]);
+      m[j][i]=(float)fabs(m[j][i]);
     }
   }
 }
@@ -127,7 +127,7 @@ void
 lib3ds_matrix_transpose(Lib3dsMatrix m)
 {
   int i,j;
-  Lib3dsFloat swp;
+  float swp;
 
   for (j=0; j<4; j++) {
     for (i=j+1; i<4; i++) {
@@ -189,7 +189,7 @@ lib3ds_matrix_mult(Lib3dsMatrix m, Lib3dsMatrix n)
 {
   Lib3dsMatrix tmp;
   int i,j,k;
-  Lib3dsFloat ab;
+  float ab;
 
   memcpy(tmp, m, sizeof(Lib3dsMatrix)); 
   for (j=0; j<4; j++) {
@@ -211,7 +211,7 @@ lib3ds_matrix_mult(Lib3dsMatrix m, Lib3dsMatrix n)
  * \ingroup matrix
  */
 void
-lib3ds_matrix_scalar(Lib3dsMatrix m, Lib3dsFloat k)
+lib3ds_matrix_scalar(Lib3dsMatrix m, float k)
 {
   int i,j;
 
@@ -223,20 +223,20 @@ lib3ds_matrix_scalar(Lib3dsMatrix m, Lib3dsFloat k)
 }
 
 
-static Lib3dsFloat
+static float
 det2x2(
-  Lib3dsFloat a, Lib3dsFloat b,
-  Lib3dsFloat c, Lib3dsFloat d) 
+  float a, float b,
+  float c, float d) 
 {
   return((a)*(d)-(b)*(c));
 }
 
 
-static Lib3dsFloat
+static float
 det3x3(
-  Lib3dsFloat a1, Lib3dsFloat a2, Lib3dsFloat a3,
-  Lib3dsFloat b1, Lib3dsFloat b2, Lib3dsFloat b3,
-  Lib3dsFloat c1, Lib3dsFloat c2, Lib3dsFloat c3)
+  float a1, float a2, float a3,
+  float b1, float b2, float b3,
+  float c1, float c2, float c3)
 {
   return(
     a1*det2x2(b2,b3,c2,c3)-
@@ -251,10 +251,10 @@ det3x3(
  *
  * \ingroup matrix
  */
-Lib3dsFloat
+float
 lib3ds_matrix_det(Lib3dsMatrix m)
 {
-  Lib3dsFloat a1,a2,a3,a4,b1,b2,b3,b4,c1,c2,c3,c4,d1,d2,d3,d4;
+  float a1,a2,a3,a4,b1,b2,b3,b4,c1,c2,c3,c4,d1,d2,d3,d4;
 
   a1 = m[0][0];
   b1 = m[1][0];
@@ -289,7 +289,7 @@ lib3ds_matrix_det(Lib3dsMatrix m)
 void
 lib3ds_matrix_adjoint(Lib3dsMatrix m)
 {
-  Lib3dsFloat a1,a2,a3,a4,b1,b2,b3,b4,c1,c2,c3,c4,d1,d2,d3,d4;
+  float a1,a2,a3,a4,b1,b2,b3,b4,c1,c2,c3,c4,d1,d2,d3,d4;
 
   a1 = m[0][0];
   b1 = m[1][0];
@@ -341,9 +341,9 @@ lib3ds_matrix_inv(Lib3dsMatrix m)
 {                          
   int i,j,k;               
   int pvt_i[4], pvt_j[4];            /* Locations of pivot elements */
-  Lib3dsFloat pvt_val;               /* Value of current pivot element */
-  Lib3dsFloat hold;                  /* Temporary storage */
-  Lib3dsFloat determinat;            
+  float pvt_val;               /* Value of current pivot element */
+  float hold;                  /* Temporary storage */
+  float determinat;            
 
   determinat = 1.0f;
   for (k=0; k<4; k++)  {
@@ -364,7 +364,7 @@ lib3ds_matrix_inv(Lib3dsMatrix m)
     /* Product of pivots, gives determinant when finished */
     determinat*=pvt_val;
     if (fabs(determinat)<LIB3DS_EPSILON) {    
-      return(LIB3DS_FALSE);  /* Matrix is singular (zero determinant) */
+      return(FALSE);  /* Matrix is singular (zero determinant) */
     }
 
     /* "Interchange" rows (with sign change stuff) */
@@ -429,7 +429,7 @@ lib3ds_matrix_inv(Lib3dsMatrix m)
       m[i][j]=hold;
     }
   }
-  return(LIB3DS_TRUE);                          
+  return(TRUE);                          
 }
 
 
@@ -439,7 +439,7 @@ lib3ds_matrix_inv(Lib3dsMatrix m)
  * \ingroup matrix
  */
 void
-lib3ds_matrix_translate_xyz(Lib3dsMatrix m, Lib3dsFloat x, Lib3dsFloat y, Lib3dsFloat z)
+lib3ds_matrix_translate_xyz(Lib3dsMatrix m, float x, float y, float z)
 {
   int i;
   
@@ -471,7 +471,7 @@ lib3ds_matrix_translate(Lib3dsMatrix m, Lib3dsVector t)
  * \ingroup matrix
  */
 void
-lib3ds_matrix_scale_xyz(Lib3dsMatrix m, Lib3dsFloat x, Lib3dsFloat y, Lib3dsFloat z)
+lib3ds_matrix_scale_xyz(Lib3dsMatrix m, float x, float y, float z)
 {
   int i;
 
@@ -507,15 +507,15 @@ lib3ds_matrix_scale(Lib3dsMatrix m, Lib3dsVector s)
  * \ingroup matrix
  */
 void
-lib3ds_matrix_rotate_x(Lib3dsMatrix m, Lib3dsFloat phi)
+lib3ds_matrix_rotate_x(Lib3dsMatrix m, float phi)
 {
-  Lib3dsFloat SinPhi,CosPhi;
-  Lib3dsFloat a1[4],a2[4];
+  float SinPhi,CosPhi;
+  float a1[4],a2[4];
 
-  SinPhi=(Lib3dsFloat)sin(phi);
-  CosPhi=(Lib3dsFloat)cos(phi);
-  memcpy(a1,m[1],4*sizeof(Lib3dsFloat));
-  memcpy(a2,m[2],4*sizeof(Lib3dsFloat));
+  SinPhi=(float)sin(phi);
+  CosPhi=(float)cos(phi);
+  memcpy(a1,m[1],4*sizeof(float));
+  memcpy(a2,m[2],4*sizeof(float));
   m[1][0]=CosPhi*a1[0]+SinPhi*a2[0];
   m[1][1]=CosPhi*a1[1]+SinPhi*a2[1];
   m[1][2]=CosPhi*a1[2]+SinPhi*a2[2];
@@ -533,15 +533,15 @@ lib3ds_matrix_rotate_x(Lib3dsMatrix m, Lib3dsFloat phi)
  * \ingroup matrix
  */
 void
-lib3ds_matrix_rotate_y(Lib3dsMatrix m, Lib3dsFloat phi)
+lib3ds_matrix_rotate_y(Lib3dsMatrix m, float phi)
 {
-  Lib3dsFloat SinPhi,CosPhi;
-  Lib3dsFloat a0[4],a2[4];
+  float SinPhi,CosPhi;
+  float a0[4],a2[4];
 
-  SinPhi=(Lib3dsFloat)sin(phi);
-  CosPhi=(Lib3dsFloat)cos(phi);
-  memcpy(a0,m[0],4*sizeof(Lib3dsFloat));
-  memcpy(a2,m[2],4*sizeof(Lib3dsFloat));
+  SinPhi=(float)sin(phi);
+  CosPhi=(float)cos(phi);
+  memcpy(a0,m[0],4*sizeof(float));
+  memcpy(a2,m[2],4*sizeof(float));
   m[0][0]=CosPhi*a0[0]-SinPhi*a2[0];
   m[0][1]=CosPhi*a0[1]-SinPhi*a2[1];
   m[0][2]=CosPhi*a0[2]-SinPhi*a2[2];
@@ -559,15 +559,15 @@ lib3ds_matrix_rotate_y(Lib3dsMatrix m, Lib3dsFloat phi)
  * \ingroup matrix
  */
 void
-lib3ds_matrix_rotate_z(Lib3dsMatrix m, Lib3dsFloat phi)
+lib3ds_matrix_rotate_z(Lib3dsMatrix m, float phi)
 {
-  Lib3dsFloat SinPhi,CosPhi;
-  Lib3dsFloat a0[4],a1[4];
+  float SinPhi,CosPhi;
+  float a0[4],a1[4];
   
-  SinPhi=(Lib3dsFloat)sin(phi);
-  CosPhi=(Lib3dsFloat)cos(phi);
-  memcpy(a0,m[0],4*sizeof(Lib3dsFloat));
-  memcpy(a1,m[1],4*sizeof(Lib3dsFloat));
+  SinPhi=(float)sin(phi);
+  CosPhi=(float)cos(phi);
+  memcpy(a0,m[0],4*sizeof(float));
+  memcpy(a1,m[1],4*sizeof(float));
   m[0][0]=CosPhi*a0[0]+SinPhi*a1[0];
   m[0][1]=CosPhi*a0[1]+SinPhi*a1[1];
   m[0][2]=CosPhi*a0[2]+SinPhi*a1[2];
@@ -587,7 +587,7 @@ lib3ds_matrix_rotate_z(Lib3dsMatrix m, Lib3dsFloat phi)
 void
 lib3ds_matrix_rotate(Lib3dsMatrix m, Lib3dsQuat q)
 {
-  Lib3dsFloat s,xs,ys,zs,wx,wy,wz,xx,xy,xz,yy,yz,zz,l;
+  float s,xs,ys,zs,wx,wy,wz,xx,xy,xz,yy,yz,zz,l;
   Lib3dsMatrix R;
 
   l=q[0]*q[0] + q[1]*q[1] + q[2]*q[2] + q[3]*q[3];
@@ -625,7 +625,7 @@ lib3ds_matrix_rotate(Lib3dsMatrix m, Lib3dsQuat q)
  * \ingroup matrix
  */
 void
-lib3ds_matrix_rotate_axis(Lib3dsMatrix m, Lib3dsVector axis, Lib3dsFloat angle)
+lib3ds_matrix_rotate_axis(Lib3dsMatrix m, Lib3dsVector axis, float angle)
 {
   Lib3dsQuat q;
   
@@ -650,7 +650,7 @@ lib3ds_matrix_rotate_axis(Lib3dsMatrix m, Lib3dsVector axis, Lib3dsFloat angle)
  */
 void
 lib3ds_matrix_camera(Lib3dsMatrix matrix, Lib3dsVector pos,
-  Lib3dsVector tgt, Lib3dsFloat roll)
+  Lib3dsVector tgt, float roll)
 {
   Lib3dsMatrix M;
   Lib3dsVector x, y, z;

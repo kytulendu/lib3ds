@@ -28,9 +28,9 @@
 
 
 /*!
- * Create and return a new ambient node.
+ * Create and return a new node object.
  *
- * The node is returned with an identity matrix.  All other fields
+ * The node is returned with an identity matrix. All other fields
  * are zero.
  *
  * \return Lib3dsNode
@@ -38,112 +38,12 @@
  * \ingroup node
  */
 Lib3dsNode*
-lib3ds_node_new_ambient()
+lib3ds_node_new(Lib3dsNodeType type)
 {
-  Lib3dsNode *node=(Lib3dsNode*)calloc(sizeof(Lib3dsNode), 1);
-  node->type=LIB3DS_AMBIENT_NODE;
-  lib3ds_matrix_identity(node->matrix);
-  return(node);
-}
-
-
-/*!
- * Create and return a new object node.
- *
- * The node is returned with an identity matrix.  All other fields
- * are zero.
- *
- * \return Lib3dsNode
- *
- * \ingroup node
- */
-Lib3dsNode*
-lib3ds_node_new_object()
-{
-  Lib3dsNode *node=(Lib3dsNode*)calloc(sizeof(Lib3dsNode), 1);
-  node->type=LIB3DS_OBJECT_NODE;
-  lib3ds_matrix_identity(node->matrix);
-  return(node);
-}
-
-
-/*!
- * Create and return a new camera node.
- *
- * The node is returned with an identity matrix.  All other fields
- * are zero.
- *
- * \return Lib3dsNode
- *
- * \ingroup node
- */
-Lib3dsNode*
-lib3ds_node_new_camera()
-{
-  Lib3dsNode *node=(Lib3dsNode*)calloc(sizeof(Lib3dsNode), 1);
-  node->type=LIB3DS_CAMERA_NODE;
-  lib3ds_matrix_identity(node->matrix);
-  return(node);
-}
-
-
-/*!
- * Create and return a new target node.
- *
- * The node is returned with an identity matrix.  All other fields
- * are zero.
- *
- * \return Lib3dsNode
- *
- * \ingroup node
- */
-Lib3dsNode*
-lib3ds_node_new_target()
-{
-  Lib3dsNode *node=(Lib3dsNode*)calloc(sizeof(Lib3dsNode), 1);
-  node->type=LIB3DS_TARGET_NODE;
-  lib3ds_matrix_identity(node->matrix);
-  return(node);
-}
-
-
-/*!
- * Create and return a new light node.
- *
- * The node is returned with an identity matrix.  All other fields
- * are zero.
- *
- * \return Lib3dsNode
- *
- * \ingroup node
- */
-Lib3dsNode*
-lib3ds_node_new_light()
-{
-  Lib3dsNode *node=(Lib3dsNode*)calloc(sizeof(Lib3dsNode), 1);
-  node->type=LIB3DS_LIGHT_NODE;
-  lib3ds_matrix_identity(node->matrix);
-  return(node);
-}
-
-
-/*!
- * Create and return a new spot node.
- *
- * The node is returned with an identity matrix.  All other fields
- * are zero.
- *
- * \return Lib3dsNode
- *
- * \ingroup node
- */
-Lib3dsNode*
-lib3ds_node_new_spot()
-{
-  Lib3dsNode *node=(Lib3dsNode*)calloc(sizeof(Lib3dsNode), 1);
-  node->type=LIB3DS_SPOT_NODE;
-  lib3ds_matrix_identity(node->matrix);
-  return(node);
+      Lib3dsNode *node = (Lib3dsNode*)calloc(sizeof(Lib3dsNode), 1);
+      node->type = type;
+      lib3ds_matrix_identity(node->matrix);
+      return node;
 }
 
 
@@ -403,7 +303,7 @@ lib3ds_node_eval(Lib3dsNode *node, Lib3dsFloat t)
  * \ingroup node
  */
 Lib3dsNode*
-lib3ds_node_by_name(Lib3dsNode *node, const char* name, Lib3dsNodeTypes type)
+lib3ds_node_by_name(Lib3dsNode *node, const char* name, Lib3dsNodeType type)
 {
   Lib3dsNode *p,*q;
 

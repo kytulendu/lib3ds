@@ -157,9 +157,9 @@ static void rot_key_setup(Lib3dsKey *prev, Lib3dsKey *cur, Lib3dsKey *next)
             lib3ds_quat_ln(qm);
         }
         else {
-            lib3ds_quat_copy(q, prev->data.q.quad);
-            if (lib3ds_quat_dot(q, cur->data.q.quad) < 0) lib3ds_quat_neg(q);
-            lib3ds_quat_ln_dif(qm, q, cur->data.q.quad);
+            lib3ds_quat_copy(q, prev->data.q.quat);
+            if (lib3ds_quat_dot(q, cur->data.q.quat) < 0) lib3ds_quat_neg(q);
+            lib3ds_quat_ln_dif(qm, q, cur->data.q.quat);
         }
     }
     if (next) {
@@ -168,9 +168,9 @@ static void rot_key_setup(Lib3dsKey *prev, Lib3dsKey *cur, Lib3dsKey *next)
             lib3ds_quat_ln(qp);
         }
         else {
-            lib3ds_quat_copy(q, next->data.q.quad);
-            if (lib3ds_quat_dot(q, cur->data.q.quad) < 0) lib3ds_quat_neg(q);
-            lib3ds_quat_ln_dif(qp, cur->data.q.quad, q);
+            lib3ds_quat_copy(q, next->data.q.quat);
+            if (lib3ds_quat_dot(q, cur->data.q.quat) < 0) lib3ds_quat_neg(q);
+            lib3ds_quat_ln_dif(qp, cur->data.q.quat, q);
         }
     }
     if (!prev) lib3ds_quat_copy(qm, qp);
@@ -205,8 +205,8 @@ static void rot_key_setup(Lib3dsKey *prev, Lib3dsKey *cur, Lib3dsKey *next)
     lib3ds_quat_exp(qa);
     lib3ds_quat_exp(qb);
 
-    lib3ds_quat_mul(cur->data.q.a, cur->data.q.quad, qa);
-    lib3ds_quat_mul(cur->data.q.b, cur->data.q.quad, qb);
+    lib3ds_quat_mul(cur->data.q.a, cur->data.q.quat, qa);
+    lib3ds_quat_mul(cur->data.q.b, cur->data.q.quat, qb);
 }
 
 
@@ -222,9 +222,9 @@ void lib3ds_track_setup(Lib3dsTrack *track)
         for (i=0; i<track->nkeys; ++i) {
             lib3ds_quat_axis_angle(q, track->keys[i].data.q.axis, track->keys[i].data.q.angle);
             if (i > 0) {
-                lib3ds_quat_mul(track->keys[i].data.q.quad, q, track->keys[i-1].data.q.quad);
+                lib3ds_quat_mul(track->keys[i].data.q.quat, q, track->keys[i-1].data.q.quat);
             } else {
-                lib3ds_quat_copy(track->keys[i].data.q.quad, q);
+                lib3ds_quat_copy(track->keys[i].data.q.quat, q);
             }
         }
     }
@@ -409,21 +409,42 @@ void lib3ds_track_eval_quat(Lib3dsTrack *track, Lib3dsQuat q, Lib3dsFloat t)
 
     index = find_index(track, t, &u);
     if (index < 0) {
-        lib3ds_quat_copy(q, track->keys[0].data.q.quad);
+        lib3ds_quat_copy(q, track->keys[0].data.q.quat);
         return;
     }
     if (index >= (int)track->nkeys) {
-        lib3ds_quat_copy(q, track->keys[track->nkeys-1].data.q.quad);
+        lib3ds_quat_copy(q, track->keys[track->nkeys-1].data.q.quat);
         return;
     }
     lib3ds_quat_squad(
         q,
-        track->keys[index-1].data.q.quad,
+        track->keys[index-1].data.q.quat,
         track->keys[index-1].data.q.a,
         track->keys[index].data.q.b,
-        track->keys[index].data.q.quad,
+        track->keys[index].data.q.quat,
         u
     );
+}
+
+
+void lib3ds_track_eval_morph(Lib3dsTrack *track, char *name, Lib3dsFloat t)
+{
+    int index;
+    Lib3dsFloat u;
+
+    strcpy(name, "");
+    if (!track) return;
+
+    index = find_index(track, t, &u);
+    if (index < 0) {
+        strcpy(name, track->keys[0].data.m.name);
+        return;
+    }
+    if (index >= (int)track->nkeys) {
+        strcpy(name, track->keys[track->nkeys-1].data.m.name);
+        return;
+    }
+    strcpy(name, track->keys[index-1].data.m.name);
 }
 
 
@@ -450,8 +471,8 @@ static void tcb_read(Lib3dsTcb *tcb, Lib3dsIo *io)
 
 Lib3dsBool lib3ds_track_read(Lib3dsTrack *track, Lib3dsIo *io)
 {
-    int nkeys;
-    int i;
+    unsigned nkeys;
+    unsigned i;
 
     track->flags = lib3ds_io_read_word(io);
     lib3ds_io_read_dword(io);
@@ -492,6 +513,14 @@ Lib3dsBool lib3ds_track_read(Lib3dsTrack *track, Lib3dsIo *io)
             }
             break;
 
+        case LIB3DS_TRACK_MORPH:
+            for (i=0; i<nkeys; ++i) {
+                track->keys[i].frame = lib3ds_io_read_intd(io);
+                tcb_read(&track->keys[i].tcb, io);
+                lib3ds_io_read_string(io, track->keys[i].data.m.name, 64);
+            }
+            break;
+
         default:
             break;
     }
@@ -501,8 +530,8 @@ Lib3dsBool lib3ds_track_read(Lib3dsTrack *track, Lib3dsIo *io)
 }
 
 
-static Lib3dsBool
-lib3ds_tcb_write(Lib3dsTcb *tcb, Lib3dsIo *io)
+void
+tcb_write(Lib3dsTcb *tcb, Lib3dsIo *io)
 {
     lib3ds_io_write_word(io, tcb->flags);
     if (tcb->flags&LIB3DS_USE_TENSION) {
@@ -520,180 +549,58 @@ lib3ds_tcb_write(Lib3dsTcb *tcb, Lib3dsIo *io)
     if (tcb->flags&LIB3DS_USE_EASE_FROM) {
         lib3ds_io_write_float(io, tcb->ease_from);
     }
-    if (lib3ds_io_error(io)) {
-        return(LIB3DS_FALSE);
-    }
-    return(LIB3DS_TRUE);
 }
 
 
 Lib3dsBool lib3ds_track_write(Lib3dsTrack *track, Lib3dsIo *io)
 {
-    return LIB3DS_TRUE;
-}
+    unsigned i;
 
+    lib3ds_io_write_word(io, (Lib3dsWord)track->flags);
+    lib3ds_io_write_dword(io, 0);
+    lib3ds_io_write_dword(io, 0);
+    lib3ds_io_write_dword(io, track->nkeys);
 
-#if 0
+    switch (track->type) {
+        case LIB3DS_TRACK_BOOL:
+            for (i=0; i<track->nkeys; ++i) {
+                lib3ds_io_write_intd(io, track->keys[i].frame);
+                tcb_write(&track->keys[i].tcb, io);
+            }
+            break;
 
-Lib3dsBool
-lib3ds_bool_track_write(Lib3dsBoolTrack *track, Lib3dsIo *io)
-{
-  Lib3dsBoolKey *k;
-  Lib3dsDword num=0;
-  for (k=track->keyL; k; k=k->next) {
-    ++num;
-  }
-  lib3ds_io_write_word(io, (Lib3dsWord)track->flags);
-  lib3ds_io_write_dword(io, 0);
-  lib3ds_io_write_dword(io, 0);
-  lib3ds_io_write_dword(io, num);
+        case LIB3DS_TRACK_FLOAT:
+            for (i=0; i<track->nkeys; ++i) {
+                lib3ds_io_write_intd(io, track->keys[i].frame);
+                tcb_write(&track->keys[i].tcb, io);
+                lib3ds_io_write_float(io, track->keys[i].data.f.value);
+            }
+            break;
 
-  for (k=track->keyL; k; k=k->next) {
-    if (!lib3ds_tcb_write(&k->tcb,io)) {
-      return(LIB3DS_FALSE);
+        case LIB3DS_TRACK_VECTOR:
+            for (i=0; i<track->nkeys; ++i) {
+                lib3ds_io_write_intd(io, track->keys[i].frame);
+                tcb_write(&track->keys[i].tcb, io);
+                lib3ds_io_write_vector(io, track->keys[i].data.v.value);
+            }
+            break;
+
+        case LIB3DS_TRACK_QUAT:
+            for (i=0; i<track->nkeys; ++i) {
+                lib3ds_io_write_intd(io, track->keys[i].frame);
+                tcb_write(&track->keys[i].tcb, io);
+                lib3ds_io_write_float(io, track->keys[i].data.q.angle);
+                lib3ds_io_write_vector(io, track->keys[i].data.q.axis);
+            }
+            break;
+
+        case LIB3DS_TRACK_MORPH:
+            for (i=0; i<track->nkeys; ++i) {
+                lib3ds_io_write_intd(io, track->keys[i].frame);
+                tcb_write(&track->keys[i].tcb, io);
+                lib3ds_io_write_string(io, track->keys[i].data.m.name);
+            }
+            break;
     }
-  }
-  return(LIB3DS_TRUE);
+    return(LIB3DS_TRUE);
 }
-
-
-Lib3dsBool
-lib3ds_lin1_track_write(Lib3dsLin1Track *track, Lib3dsIo *io)
-{
-  Lib3dsLin1Key *k;
-  Lib3dsDword num=0;
-  for (k=track->keyL; k; k=k->next) {
-    ++num;
-  }
-  lib3ds_io_write_word(io, (Lib3dsWord)track->flags);
-  lib3ds_io_write_dword(io, 0);
-  lib3ds_io_write_dword(io, 0);
-  lib3ds_io_write_dword(io, num);
-
-  for (k=track->keyL; k; k=k->next) {
-    if (!lib3ds_tcb_write(&k->tcb,io)) {
-      return(LIB3DS_FALSE);
-    }
-    lib3ds_io_write_float(io, k->value);
-  }
-  return(LIB3DS_TRUE);
-}
-
-
-Lib3dsBool
-lib3ds_lin3_track_write(Lib3dsLin3Track *track, Lib3dsIo *io)
-{
-  Lib3dsLin3Key *k;
-  Lib3dsDword num=0;
-  for (k=track->keyL; k; k=k->next) {
-    ++num;
-  }
-  lib3ds_io_write_word(io, (Lib3dsWord)track->flags);
-  lib3ds_io_write_dword(io, 0);
-  lib3ds_io_write_dword(io, 0);
-  lib3ds_io_write_dword(io, num);
-
-  for (k=track->keyL; k; k=k->next) {
-    if (!lib3ds_tcb_write(&k->tcb,io)) {
-      return(LIB3DS_FALSE);
-    }
-    lib3ds_io_write_vector(io, k->value);
-  }
-  return(LIB3DS_TRUE);
-}
-
-
-Lib3dsBool
-lib3ds_quat_track_write(Lib3dsQuatTrack *track, Lib3dsIo *io)
-{
-  Lib3dsQuatKey *k;
-  Lib3dsDword num=0;
-  for (k=track->keyL; k; k=k->next) {
-    ++num;
-  }
-  lib3ds_io_write_word(io, (Lib3dsWord)track->flags);
-  lib3ds_io_write_dword(io, 0);
-  lib3ds_io_write_dword(io, 0);
-  lib3ds_io_write_dword(io, num);
-
-  for (k=track->keyL; k; k=k->next) {
-    if (!lib3ds_tcb_write(&k->tcb,io)) {
-      return(LIB3DS_FALSE);
-    }
-    lib3ds_io_write_float(io, k->angle);
-    lib3ds_io_write_vector(io, k->axis);
-  }
-  return(LIB3DS_TRUE);
-}
-
-void
-lib3ds_morph_track_eval(Lib3dsMorphTrack *track, char *p, Lib3dsFloat t)
-{
-  Lib3dsMorphKey *k;
-  char* result;
-
-  ASSERT(p);
-  if (!track->keyL) {
-    strcpy(p,"");
-    return;
-  }
-  if (!track->keyL->next) {
-    strcpy(p,track->keyL->name);
-    return;
-  }
-
-
-  /* TODO: this function finds the mesh frame that corresponds to this
-   * timeframe.  It would be better to actually interpolate the mesh.
-   */
-
-  result=0;
-
-  for(k = track->keyL;
-      k->next != NULL && t >= k->next->tcb.frame;
-      k = k->next);
-
-  result=k->name;
-
-  if (result) {
-    strcpy(p,result);
-  }
-  else {
-    strcpy(p,"");
-  }
-}
-
-
-/*!
- * \ingroup tracks
- */
-Lib3dsBool
-lib3ds_morph_track_read(Lib3dsMorphTrack *track, Lib3dsIo *io)
-{
-  /* This function was written by Stephane Denis on 5-18-04 */
-    int i;
-    Lib3dsMorphKey *k, *pk;
-    int keys;
-    track->flags=lib3ds_io_read_word(io);
-    lib3ds_io_read_dword(io);
-    lib3ds_io_read_dword(io);
-    keys=lib3ds_io_read_intd(io);
-
-    for (i=0; i<keys; ++i) {
-        k=lib3ds_morph_key_new();
-        if (!lib3ds_tcb_read(&k->tcb, io)) {
-            return(LIB3DS_FALSE);
-        }
-        if (!lib3ds_io_read_string(io, k->name, 11)) {
-            return(LIB3DS_FALSE);
-        }
-        if (!track->keyL)
-            track->keyL = k;
-        else
-            pk->next = k;
-        pk = k;
-    }
-  return(LIB3DS_TRUE);
-}
-
-#endif

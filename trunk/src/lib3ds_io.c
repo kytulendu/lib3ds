@@ -32,19 +32,10 @@ typedef union {
 } Lib3dsDwordFloat;
 
 
-struct Lib3dsIo {
-    void *self;
-    Lib3dsIoErrorFunc error_func;
-    Lib3dsIoSeekFunc seek_func;
-    Lib3dsIoTellFunc tell_func;
-    Lib3dsIoReadFunc read_func;
-    Lib3dsIoWriteFunc write_func;
-};
-
-
 Lib3dsIo*
-lib3ds_io_new(void *self, Lib3dsIoErrorFunc error_func, Lib3dsIoSeekFunc seek_func,
-              Lib3dsIoTellFunc tell_func, Lib3dsIoReadFunc read_func, Lib3dsIoWriteFunc write_func) {
+lib3ds_io_new(void *self, Lib3dsIoSeekFunc seek_func, Lib3dsIoTellFunc tell_func, 
+              Lib3dsIoReadFunc read_func, Lib3dsIoWriteFunc write_func,
+              Lib3dsIoLogFunc log_func) {
     Lib3dsIo *io = calloc(sizeof(Lib3dsIo), 1);
     ASSERT(io);
     if (!io) {
@@ -52,11 +43,11 @@ lib3ds_io_new(void *self, Lib3dsIoErrorFunc error_func, Lib3dsIoSeekFunc seek_fu
     }
 
     io->self = self;
-    io->error_func = error_func;
     io->seek_func = seek_func;
     io->tell_func = tell_func;
     io->read_func = read_func;
     io->write_func = write_func;
+    io->log_func = log_func;
 
     return io;
 }
@@ -68,17 +59,15 @@ lib3ds_io_free(Lib3dsIo *io) {
     if (!io) {
         return;
     }
-    free(io);
-}
 
-
-Lib3dsBool
-lib3ds_io_error(Lib3dsIo *io) {
-    ASSERT(io);
-    if (!io || !io->error_func) {
-        return 0;
+    if (io->tmp_mem) {
+        free(io->tmp_mem);
     }
-    return (*io->error_func)(io->self);
+    if (io->tmp_node) {
+        lib3ds_node_free(io->tmp_node);
+    }
+
+    free(io);
 }
 
 
@@ -119,6 +108,47 @@ lib3ds_io_write(Lib3dsIo *io, const void *buffer, size_t size) {
         return 0;
     }
     return (*io->write_func)(io->self, buffer, size);
+}
+
+
+void lib3ds_io_log(Lib3dsIo *io, Lib3dsLogLevel level, char *format, ...) {
+    va_list args;
+    char msg[1024];
+
+    ASSERT(io);
+    if (!io || !io->log_func) {
+        return;
+    }
+
+    va_start(args, format);
+    /* FIXME: */ vsprintf(msg, format, args); 
+    (*io->log_func)(io->self, level, msg);
+}
+
+
+void lib3ds_io_fatal_error(Lib3dsIo *io, char *format, ...) {
+    va_list args;
+    char msg[1024];
+
+    ASSERT(io);
+    if (!io || !io->log_func) {
+        return;
+    }
+
+    va_start(args, format);
+    /* FIXME: */ vsprintf(msg, format, args); 
+    (*io->log_func)(io->self, LIB3DS_LOG_ERROR, msg);
+    longjmp(io->jmpbuf, 1);
+}
+
+
+void lib3ds_io_read_error(Lib3dsIo *io) {
+    lib3ds_io_fatal_error(io, "Reading from input stream failed.");
+}
+
+
+void lib3ds_io_write_error(Lib3dsIo *io) {
+    lib3ds_io_fatal_error(io, "Writing to output stream failed.");
 }
 
 
@@ -254,30 +284,24 @@ lib3ds_io_read_float(Lib3dsIo *io) {
  * \param io IO input handle.
  * \param v  The vector to store the data.
  */
-Lib3dsBool
+void
 lib3ds_io_read_vector(Lib3dsIo *io, Lib3dsVector v) {
     ASSERT(io);
-
     v[0] = lib3ds_io_read_float(io);
     v[1] = lib3ds_io_read_float(io);
     v[2] = lib3ds_io_read_float(io);
-
-    return(!lib3ds_io_error(io));
 }
 
 
 /*!
  * \ingroup io
  */
-Lib3dsBool
+void
 lib3ds_io_read_rgb(Lib3dsIo *io, Lib3dsRgb rgb) {
     ASSERT(io);
-
     rgb[0] = lib3ds_io_read_float(io);
     rgb[1] = lib3ds_io_read_float(io);
     rgb[2] = lib3ds_io_read_float(io);
-
-    return(!lib3ds_io_error(io));
 }
 
 
@@ -292,7 +316,7 @@ lib3ds_io_read_rgb(Lib3dsIo *io, Lib3dsRgb rgb) {
  *
  * \return        True on success, False otherwise.
  */
-Lib3dsBool
+void
 lib3ds_io_read_string(Lib3dsIo *io, char *s, int buflen) {
     char c;
     int k = 0;
@@ -300,7 +324,7 @@ lib3ds_io_read_string(Lib3dsIo *io, char *s, int buflen) {
     ASSERT(io);
     for (;;) {
         if (lib3ds_io_read(io, &c, 1) != 1) {
-            return FALSE;
+            lib3ds_io_read_error(io);
         }
         *s++ = c;
         if (!c) {
@@ -308,11 +332,9 @@ lib3ds_io_read_string(Lib3dsIo *io, char *s, int buflen) {
         }
         ++k;
         if (k >= buflen) {
-            return(FALSE);
+            lib3ds_io_fatal_error(io, "Invalid string in input stream.");
         }
     }
-
-    return(!lib3ds_io_error(io));
 }
 
 
@@ -321,13 +343,12 @@ lib3ds_io_read_string(Lib3dsIo *io, char *s, int buflen) {
  *
  * Writes a byte into a file stream.
  */
-Lib3dsBool
+void
 lib3ds_io_write_byte(Lib3dsIo *io, Lib3dsByte b) {
     ASSERT(io);
     if (lib3ds_io_write(io, &b, 1) != 1) {
-        return(FALSE);
+        lib3ds_io_write_error(io);
     }
-    return(TRUE);
 }
 
 
@@ -336,7 +357,7 @@ lib3ds_io_write_byte(Lib3dsIo *io, Lib3dsByte b) {
  *
  * Writes a word into a little endian file stream.
  */
-Lib3dsBool
+void
 lib3ds_io_write_word(Lib3dsIo *io, Lib3dsWord w) {
     Lib3dsByte b[2];
 
@@ -344,9 +365,8 @@ lib3ds_io_write_word(Lib3dsIo *io, Lib3dsWord w) {
     b[1] = ((Lib3dsWord)w & 0xFF00) >> 8;
     b[0] = ((Lib3dsWord)w & 0x00FF);
     if (lib3ds_io_write(io, b, 2) != 2) {
-        return(FALSE);
+        lib3ds_io_write_error(io);
     }
-    return(TRUE);
 }
 
 
@@ -355,7 +375,7 @@ lib3ds_io_write_word(Lib3dsIo *io, Lib3dsWord w) {
  *
  * Writes a dword into a little endian file stream.
  */
-Lib3dsBool
+void
 lib3ds_io_write_dword(Lib3dsIo *io, Lib3dsDword d) {
     Lib3dsByte b[4];
 
@@ -365,9 +385,8 @@ lib3ds_io_write_dword(Lib3dsIo *io, Lib3dsDword d) {
     b[1] = (Lib3dsByte)(((Lib3dsDword)d & 0x0000FF00) >> 8);
     b[0] = (Lib3dsByte)(((Lib3dsDword)d & 0x000000FF));
     if (lib3ds_io_write(io, b, 4) != 4) {
-        return(FALSE);
+        lib3ds_io_write_error(io);
     }
-    return(TRUE);
 }
 
 
@@ -376,13 +395,12 @@ lib3ds_io_write_dword(Lib3dsIo *io, Lib3dsDword d) {
  *
  * Writes a signed byte in a file stream.
  */
-Lib3dsBool
+void
 lib3ds_io_write_intb(Lib3dsIo *io, Lib3dsIntb b) {
     ASSERT(io);
     if (lib3ds_io_write(io, &b, 1) != 1) {
-        return(FALSE);
+        lib3ds_io_write_error(io);
     }
-    return(TRUE);
 }
 
 
@@ -391,7 +409,7 @@ lib3ds_io_write_intb(Lib3dsIo *io, Lib3dsIntb b) {
  *
  * Writes a signed word into a little endian file stream.
  */
-Lib3dsBool
+void
 lib3ds_io_write_intw(Lib3dsIo *io, Lib3dsIntw w) {
     Lib3dsByte b[2];
 
@@ -399,9 +417,8 @@ lib3ds_io_write_intw(Lib3dsIo *io, Lib3dsIntw w) {
     b[1] = ((Lib3dsWord)w & 0xFF00) >> 8;
     b[0] = ((Lib3dsWord)w & 0x00FF);
     if (lib3ds_io_write(io, b, 2) != 2) {
-        return(FALSE);
+        lib3ds_io_write_error(io);
     }
-    return(TRUE);
 }
 
 
@@ -410,7 +427,7 @@ lib3ds_io_write_intw(Lib3dsIo *io, Lib3dsIntw w) {
  *
  * Writes a signed dword into a little endian file stream.
  */
-Lib3dsBool
+void
 lib3ds_io_write_intd(Lib3dsIo *io, Lib3dsIntd d) {
     Lib3dsByte b[4];
 
@@ -420,9 +437,8 @@ lib3ds_io_write_intd(Lib3dsIo *io, Lib3dsIntd d) {
     b[1] = (Lib3dsByte)(((Lib3dsDword)d & 0x0000FF00) >> 8);
     b[0] = (Lib3dsByte)(((Lib3dsDword)d & 0x000000FF));
     if (lib3ds_io_write(io, b, 4) != 4) {
-        return(FALSE);
+        lib3ds_io_write_error(io);
     }
-    return(TRUE);
 }
 
 
@@ -431,7 +447,7 @@ lib3ds_io_write_intd(Lib3dsIo *io, Lib3dsIntd d) {
  *
  * Writes a float into a little endian file stream.
  */
-Lib3dsBool
+void
 lib3ds_io_write_float(Lib3dsIo *io, float l) {
     Lib3dsByte b[4];
     Lib3dsDwordFloat d;
@@ -443,9 +459,8 @@ lib3ds_io_write_float(Lib3dsIo *io, float l) {
     b[1] = (Lib3dsByte)(((Lib3dsDword)d.dword_value & 0x0000FF00) >> 8);
     b[0] = (Lib3dsByte)(((Lib3dsDword)d.dword_value & 0x000000FF));
     if (lib3ds_io_write(io, b, 4) != 4) {
-        return(FALSE);
+        lib3ds_io_write_error(io);
     }
-    return(TRUE);
 }
 
 
@@ -454,30 +469,24 @@ lib3ds_io_write_float(Lib3dsIo *io, float l) {
  *
  * Writes a vector into a file stream in little endian format.
  */
-Lib3dsBool
+void
 lib3ds_io_write_vector(Lib3dsIo *io, Lib3dsVector v) {
     int i;
     for (i = 0; i < 3; ++i) {
-        if (!lib3ds_io_write_float(io, v[i])) {
-            return(FALSE);
-        }
+        lib3ds_io_write_float(io, v[i]);
     }
-    return(TRUE);
 }
 
 
 /*!
  * \ingroup io
  */
-Lib3dsBool
+void
 lib3ds_io_write_rgb(Lib3dsIo *io, Lib3dsRgb rgb) {
     int i;
     for (i = 0; i < 3; ++i) {
-        if (!lib3ds_io_write_float(io, rgb[i])) {
-            return(FALSE);
-        }
+        lib3ds_io_write_float(io, rgb[i]);
     }
-    return(TRUE);
 }
 
 
@@ -486,10 +495,12 @@ lib3ds_io_write_rgb(Lib3dsIo *io, Lib3dsRgb rgb) {
  *
  * Writes a zero-terminated string into a file stream.
  */
-Lib3dsBool
+void
 lib3ds_io_write_string(Lib3dsIo *io, const char *s) {
-    ASSERT(s);
-    ASSERT(io);
-    lib3ds_io_write(io, s, strlen(s) + 1);
-    return(!lib3ds_io_error(io));
+    size_t len;
+    assert(io && s);
+    len = strlen(s);
+    if (lib3ds_io_write(io, s, len + 1) != len +1) {
+        lib3ds_io_write_error(io);
+    }
 }

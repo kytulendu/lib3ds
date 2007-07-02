@@ -105,20 +105,17 @@ lib3ds_camera_dump(Lib3dsCamera *camera) {
  * \param camera A Lib3dsCamera to be filled in.
  * \param io A Lib3dsIo object previously set up by the caller.
  *
- * \return LIB3DS_TRUE on success, LIB3DS_FALSE on failure.
- *
  * \see lib3ds_file_read
  *
  * \ingroup camera
  */
-Lib3dsBool
+void
 lib3ds_camera_read(Lib3dsCamera *camera, Lib3dsIo *io) {
     Lib3dsChunk c;
     Lib3dsWord chunk;
 
-    if (!lib3ds_chunk_read_start(&c, LIB3DS_N_CAMERA, io)) {
-        return(FALSE);
-    }
+    lib3ds_chunk_read_start(&c, LIB3DS_N_CAMERA, io);
+
     {
         int i;
         for (i = 0; i < 3; ++i) {
@@ -159,7 +156,6 @@ lib3ds_camera_read(Lib3dsCamera *camera, Lib3dsIo *io) {
     }
 
     lib3ds_chunk_read_end(&c, io);
-    return(TRUE);
 }
 
 
@@ -172,20 +168,16 @@ lib3ds_camera_read(Lib3dsCamera *camera, Lib3dsIo *io) {
  * \param camera A Lib3dsCamera to be written.
  * \param io A Lib3dsIo object previously set up by the caller.
  *
- * \return LIB3DS_TRUE on success, LIB3DS_FALSE on failure.
- *
  * \see lib3ds_file_write
  *
  * \ingroup camera
  */
-Lib3dsBool
+void
 lib3ds_camera_write(Lib3dsCamera *camera, Lib3dsIo *io) {
     Lib3dsChunk c;
 
     c.chunk = LIB3DS_N_CAMERA;
-    if (!lib3ds_chunk_write_start(&c, io)) {
-        return(FALSE);
-    }
+    lib3ds_chunk_write_start(&c, io);
 
     lib3ds_io_write_vector(io, camera->position);
     lib3ds_io_write_vector(io, camera->target);
@@ -211,9 +203,6 @@ lib3ds_camera_write(Lib3dsCamera *camera, Lib3dsIo *io) {
         lib3ds_io_write_float(io, camera->far_range);
     }
 
-    if (!lib3ds_chunk_write_end(&c, io)) {
-        return(FALSE);
-    }
-    return(TRUE);
+    lib3ds_chunk_write_end(&c, io);
 }
 

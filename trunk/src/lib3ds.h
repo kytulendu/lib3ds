@@ -22,7 +22,8 @@
  *
  * $Id: types.h,v 1.25 2007/06/21 08:36:41 jeh Exp $
  */
-#include <stdio.h>
+
+#include <stddef.h>
 #ifndef _MSC_VER
 #include <stdint.h>
 #endif
@@ -158,16 +159,24 @@ typedef enum Lib3dsIoSeek {
   LIB3DS_SEEK_END  =2
 } Lib3dsIoSeek;
 
+typedef enum Lib3dsLogLevel {
+    LIB3DS_LOG_ERROR    = 0,
+    LIB3DS_LOG_WARNING  = 1,
+    LIB3DS_LOG_INFO     = 2,
+    LIB3DS_LOG_DEBUG    = 3
+} Lib3dsLogLevel;
+
 typedef struct Lib3dsIo Lib3dsIo;
 typedef Lib3dsBool (*Lib3dsIoErrorFunc)(void *self);
 typedef long (*Lib3dsIoSeekFunc)(void *self, long offset, Lib3dsIoSeek origin);
 typedef long (*Lib3dsIoTellFunc)(void *self);
 typedef size_t (*Lib3dsIoReadFunc)(void *self, void *buffer, size_t size);
 typedef size_t (*Lib3dsIoWriteFunc)(void *self, const void *buffer, size_t size);
+typedef void (*Lib3dsIoLogFunc)(Lib3dsIo *io, Lib3dsLogLevel level, char *msg);
 
-extern LIB3DSAPI Lib3dsIo* lib3ds_io_new(void *self, Lib3dsIoErrorFunc error_func,
-                                         Lib3dsIoSeekFunc seek_func, Lib3dsIoTellFunc tell_func,
-                                         Lib3dsIoReadFunc read_func, Lib3dsIoWriteFunc write_func);
+extern LIB3DSAPI Lib3dsIo* lib3ds_io_new(void *self, Lib3dsIoSeekFunc seek_func, Lib3dsIoTellFunc tell_func,
+                                         Lib3dsIoReadFunc read_func, Lib3dsIoWriteFunc write_func,
+                                         Lib3dsIoLogFunc log_func);
 extern LIB3DSAPI void lib3ds_io_free(Lib3dsIo *io);
 
 /**
@@ -656,13 +665,13 @@ typedef struct Lib3dsMesh {
     Lib3dsDword object_flags;   /*< @see Lib3dsObjectFlags */ 
     Lib3dsByte color;
     Lib3dsMatrix matrix;    	/*< Transformation matrix for mesh data */
-    Lib3dsDword nvertices;		/*< Number of points in point list */
+    Lib3dsWord nvertices;		/*< Number of points in point list */
     Lib3dsVector *vertices;	    /*< Point list */
-    Lib3dsDword nflags;		    /*< Number of flags in per-point flags list */
+    Lib3dsWord nflags;		    /*< Number of flags in per-point flags list */
     Lib3dsWord *flags;		    /*< Per-point flags list */
-    Lib3dsDword ntexcos;		/*< Number of U-V texture coordinates */
+    Lib3dsWord ntexcos;		    /*< Number of U-V texture coordinates */
     Lib3dsTexco *texcos;	    /*< U-V texture coordinates */
-    Lib3dsDword nfaces;	        /*< Number of faces in face list */
+    Lib3dsWord nfaces;	        /*< Number of faces in face list */
     Lib3dsFace *faces;		    /*< Face list */
     Lib3dsBoxMap box_map;
     Lib3dsMapData map_data;
@@ -670,10 +679,10 @@ typedef struct Lib3dsMesh {
 
 extern LIB3DSAPI Lib3dsMesh* lib3ds_mesh_new(const char *name);
 extern LIB3DSAPI void lib3ds_mesh_free(Lib3dsMesh *mesh);
-extern LIB3DSAPI void lib3ds_mesh_alloc_vertices(Lib3dsMesh *mesh, Lib3dsDword nvertices);
-extern LIB3DSAPI void lib3ds_mesh_alloc_flags(Lib3dsMesh *mesh, Lib3dsDword nflags);
-extern LIB3DSAPI void lib3ds_mesh_alloc_texcos(Lib3dsMesh *mesh, Lib3dsDword ntexcos);
-extern LIB3DSAPI void lib3ds_mesh_alloc_faces(Lib3dsMesh *mesh, Lib3dsDword nfaces);
+extern LIB3DSAPI void lib3ds_mesh_alloc_vertices(Lib3dsMesh *mesh, Lib3dsWord nvertices);
+extern LIB3DSAPI void lib3ds_mesh_alloc_flags(Lib3dsMesh *mesh, Lib3dsWord nflags);
+extern LIB3DSAPI void lib3ds_mesh_alloc_texcos(Lib3dsMesh *mesh, Lib3dsWord ntexcos);
+extern LIB3DSAPI void lib3ds_mesh_alloc_faces(Lib3dsMesh *mesh, Lib3dsWord nfaces);
 extern LIB3DSAPI void lib3ds_mesh_bounding_box(Lib3dsMesh *mesh, Lib3dsVector bmin, Lib3dsVector bmax);
 extern LIB3DSAPI void lib3ds_mesh_calculate_normals(Lib3dsMesh *mesh, Lib3dsVector *normalL);
 extern LIB3DSAPI void lib3ds_mesh_dump(Lib3dsMesh *mesh);
@@ -985,7 +994,7 @@ extern LIB3DSAPI Lib3dsIntd lib3ds_file_mesh_by_name(Lib3dsFile *file, const cha
 extern LIB3DSAPI Lib3dsNode* lib3ds_file_node_by_name(Lib3dsFile *file, const char* name, Lib3dsNodeType type);
 extern LIB3DSAPI Lib3dsNode* lib3ds_file_node_by_id(Lib3dsFile *file, Lib3dsWord node_id);
 extern LIB3DSAPI void lib3ds_file_insert_node(Lib3dsFile *file, Lib3dsNode *node);
-extern LIB3DSAPI Lib3dsBool lib3ds_file_remove_node(Lib3dsFile *file, Lib3dsNode *node);
+extern LIB3DSAPI void lib3ds_file_remove_node(Lib3dsFile *file, Lib3dsNode *node);
 extern LIB3DSAPI void lib3ds_file_bounding_box_of_objects(Lib3dsFile *file, Lib3dsBool include_meshes, Lib3dsBool include_cameras, Lib3dsBool include_lights, Lib3dsVector bmin, Lib3dsVector bmax);
 extern LIB3DSAPI void lib3ds_file_bounding_box_of_nodes(Lib3dsFile *file, Lib3dsBool include_meshes, Lib3dsBool include_cameras, Lib3dsBool include_lights, Lib3dsVector bmin, Lib3dsVector bmax);
 

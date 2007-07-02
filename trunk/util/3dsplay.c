@@ -20,12 +20,9 @@
 * $Id: 3dsplay.c,v 1.14 2007/06/18 06:51:53 jeh Exp $
 */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include <lib3ds.h>
 #include <string.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <assert.h>

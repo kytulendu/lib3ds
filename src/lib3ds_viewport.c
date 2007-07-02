@@ -30,7 +30,7 @@
 /*!
 * \ingroup viewport
 */
-Lib3dsBool
+void
 lib3ds_viewport_read(Lib3dsViewport *viewport, Lib3dsIo *io) {
     Lib3dsChunk c;
     Lib3dsWord chunk;
@@ -158,14 +158,13 @@ lib3ds_viewport_read(Lib3dsViewport *viewport, Lib3dsIo *io) {
     }
 
     lib3ds_chunk_read_end(&c, io);
-    return(TRUE);
 }
 
 
 /*!
 * \ingroup viewport
 */
-Lib3dsBool
+void
 lib3ds_viewport_write(Lib3dsViewport *viewport, Lib3dsIo *io) {
     if (viewport->layout.nviews) {
         Lib3dsChunk c;
@@ -308,7 +307,6 @@ lib3ds_viewport_write(Lib3dsViewport *viewport, Lib3dsIo *io) {
 
         lib3ds_chunk_write_end(&c, io);
     }
-    return(TRUE);
 }
 
 

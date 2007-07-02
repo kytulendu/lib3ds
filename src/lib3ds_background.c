@@ -27,15 +27,13 @@
  */
 
 
-static Lib3dsBool
+static void
 solid_bgnd_read(Lib3dsBackground *background, Lib3dsIo *io) {
     Lib3dsChunk c;
     Lib3dsWord chunk;
     Lib3dsBool have_lin = FALSE;
 
-    if (!lib3ds_chunk_read_start(&c, LIB3DS_SOLID_BGND, io)) {
-        return(FALSE);
-    }
+    lib3ds_chunk_read_start(&c, LIB3DS_SOLID_BGND, io);
 
     while ((chunk = lib3ds_chunk_read_next(&c, io)) != 0) {
         switch (chunk) {
@@ -54,11 +52,10 @@ solid_bgnd_read(Lib3dsBackground *background, Lib3dsIo *io) {
     }
 
     lib3ds_chunk_read_end(&c, io);
-    return(TRUE);
 }
 
 
-static Lib3dsBool
+static void
 v_gradient_read(Lib3dsBackground *background, Lib3dsIo *io) {
     Lib3dsChunk c;
     Lib3dsWord chunk;
@@ -66,10 +63,8 @@ v_gradient_read(Lib3dsBackground *background, Lib3dsIo *io) {
     Lib3dsRgb col[2][3];
     int have_lin = 0;
 
+    lib3ds_chunk_read_start(&c, LIB3DS_V_GRADIENT, io);
 
-    if (!lib3ds_chunk_read_start(&c, LIB3DS_V_GRADIENT, io)) {
-        return(FALSE);
-    }
     background->gradient.percent = lib3ds_io_read_float(io);
     lib3ds_chunk_read_tell(&c, io);
 
@@ -100,66 +95,54 @@ v_gradient_read(Lib3dsBackground *background, Lib3dsIo *io) {
         }
     }
     lib3ds_chunk_read_end(&c, io);
-    return(TRUE);
 }
 
 
 /*!
  * \ingroup background
  */
-Lib3dsBool
+void
 lib3ds_background_read(Lib3dsBackground *background, Lib3dsIo *io) {
     Lib3dsChunk c;
 
-    if (!lib3ds_chunk_read(&c, io)) {
-        return(FALSE);
-    }
-
+    lib3ds_chunk_read(&c, io);
     switch (c.chunk) {
         case LIB3DS_BIT_MAP: {
-            if (!lib3ds_io_read_string(io, background->bitmap.name, 64)) {
-                return(FALSE);
-            }
+            lib3ds_io_read_string(io, background->bitmap.name, 64);
+            break;
         }
-        break;
 
         case LIB3DS_SOLID_BGND: {
             lib3ds_chunk_read_reset(&c, io);
-            if (!solid_bgnd_read(background, io)) {
-                return(FALSE);
-            }
+            solid_bgnd_read(background, io);
+            break;
         }
-        break;
 
         case LIB3DS_V_GRADIENT: {
             lib3ds_chunk_read_reset(&c, io);
-            if (!v_gradient_read(background, io)) {
-                return(FALSE);
-            }
+            v_gradient_read(background, io);
+            break;
         }
-        break;
 
         case LIB3DS_USE_BIT_MAP: {
             background->bitmap.use = TRUE;
+            break;
         }
-        break;
 
         case LIB3DS_USE_SOLID_BGND: {
             background->solid.use = TRUE;
+            break;
         }
-        break;
 
         case LIB3DS_USE_V_GRADIENT: {
             background->gradient.use = TRUE;
+            break;
         }
-        break;
     }
-
-    return(TRUE);
 }
 
 
-static Lib3dsBool
+static void
 colorf_write(Lib3dsRgba rgb, Lib3dsIo *io) {
     Lib3dsChunk c;
 
@@ -172,7 +155,6 @@ colorf_write(Lib3dsRgba rgb, Lib3dsIo *io) {
     c.size = 18;
     lib3ds_chunk_write(&c, io);
     lib3ds_io_write_rgb(io, rgb);
-    return(TRUE);
 }
 
 
@@ -191,7 +173,7 @@ colorf_defined(Lib3dsRgba rgb) {
 /*!
  * \ingroup background
  */
-Lib3dsBool
+void
 lib3ds_background_write(Lib3dsBackground *background, Lib3dsIo *io) {
     if (strlen(background->bitmap.name)) { /*---- LIB3DS_BIT_MAP ----*/
         Lib3dsChunk c;
@@ -242,7 +224,5 @@ lib3ds_background_write(Lib3dsBackground *background, Lib3dsIo *io) {
         c.size = 6;
         lib3ds_chunk_write(&c, io);
     }
-
-    return(TRUE);
 }
 

@@ -22,7 +22,8 @@
 #include "lib3ds_impl.h"
 
 
-Lib3dsTrack* lib3ds_track_new(Lib3dsTrackType type, Lib3dsDword nkeys) {
+Lib3dsTrack* 
+lib3ds_track_new(Lib3dsTrackType type, Lib3dsDword nkeys) {
     Lib3dsTrack *track = (Lib3dsTrack*)calloc(sizeof(Lib3dsTrack), 1);
     track->type = type;
     if (type != LIB3DS_TRACK_UNKNOWN) {
@@ -32,7 +33,8 @@ Lib3dsTrack* lib3ds_track_new(Lib3dsTrackType type, Lib3dsDword nkeys) {
 }
 
 
-void lib3ds_track_free(Lib3dsTrack *track) {
+void 
+lib3ds_track_free(Lib3dsTrack *track) {
     assert(track);
     lib3ds_track_resize(track, 0);
     memset(track, 0, sizeof(Lib3dsTrack));
@@ -40,7 +42,8 @@ void lib3ds_track_free(Lib3dsTrack *track) {
 }
 
 
-void lib3ds_track_resize(Lib3dsTrack *track, Lib3dsDword nkeys) {
+void 
+lib3ds_track_resize(Lib3dsTrack *track, Lib3dsDword nkeys) {
     char *p;
 
     assert(track);
@@ -56,7 +59,8 @@ void lib3ds_track_resize(Lib3dsTrack *track, Lib3dsDword nkeys) {
 }
 
 
-static void float_key_setup(Lib3dsKey *pp, Lib3dsKey *pc, Lib3dsKey *pn) {
+static void 
+float_key_setup(Lib3dsKey *pp, Lib3dsKey *pc, Lib3dsKey *pn) {
     float tm, cm, cp, bm, bp, tmcm, tmcp, ksm, ksp, kdm, kdp, c;
     float dt, fp, fn;
     float delm, delp;
@@ -95,7 +99,8 @@ static void float_key_setup(Lib3dsKey *pp, Lib3dsKey *pc, Lib3dsKey *pn) {
 }
 
 
-static void pos_key_setup(Lib3dsKey *pp, Lib3dsKey *pc, Lib3dsKey *pn) {
+static void 
+pos_key_setup(Lib3dsKey *pp, Lib3dsKey *pc, Lib3dsKey *pn) {
     float tm, cm, cp, bm, bp, tmcm, tmcp, ksm, ksp, kdm, kdp, c;
     float dt, fp, fn;
     Lib3dsVector delm, delp;
@@ -138,7 +143,8 @@ static void pos_key_setup(Lib3dsKey *pp, Lib3dsKey *pc, Lib3dsKey *pn) {
 }
 
 
-static void rot_key_setup(Lib3dsKey *prev, Lib3dsKey *cur, Lib3dsKey *next) {
+static void 
+rot_key_setup(Lib3dsKey *prev, Lib3dsKey *cur, Lib3dsKey *next) {
     float tm, cm, cp, bm, bp, tmcm, tmcp, ksm, ksp, kdm, kdp, c;
     float dt, fp, fn;
     Lib3dsQuat q, qm, qp, qa, qb;
@@ -202,7 +208,8 @@ static void rot_key_setup(Lib3dsKey *prev, Lib3dsKey *cur, Lib3dsKey *next) {
 }
 
 
-void lib3ds_track_setup(Lib3dsTrack *track) {
+void 
+lib3ds_track_setup(Lib3dsTrack *track) {
     unsigned i;
     Lib3dsKey keyp, keyn;
     Lib3dsKey *pp, *pn;
@@ -276,7 +283,8 @@ lib3ds_float_cubic(float a, float p, float q, float b, float t) {
 }
 
 
-static int find_index(Lib3dsTrack *track, float t, float *u) {
+static int 
+find_index(Lib3dsTrack *track, float t, float *u) {
     unsigned i;
     float nt;
     Lib3dsIntd t0, t1;
@@ -312,7 +320,8 @@ static int find_index(Lib3dsTrack *track, float t, float *u) {
 }
 
 
-void lib3ds_track_eval_bool(Lib3dsTrack *track, Lib3dsBool *b, float t) {
+void 
+lib3ds_track_eval_bool(Lib3dsTrack *track, Lib3dsBool *b, float t) {
     unsigned index;
     float u;
 
@@ -332,7 +341,8 @@ void lib3ds_track_eval_bool(Lib3dsTrack *track, Lib3dsBool *b, float t) {
 }
 
 
-void lib3ds_track_eval_float(Lib3dsTrack *track, float *f, float t) {
+void 
+lib3ds_track_eval_float(Lib3dsTrack *track, float *f, float t) {
     unsigned index;
     float u;
 
@@ -358,7 +368,8 @@ void lib3ds_track_eval_float(Lib3dsTrack *track, float *f, float t) {
 }
 
 
-void lib3ds_track_eval_vector(Lib3dsTrack *track, Lib3dsVector p, float t) {
+void 
+lib3ds_track_eval_vector(Lib3dsTrack *track, Lib3dsVector p, float t) {
     unsigned index;
     float u;
 
@@ -385,7 +396,8 @@ void lib3ds_track_eval_vector(Lib3dsTrack *track, Lib3dsVector p, float t) {
 }
 
 
-void lib3ds_track_eval_quat(Lib3dsTrack *track, Lib3dsQuat q, float t) {
+void 
+lib3ds_track_eval_quat(Lib3dsTrack *track, Lib3dsQuat q, float t) {
     int index;
     float u;
 
@@ -412,7 +424,8 @@ void lib3ds_track_eval_quat(Lib3dsTrack *track, Lib3dsQuat q, float t) {
 }
 
 
-void lib3ds_track_eval_morph(Lib3dsTrack *track, char *name, float t) {
+void 
+lib3ds_track_eval_morph(Lib3dsTrack *track, char *name, float t) {
     int index;
     float u;
 
@@ -432,7 +445,8 @@ void lib3ds_track_eval_morph(Lib3dsTrack *track, char *name, float t) {
 }
 
 
-static void tcb_read(Lib3dsTcb *tcb, Lib3dsIo *io) {
+static void 
+tcb_read(Lib3dsTcb *tcb, Lib3dsIo *io) {
     tcb->flags = lib3ds_io_read_word(io);
     if (tcb->flags & LIB3DS_USE_TENSION) {
         tcb->tens = lib3ds_io_read_float(io);
@@ -452,7 +466,8 @@ static void tcb_read(Lib3dsTcb *tcb, Lib3dsIo *io) {
 }
 
 
-Lib3dsBool lib3ds_track_read(Lib3dsTrack *track, Lib3dsIo *io) {
+void 
+lib3ds_track_read(Lib3dsTrack *track, Lib3dsIo *io) {
     unsigned nkeys;
     unsigned i;
 
@@ -508,7 +523,6 @@ Lib3dsBool lib3ds_track_read(Lib3dsTrack *track, Lib3dsIo *io) {
     }
 
     lib3ds_track_setup(track);
-    return TRUE;
 }
 
 
@@ -533,7 +547,8 @@ tcb_write(Lib3dsTcb *tcb, Lib3dsIo *io) {
 }
 
 
-Lib3dsBool lib3ds_track_write(Lib3dsTrack *track, Lib3dsIo *io) {
+void
+lib3ds_track_write(Lib3dsTrack *track, Lib3dsIo *io) {
     unsigned i;
 
     lib3ds_io_write_word(io, (Lib3dsWord)track->flags);
@@ -582,5 +597,4 @@ Lib3dsBool lib3ds_track_write(Lib3dsTrack *track, Lib3dsIo *io) {
             }
             break;
     }
-    return(TRUE);
 }

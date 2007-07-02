@@ -81,7 +81,7 @@ lib3ds_file_enable_dump(Lib3dsBool enable, Lib3dsBool unknown) {
  *
  * \return   True on success, False otherwise.
  */
-Lib3dsBool
+void
 lib3ds_chunk_read(Lib3dsChunk *c, Lib3dsIo *io) {
     ASSERT(c);
     ASSERT(io);
@@ -90,10 +90,9 @@ lib3ds_chunk_read(Lib3dsChunk *c, Lib3dsIo *io) {
     c->size = lib3ds_io_read_dword(io);
     c->end = c->cur + c->size;
     c->cur += 6;
-    if (lib3ds_io_error(io) || (c->size < 6)) {
-        return(FALSE);
+    if (c->size < 6) {
+        lib3ds_io_fatal_error(io, "Invalid chunk header.");
     }
-    return(TRUE);
 
 }
 
@@ -101,15 +100,15 @@ lib3ds_chunk_read(Lib3dsChunk *c, Lib3dsIo *io) {
 /*!
  * \ingroup chunk
  */
-Lib3dsBool
+void
 lib3ds_chunk_read_start(Lib3dsChunk *c, Lib3dsWord chunk, Lib3dsIo *io) {
     ASSERT(c);
     ASSERT(io);
-    if (!lib3ds_chunk_read(c, io)) {
-        return(FALSE);
-    }
+    lib3ds_chunk_read(c, io);
     lib3ds_chunk_debug_enter(c);
-    return((chunk == 0) || (c->chunk == chunk));
+    if ((chunk != 0) && (c->chunk != chunk)) {
+        lib3ds_io_fatal_error(io, "Unexpected chunk found.");
+    }
 }
 
 
@@ -172,71 +171,50 @@ lib3ds_chunk_read_end(Lib3dsChunk *c, Lib3dsIo *io) {
  *
  * \return   True on success, False otherwise.
  */
-Lib3dsBool
+void
 lib3ds_chunk_write(Lib3dsChunk *c, Lib3dsIo *io) {
     ASSERT(c);
-    if (!lib3ds_io_write_word(io, c->chunk)) {
-        LIB3DS_ERROR_LOG;
-        return(FALSE);
-    }
-    if (!lib3ds_io_write_dword(io, c->size)) {
-        LIB3DS_ERROR_LOG;
-        return(FALSE);
-    }
-    return(TRUE);
+    lib3ds_io_write_word(io, c->chunk);
+    lib3ds_io_write_dword(io, c->size);
 }
 
 
 /*!
  * \ingroup chunk
  */
-Lib3dsBool
+void
 lib3ds_chunk_write_start(Lib3dsChunk *c, Lib3dsIo *io) {
     ASSERT(c);
     c->size = 0;
     c->cur = lib3ds_io_tell(io);
-    if (!lib3ds_io_write_word(io, c->chunk)) {
-        return(FALSE);
-    }
-    if (!lib3ds_io_write_dword(io, c->size)) {
-        return(FALSE);
-    }
-    return(TRUE);
+    lib3ds_io_write_word(io, c->chunk);
+    lib3ds_io_write_dword(io, c->size);
 }
 
 
 /*!
  * \ingroup chunk
  */
-Lib3dsBool
+void
 lib3ds_chunk_write_end(Lib3dsChunk *c, Lib3dsIo *io) {
     ASSERT(c);
     c->size = lib3ds_io_tell(io) - c->cur;
     lib3ds_io_seek(io, c->cur + 2, LIB3DS_SEEK_SET);
-    if (!lib3ds_io_write_dword(io, c->size)) {
-        LIB3DS_ERROR_LOG;
-        return(FALSE);
-    }
-
+    lib3ds_io_write_dword(io, c->size);
     c->cur += c->size;
     lib3ds_io_seek(io, c->cur, LIB3DS_SEEK_SET);
-    if (lib3ds_io_error(io)) {
-        LIB3DS_ERROR_LOG;
-        return(FALSE);
-    }
-    return(TRUE);
 }
 
 
 /*!
 * \ingroup chunk
 */
-Lib3dsBool
+void
 lib3ds_chunk_write_switch(Lib3dsWord chunk, Lib3dsIo *io) {
     Lib3dsChunk c;
     c.chunk = chunk;
     c.size = 6;
-    return lib3ds_chunk_write(&c, io);
+    lib3ds_chunk_write(&c, io);
 }
 
 

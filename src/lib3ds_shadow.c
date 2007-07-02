@@ -22,61 +22,51 @@
 #include "lib3ds_impl.h"
 
 
-/*!
- * \defgroup shadow Shadow Map Settings
- */
-
-
-/*!
- * \ingroup shadow
- */
-Lib3dsBool
+void
 lib3ds_shadow_read(Lib3dsShadow *shadow, Lib3dsIo *io) {
     Lib3dsChunk c;
 
-    if (!lib3ds_chunk_read(&c, io)) {
-        return(FALSE);
-    }
-
+    lib3ds_chunk_read(&c, io);
     switch (c.chunk) {
         case LIB3DS_SHADOW_MAP_SIZE: {
             shadow->map_size = lib3ds_io_read_intw(io);
+            break;
         }
-        break;
+
         case LIB3DS_LO_SHADOW_BIAS: {
             shadow->lo_bias = lib3ds_io_read_float(io);
+            break;
         }
-        break;
+
         case LIB3DS_HI_SHADOW_BIAS: {
             shadow->hi_bias = lib3ds_io_read_float(io);
+            break;
         }
-        break;
+
         case LIB3DS_SHADOW_SAMPLES: {
             shadow->samples = lib3ds_io_read_intw(io);
+            break;
         }
-        break;
+
         case LIB3DS_SHADOW_RANGE: {
             shadow->range = lib3ds_io_read_intd(io);
+            break;
         }
-        break;
+
         case LIB3DS_SHADOW_FILTER: {
             shadow->filter = lib3ds_io_read_float(io);
+            break;
         }
-        break;
+
         case LIB3DS_RAY_BIAS: {
             shadow->ray_bias = lib3ds_io_read_float(io);
+            break;
         }
-        break;
     }
-
-    return(TRUE);
 }
 
 
-/*!
- * \ingroup shadow
- */
-Lib3dsBool
+void
 lib3ds_shadow_write(Lib3dsShadow *shadow, Lib3dsIo *io) {
     if (fabs(shadow->lo_bias) > LIB3DS_EPSILON) { /*---- LIB3DS_LO_SHADOW_BIAS ----*/
         Lib3dsChunk c;
@@ -132,6 +122,5 @@ lib3ds_shadow_write(Lib3dsShadow *shadow, Lib3dsIo *io) {
         lib3ds_chunk_write(&c, io);
         lib3ds_io_write_float(io, shadow->ray_bias);
     }
-    return(TRUE);
 }
 

@@ -49,15 +49,15 @@ void lib3ds_util_insert_array(void ***ptr, Lib3dsIntd *n, Lib3dsIntd *size,
     i = ((index >= 0) && (index < *n)) ? index : *n;
     if (i >= *size) {
         int new_size = 2 * (*size);
-#ifdef _DEBUG
-        if (new_size < 1) {
-            new_size = 1;
-        }
-#else
-        if (new_size < 32) {
-            new_size = 32;
-        }
-#endif
+        #ifdef _DEBUG
+            if (new_size < 1) {
+                new_size = 1;
+            }
+        #else
+            if (new_size < 32) {
+                new_size = 32;
+            }
+        #endif
         lib3ds_util_reserve_array(ptr, n, size, new_size, FALSE, NULL);
     }
     assert(*ptr);

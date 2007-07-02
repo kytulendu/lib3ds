@@ -20,6 +20,7 @@
  * $Id: 3dsdump.c,v 1.4 2007/06/14 11:29:39 jeh Exp $
  */
 #include <lib3ds.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 

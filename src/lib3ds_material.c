@@ -94,7 +94,7 @@ lib3ds_material_free(Lib3dsMaterial *material) {
 
 
 static void
-color_read(Lib3dsRgba rgb, Lib3dsIo *io) {
+color_read(Lib3dsRgb rgb, Lib3dsIo *io) {
     Lib3dsChunk c;
     Lib3dsWord chunk;
     Lib3dsBool have_lin = FALSE;
@@ -108,7 +108,6 @@ color_read(Lib3dsRgba rgb, Lib3dsIo *io) {
                 for (i = 0; i < 3; ++i) {
                     rgb[i] = 1.0f * lib3ds_io_read_byte(io) / 255.0f;
                 }
-                rgb[3] = 1.0f;
                 have_lin = TRUE;
                 break;
             }
@@ -121,7 +120,6 @@ color_read(Lib3dsRgba rgb, Lib3dsIo *io) {
                     for (i = 0; i < 3; ++i) {
                         rgb[i] = 1.0f * lib3ds_io_read_byte(io) / 255.0f;
                     }
-                    rgb[3] = 1.0f;
                 }
                 break;
             }
@@ -131,7 +129,6 @@ color_read(Lib3dsRgba rgb, Lib3dsIo *io) {
                 for (i = 0; i < 3; ++i) {
                     rgb[i] = lib3ds_io_read_float(io);
                 }
-                rgb[3] = 1.0f;
                 have_lin = TRUE;
                 break;
             }
@@ -142,13 +139,12 @@ color_read(Lib3dsRgba rgb, Lib3dsIo *io) {
                     for (i = 0; i < 3; ++i) {
                         rgb[i] = lib3ds_io_read_float(io);
                     }
-                    rgb[3] = 1.0f;
                 }
                 break;
             }
 
             default:
-                lib3ds_chunk_unknown(chunk);
+                lib3ds_chunk_unknown(chunk, io);
         }
     }
 
@@ -172,7 +168,7 @@ int_percentage_read(float *p, Lib3dsIo *io) {
             }
 
             default:
-                lib3ds_chunk_unknown(chunk);
+                lib3ds_chunk_unknown(chunk, io);
         }
     }
 
@@ -196,7 +192,7 @@ texture_map_read(Lib3dsTextureMap *map, Lib3dsIo *io) {
 
             case LIB3DS_MAT_MAPNAME: {
                 lib3ds_io_read_string(io, map->name, 64);
-                lib3ds_chunk_dump_info("  NAME=%s", map->name);
+                lib3ds_io_log(io, LIB3DS_LOG_INFO, "  NAME=%s", map->name);
                 break;
             }
 
@@ -268,96 +264,11 @@ texture_map_read(Lib3dsTextureMap *map, Lib3dsIo *io) {
             }
 
             default:
-                lib3ds_chunk_unknown(chunk);
+                lib3ds_chunk_unknown(chunk,io);
         }
     }
 
     lib3ds_chunk_read_end(&c, io);
-}
-
-
-/*!
- * \ingroup material
- */
-static void
-texture_dump(const char *maptype, Lib3dsTextureMap *texture) {
-    ASSERT(texture);
-    if (strlen(texture->name) == 0) {
-        return;
-    }
-    printf("  %s:\n", maptype);
-    printf("    name:        %s\n", texture->name);
-    printf("    flags:       %X\n", (unsigned)texture->flags);
-    printf("    percent:     %f\n", texture->percent);
-    printf("    blur:        %f\n", texture->blur);
-    printf("    scale:       (%f, %f)\n", texture->scale[0], texture->scale[1]);
-    printf("    offset:      (%f, %f)\n", texture->offset[0], texture->offset[1]);
-    printf("    rotation:    %f\n", texture->rotation);
-    printf("    tint_1:      (%f, %f, %f)\n",
-           texture->tint_1[0], texture->tint_1[1], texture->tint_1[2]);
-    printf("    tint_2:      (%f, %f, %f)\n",
-           texture->tint_2[0], texture->tint_2[1], texture->tint_2[2]);
-    printf("    tint_r:      (%f, %f, %f)\n",
-           texture->tint_r[0], texture->tint_r[1], texture->tint_r[2]);
-    printf("    tint_g:      (%f, %f, %f)\n",
-           texture->tint_g[0], texture->tint_g[1], texture->tint_g[2]);
-    printf("    tint_b:      (%f, %f, %f)\n",
-           texture->tint_b[0], texture->tint_b[1], texture->tint_b[2]);
-}
-
-
-/*!
- * \ingroup material
- */
-void
-lib3ds_material_dump(Lib3dsMaterial *material) {
-    ASSERT(material);
-    printf("  name:          %s\n", material->name);
-    printf("  ambient:       (%f, %f, %f)\n",
-           material->ambient[0], material->ambient[1], material->ambient[2]);
-    printf("  diffuse:       (%f, %f, %f)\n",
-           material->diffuse[0], material->diffuse[1], material->diffuse[2]);
-    printf("  specular:      (%f, %f, %f)\n",
-           material->specular[0], material->specular[1], material->specular[2]);
-    printf("  shininess:     %f\n", material->shininess);
-    printf("  shin_strength: %f\n", material->shin_strength);
-    printf("  use_blur:      %s\n", material->use_blur ? "yes" : "no");
-    printf("  blur:          %f\n", material->blur);
-    printf("  falloff:       %f\n", material->falloff);
-    printf("  additive:      %s\n", material->additive ? "yes" : "no");
-    printf("  use_falloff:   %s\n", material->use_falloff ? "yes" : "no");
-    printf("  self_illum:    %s\n", material->self_illum ? "yes" : "no");
-    printf("  self_ilpct:    %f\n", material->self_ilpct);
-    printf("  shading:       %d\n", material->shading);
-    printf("  soften:        %s\n", material->soften ? "yes" : "no");
-    printf("  face_map:      %s\n", material->face_map ? "yes" : "no");
-    printf("  two_sided:     %s\n", material->two_sided ? "yes" : "no");
-    printf("  map_decal:     %s\n", material->map_decal ? "yes" : "no");
-    printf("  use_wire:      %s\n", material->use_wire ? "yes" : "no");
-    printf("  use_wire_abs:  %s\n", material->use_wire_abs ? "yes" : "no");
-    printf("  wire_size:     %f\n", material->wire_size);
-    texture_dump("texture1_map", &material->texture1_map);
-    texture_dump("texture1_mask", &material->texture1_mask);
-    texture_dump("texture2_map", &material->texture2_map);
-    texture_dump("texture2_mask", &material->texture2_mask);
-    texture_dump("opacity_map", &material->opacity_map);
-    texture_dump("opacity_mask", &material->opacity_mask);
-    texture_dump("bump_map", &material->bump_map);
-    texture_dump("bump_mask", &material->bump_mask);
-    texture_dump("specular_map", &material->specular_map);
-    texture_dump("specular_mask", &material->specular_mask);
-    texture_dump("shininess_map", &material->shininess_map);
-    texture_dump("shininess_mask", &material->shininess_mask);
-    texture_dump("self_illum_map", &material->self_illum_map);
-    texture_dump("self_illum_mask", &material->self_illum_mask);
-    texture_dump("reflection_map", &material->reflection_map);
-    texture_dump("reflection_mask", &material->reflection_mask);
-    printf("  autorefl_map:\n");
-    printf("    flags        %X\n", (unsigned)material->autorefl_map.flags);
-    printf("    level        %d\n", (int)material->autorefl_map.level);
-    printf("    size         %d\n", (int)material->autorefl_map.size);
-    printf("    frame_step   %d\n", (int)material->autorefl_map.frame_step);
-    printf("\n");
 }
 
 
@@ -376,7 +287,7 @@ lib3ds_material_read(Lib3dsMaterial *material, Lib3dsIo *io) {
         switch (chunk) {
             case LIB3DS_MAT_NAME: {
                 lib3ds_io_read_string(io, material->name, 64);
-                lib3ds_chunk_dump_info("  NAME=%s", material->name);
+                lib3ds_io_log(io, LIB3DS_LOG_INFO, "  NAME=%s", material->name);
                 break;
             }
 
@@ -597,7 +508,7 @@ lib3ds_material_read(Lib3dsMaterial *material, Lib3dsIo *io) {
             }
 
             default:
-                lib3ds_chunk_unknown(chunk);
+                lib3ds_chunk_unknown(chunk, io);
         }
     }
 
@@ -606,7 +517,7 @@ lib3ds_material_read(Lib3dsMaterial *material, Lib3dsIo *io) {
 
 
 static void
-color_write(Lib3dsRgba rgb, Lib3dsIo *io) {
+color_write(Lib3dsRgb rgb, Lib3dsIo *io) {
     Lib3dsChunk c;
 
     c.chunk = LIB3DS_COLOR_24;

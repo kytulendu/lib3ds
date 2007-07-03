@@ -324,55 +324,6 @@ lib3ds_node_by_id(Lib3dsNode *node, Lib3dsWord node_id) {
 }
 
 
-static const char* node_names_table[] = {
-    "***Unknown***",
-    "Ambient",
-    "Object",
-    "Camera",
-    "Target",
-    "Light",
-    "Spot"
-};
-
-
-/*!
- * Dump node and all descendants recursively.
- *
- * \param node The top-level node to be dumped.
- * \param level current recursion depth
- *
- * \ingroup node
- */
-void
-lib3ds_node_dump(Lib3dsNode *node, Lib3dsIntd level) {
-    Lib3dsNode *p;
-    char l[128];
-
-    ASSERT(node);
-    memset(l, ' ', 2*level);
-    l[2*level] = 0;
-
-    if (node->type == LIB3DS_OBJECT_NODE) {
-        printf("%s%s [%s] (%s)\n",
-               l,
-               node->name,
-               node->data.object.instance,
-               node_names_table[node->type]
-              );
-    } else {
-        printf("%s%s (%s)\n",
-               l,
-               node->name,
-               node_names_table[node->type]
-              );
-    }
-
-    for (p = node->childs; p != 0; p = p->next) {
-        lib3ds_node_dump(p, level + 1);
-    }
-}
-
-
 /*!
 * \ingroup node
 */
@@ -402,7 +353,7 @@ lib3ds_node_read(Lib3dsNode *node, Lib3dsFile *file, Lib3dsIo *io) {
         switch (chunk) {
             case LIB3DS_NODE_ID: {
                 node->node_id = lib3ds_io_read_word(io);
-                lib3ds_chunk_dump_info("  ID = %d", (short)node->node_id);
+                lib3ds_io_log(io, LIB3DS_LOG_INFO, "  ID=%d", (short)node->node_id);
                 break;
             }
 
@@ -412,8 +363,8 @@ lib3ds_node_read(Lib3dsNode *node, Lib3dsFile *file, Lib3dsIo *io) {
                 node->flags2 = lib3ds_io_read_word(io);
                 node->parent_id = lib3ds_io_read_word(io);
 
-                lib3ds_chunk_dump_info("  NAME =%s", node->name);
-                lib3ds_chunk_dump_info("  PARENT=%d", (short)node->parent_id);
+                lib3ds_io_log(io, LIB3DS_LOG_INFO, "  NAME=%s", node->name);
+                lib3ds_io_log(io, LIB3DS_LOG_INFO, "  PARENT=%d", (short)node->parent_id);
                 break;
             }
 
@@ -421,7 +372,7 @@ lib3ds_node_read(Lib3dsNode *node, Lib3dsFile *file, Lib3dsIo *io) {
                 if (node->type == LIB3DS_OBJECT_NODE) {
                     lib3ds_io_read_vector(io, node->data.object.pivot);
                 } else {
-                    lib3ds_chunk_unknown(chunk);
+                    lib3ds_chunk_unknown(chunk, io);
                 }
                 break;
             }
@@ -430,7 +381,7 @@ lib3ds_node_read(Lib3dsNode *node, Lib3dsFile *file, Lib3dsIo *io) {
                 if (node->type == LIB3DS_OBJECT_NODE) {
                     lib3ds_io_read_string(io, node->data.object.instance, 64);
                 } else {
-                    lib3ds_chunk_unknown(chunk);
+                    lib3ds_chunk_unknown(chunk, io);
                 }
                 break;
             }
@@ -440,7 +391,7 @@ lib3ds_node_read(Lib3dsNode *node, Lib3dsFile *file, Lib3dsIo *io) {
                     lib3ds_io_read_vector(io, node->data.object.bbox_min);
                     lib3ds_io_read_vector(io, node->data.object.bbox_max);
                 } else {
-                    lib3ds_chunk_unknown(chunk);
+                    lib3ds_chunk_unknown(chunk, io);
                 }
                 break;
             }
@@ -455,7 +406,7 @@ lib3ds_node_read(Lib3dsNode *node, Lib3dsFile *file, Lib3dsIo *io) {
                         track = &node->data.light.col_track;
                         break;
                     default:
-                        lib3ds_chunk_unknown(chunk);
+                        lib3ds_chunk_unknown(chunk, io);
                 }
                 if (track) {
                     *track = lib3ds_track_new(LIB3DS_TRACK_VECTOR, 0);
@@ -483,7 +434,7 @@ lib3ds_node_read(Lib3dsNode *node, Lib3dsFile *file, Lib3dsIo *io) {
                         track = &node->data.spot.pos_track;
                         break;
                     default:
-                        lib3ds_chunk_unknown(chunk);
+                        lib3ds_chunk_unknown(chunk, io);
                 }
                 if (track) {
                     *track = lib3ds_track_new(LIB3DS_TRACK_VECTOR, 0);
@@ -497,7 +448,7 @@ lib3ds_node_read(Lib3dsNode *node, Lib3dsFile *file, Lib3dsIo *io) {
                     node->data.object.rot_track = lib3ds_track_new(LIB3DS_TRACK_QUAT, 0);
                     lib3ds_track_read(node->data.object.rot_track, io);
                 } else {
-                    lib3ds_chunk_unknown(chunk);
+                    lib3ds_chunk_unknown(chunk, io);
                 }
                 break;
             }
@@ -507,7 +458,7 @@ lib3ds_node_read(Lib3dsNode *node, Lib3dsFile *file, Lib3dsIo *io) {
                     node->data.object.scl_track = lib3ds_track_new(LIB3DS_TRACK_VECTOR, 0);
                     lib3ds_track_read(node->data.object.scl_track, io);
                 } else {
-                    lib3ds_chunk_unknown(chunk);
+                    lib3ds_chunk_unknown(chunk, io);
                 }
                 break;
             }
@@ -517,7 +468,7 @@ lib3ds_node_read(Lib3dsNode *node, Lib3dsFile *file, Lib3dsIo *io) {
                     node->data.camera.fov_track = lib3ds_track_new(LIB3DS_TRACK_FLOAT, 0);
                     lib3ds_track_read(node->data.camera.fov_track, io);
                 } else {
-                    lib3ds_chunk_unknown(chunk);
+                    lib3ds_chunk_unknown(chunk, io);
                 }
                 break;
             }
@@ -527,7 +478,7 @@ lib3ds_node_read(Lib3dsNode *node, Lib3dsFile *file, Lib3dsIo *io) {
                     node->data.light.hotspot_track = lib3ds_track_new(LIB3DS_TRACK_FLOAT, 0);
                     lib3ds_track_read(node->data.light.hotspot_track, io);
                 } else {
-                    lib3ds_chunk_unknown(chunk);
+                    lib3ds_chunk_unknown(chunk, io);
                 }
                 break;
             }
@@ -537,7 +488,7 @@ lib3ds_node_read(Lib3dsNode *node, Lib3dsFile *file, Lib3dsIo *io) {
                     node->data.light.falloff_track = lib3ds_track_new(LIB3DS_TRACK_FLOAT, 0);
                     lib3ds_track_read(node->data.light.falloff_track, io);
                 } else {
-                    lib3ds_chunk_unknown(chunk);
+                    lib3ds_chunk_unknown(chunk, io);
                 }
                 break;
             }
@@ -555,7 +506,7 @@ lib3ds_node_read(Lib3dsNode *node, Lib3dsFile *file, Lib3dsIo *io) {
                         break;
 
                     default:
-                        lib3ds_chunk_unknown(chunk);
+                        lib3ds_chunk_unknown(chunk, io);
                 }
                 break;
             }
@@ -565,7 +516,7 @@ lib3ds_node_read(Lib3dsNode *node, Lib3dsFile *file, Lib3dsIo *io) {
                     node->data.object.hide_track = lib3ds_track_new(LIB3DS_TRACK_BOOL, 0);
                     lib3ds_track_read(node->data.object.hide_track, io);
                 } else {
-                    lib3ds_chunk_unknown(chunk);
+                    lib3ds_chunk_unknown(chunk, io);
                 }
                 break;
             }
@@ -574,7 +525,7 @@ lib3ds_node_read(Lib3dsNode *node, Lib3dsFile *file, Lib3dsIo *io) {
                 if (node->type == LIB3DS_OBJECT_NODE) {
                     node->data.object.morph_smooth = lib3ds_io_read_float(io);
                 } else {
-                    lib3ds_chunk_unknown(chunk);
+                    lib3ds_chunk_unknown(chunk, io);
                 }
             }
             break;
@@ -585,13 +536,13 @@ lib3ds_node_read(Lib3dsNode *node, Lib3dsFile *file, Lib3dsIo *io) {
                         node->data.object.morph_track = lib3ds_track_new(LIB3DS_TRACK_MORPH, 0);
                         lib3ds_track_read(node->data.object.morph_track, io);
                     } else {
-                        lib3ds_chunk_unknown(chunk);
+                        lib3ds_chunk_unknown(chunk, io);
                     }
                 }
                 break;
 
             default:
-                lib3ds_chunk_unknown(chunk);
+                lib3ds_chunk_unknown(chunk, io);
         }
     }
 

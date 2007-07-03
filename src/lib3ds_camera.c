@@ -71,32 +71,6 @@ lib3ds_camera_free(Lib3dsCamera *camera) {
 
 
 /*!
- * Dump information about a Lib3dsCamera object to stdout.
- *
- * \param camera Object to be dumped.
- *
- * \see lib3ds_file_dump_cameras
- *
- * \ingroup camera
- */
-void
-lib3ds_camera_dump(Lib3dsCamera *camera) {
-    ASSERT(camera);
-    printf("  name:       %s\n", camera->name);
-    printf("  position:   (%f, %f, %f)\n",
-           camera->position[0], camera->position[1], camera->position[2]);
-    printf("  target      (%f, %f, %f)\n",
-           camera->target[0], camera->target[1], camera->target[2]);
-    printf("  roll:       %f\n", camera->roll);
-    printf("  fov:        %f\n", camera->fov);
-    printf("  see_cone:   %s\n", camera->see_cone ? "yes" : "no");
-    printf("  near_range: %f\n", camera->near_range);
-    printf("  far_range:  %f\n", camera->far_range);
-    printf("\n");
-}
-
-
-/*!
  * Read a camera definition from a file.
  *
  * This function is called by lib3ds_file_read(), and you probably
@@ -151,7 +125,7 @@ lib3ds_camera_read(Lib3dsCamera *camera, Lib3dsIo *io) {
             break;
 
             default:
-                lib3ds_chunk_unknown(chunk);
+                lib3ds_chunk_unknown(chunk, io);
         }
     }
 

@@ -47,7 +47,7 @@ solid_bgnd_read(Lib3dsBackground *background, Lib3dsIo *io) {
                 break;
 
             default:
-                lib3ds_chunk_unknown(chunk);
+                lib3ds_chunk_unknown(chunk, io);
         }
     }
 
@@ -83,7 +83,7 @@ v_gradient_read(Lib3dsBackground *background, Lib3dsIo *io) {
                 break;
 
             default:
-                lib3ds_chunk_unknown(chunk);
+                lib3ds_chunk_unknown(chunk, io);
         }
     }
     {
@@ -143,7 +143,7 @@ lib3ds_background_read(Lib3dsBackground *background, Lib3dsIo *io) {
 
 
 static void
-colorf_write(Lib3dsRgba rgb, Lib3dsIo *io) {
+colorf_write(Lib3dsRgb rgb, Lib3dsIo *io) {
     Lib3dsChunk c;
 
     c.chunk = LIB3DS_COLOR_F;
@@ -159,7 +159,7 @@ colorf_write(Lib3dsRgba rgb, Lib3dsIo *io) {
 
 
 static Lib3dsBool
-colorf_defined(Lib3dsRgba rgb) {
+colorf_defined(Lib3dsRgb rgb) {
     int i;
     for (i = 0; i < 3; ++i) {
         if (fabs(rgb[i]) > LIB3DS_EPSILON) {

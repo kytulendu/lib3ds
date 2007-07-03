@@ -22,18 +22,6 @@
 #include "lib3ds_impl.h"
 
 
-/*!
- * \defgroup file Files
- */
-
-
-static Lib3dsBool
-fileio_error_func(void *self) {
-    FILE *f = (FILE*)self;
-    return(ferror(f) != 0);
-}
-
-
 static long
 fileio_seek_func(void *self, long offset, Lib3dsIoSeek origin) {
     FILE *f = (FILE*)self;
@@ -105,12 +93,12 @@ lib3ds_file_load(const char *filename) {
 
     f = fopen(filename, "rb");
     if (!f) {
-        return(0);
+        return NULL;
     }
     file = lib3ds_file_new();
     if (!file) {
         fclose(f);
-        return(0);
+        return NULL;
     }
 
     io = lib3ds_io_new(
@@ -124,19 +112,19 @@ lib3ds_file_load(const char *filename) {
     if (!io) {
         lib3ds_file_free(file);
         fclose(f);
-        return(0);
+        return NULL;
     }
 
     if (!lib3ds_file_read(file, io)) {
         free(file);
         lib3ds_io_free(io);
         fclose(f);
-        return(0);
+        return NULL;
     }
 
     lib3ds_io_free(io);
     fclose(f);
-    return(file);
+    return file;
 }
 
 
@@ -274,7 +262,7 @@ named_object_read(Lib3dsFile *file, Lib3dsIo *io) {
     lib3ds_chunk_read_start(&c, LIB3DS_NAMED_OBJECT, io);
     
     lib3ds_io_read_string(io, name, 64);
-    lib3ds_chunk_dump_info("  NAME=%s", name);
+    lib3ds_io_log(io, LIB3DS_LOG_INFO, "  NAME=%s", name);
     lib3ds_chunk_read_tell(&c, io);
 
     object_flags = 0;
@@ -333,7 +321,7 @@ named_object_read(Lib3dsFile *file, Lib3dsIo *io) {
                 break;
 
             default:
-                lib3ds_chunk_unknown(chunk);
+                lib3ds_chunk_unknown(chunk, io);
         }
     }
 
@@ -380,7 +368,7 @@ ambient_read(Lib3dsFile *file, Lib3dsIo *io) {
             }
 
             default:
-                lib3ds_chunk_unknown(chunk);
+                lib3ds_chunk_unknown(chunk, io);
         }
     }
 
@@ -477,7 +465,7 @@ mdata_read(Lib3dsFile *file, Lib3dsIo *io) {
             }
 
             default:
-                lib3ds_chunk_unknown(chunk);
+                lib3ds_chunk_unknown(chunk, io);
         }
     }
 
@@ -582,7 +570,7 @@ kfdata_read(Lib3dsFile *file, Lib3dsIo *io) {
             }
 
             default:
-                lib3ds_chunk_unknown(chunk);
+                lib3ds_chunk_unknown(chunk, io);
         }
     }
 
@@ -640,14 +628,14 @@ lib3ds_file_read(Lib3dsFile *file, Lib3dsIo *io) {
                     }
 
                     default:
-                        lib3ds_chunk_unknown(chunk);
+                        lib3ds_chunk_unknown(chunk, io);
                 }
             }
             break;
         }
 
         default:
-            lib3ds_chunk_unknown(c.chunk);
+            lib3ds_chunk_unknown(c.chunk, io);
             return FALSE;
     }
 
@@ -659,7 +647,7 @@ lib3ds_file_read(Lib3dsFile *file, Lib3dsIo *io) {
 
 
 static void
-colorf_write(Lib3dsRgba rgb, Lib3dsIo *io) {
+colorf_write(Lib3dsRgb rgb, Lib3dsIo *io) {
     Lib3dsChunk c;
 
     c.chunk = LIB3DS_COLOR_F;
@@ -677,26 +665,36 @@ colorf_write(Lib3dsRgba rgb, Lib3dsIo *io) {
 static void
 object_flags_write(Lib3dsDword flags, Lib3dsIo *io) {
     if (flags) {
+        Lib3dsChunk c;
+        c.size = 6;
+
         if (flags & LIB3DS_OBJECT_HIDDEN) {
-            lib3ds_chunk_write_switch(LIB3DS_OBJ_HIDDEN, io);
+            c.chunk = LIB3DS_OBJ_HIDDEN;
+            lib3ds_chunk_write(&c, io);
         }
         if (flags & LIB3DS_OBJECT_VIS_LOFTER) {
-            lib3ds_chunk_write_switch(LIB3DS_OBJ_VIS_LOFTER, io);
+            c.chunk = LIB3DS_OBJ_VIS_LOFTER;
+            lib3ds_chunk_write(&c, io);
         }
         if (flags & LIB3DS_OBJECT_DOESNT_CAST) {
-            lib3ds_chunk_write_switch(LIB3DS_OBJ_DOESNT_CAST, io);
+            c.chunk = LIB3DS_OBJ_DOESNT_CAST;
+            lib3ds_chunk_write(&c, io);
         }
         if (flags & LIB3DS_OBJECT_MATTE) {
-            lib3ds_chunk_write_switch(LIB3DS_OBJ_MATTE, io);
+            c.chunk = LIB3DS_OBJ_MATTE;
+            lib3ds_chunk_write(&c, io);
         }
         if (flags & LIB3DS_OBJECT_DONT_RCVSHADOW) {
-            lib3ds_chunk_write_switch(LIB3DS_OBJ_DOESNT_CAST, io);
+            c.chunk = LIB3DS_OBJ_DOESNT_CAST;
+            lib3ds_chunk_write(&c, io);
         }
         if (flags & LIB3DS_OBJECT_FAST) {
-            lib3ds_chunk_write_switch(LIB3DS_OBJ_FAST, io);
+            c.chunk = LIB3DS_OBJ_FAST;
+            lib3ds_chunk_write(&c, io);
         }
         if (flags & LIB3DS_OBJECT_FROZEN) {
-            lib3ds_chunk_write_switch(LIB3DS_OBJ_FROZEN, io);
+            c.chunk = LIB3DS_OBJ_FROZEN;
+            lib3ds_chunk_write(&c, io);
         }
     }
 }

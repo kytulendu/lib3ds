@@ -59,7 +59,7 @@ fog_read(Lib3dsFog *fog, Lib3dsIo *io) {
             break;
 
             default:
-                lib3ds_chunk_unknown(chunk);
+                lib3ds_chunk_unknown(chunk, io);
         }
     }
 
@@ -93,7 +93,7 @@ layer_fog_read(Lib3dsLayerFog *fog, Lib3dsIo *io) {
                 break;
 
             default:
-                lib3ds_chunk_unknown(chunk);
+                lib3ds_chunk_unknown(chunk, io);
         }
     }
 
@@ -122,7 +122,7 @@ distance_cue_read(Lib3dsDistanceCue *cue, Lib3dsIo *io) {
             break;
 
             default:
-                lib3ds_chunk_unknown(chunk);
+                lib3ds_chunk_unknown(chunk, io);
         }
     }
 

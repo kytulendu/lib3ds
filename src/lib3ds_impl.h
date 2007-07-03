@@ -55,6 +55,20 @@ extern "C" {
 #define LIB3DS_ERROR_LOG
 #endif
 
+#ifndef TRUE
+#define TRUE 1
+#endif
+#ifndef FALSE
+#define FALSE 0
+#endif
+
+#define LIB3DS_EPSILON (1e-5)
+#define LIB3DS_PI 3.14159265358979323846
+#define LIB3DS_TWOPI (2.0*LIB3DS_PI)
+#define LIB3DS_HALFPI (LIB3DS_PI/2.0)
+#define LIB3DS_RAD_TO_DEG(x) ((180.0/LIB3DS_PI)*(x))
+#define LIB3DS_DEG_TO_RAD(x) ((LIB3DS_PI/180.0)*(x))
+
 typedef enum Lib3dsChunks {
   LIB3DS_NULL_CHUNK             =0x0000,
   LIB3DS_M3DMAGIC               =0x4D4D,    /*3DS file*/
@@ -300,10 +314,8 @@ extern void lib3ds_chunk_read_end(Lib3dsChunk *c, Lib3dsIo *io);
 extern void lib3ds_chunk_write(Lib3dsChunk *c, Lib3dsIo *io);
 extern void lib3ds_chunk_write_start(Lib3dsChunk *c, Lib3dsIo *io);
 extern void lib3ds_chunk_write_end(Lib3dsChunk *c, Lib3dsIo *io);
-extern void lib3ds_chunk_write_switch(Lib3dsWord chunk, Lib3dsIo *io);
 extern const char* lib3ds_chunk_name(Lib3dsWord chunk);
-extern void lib3ds_chunk_unknown(Lib3dsWord chunk);
-extern void lib3ds_chunk_dump_info(const char *format, ...);
+extern void lib3ds_chunk_unknown(Lib3dsWord chunk, Lib3dsIo *io);
 
 struct Lib3dsIo {
     void *self;
@@ -313,6 +325,7 @@ struct Lib3dsIo {
     Lib3dsIoReadFunc read_func;
     Lib3dsIoWriteFunc write_func;
     Lib3dsIoLogFunc log_func;
+    Lib3dsIntd log_indent;
     void *tmp_mem;
     Lib3dsNode *tmp_node;
 };
@@ -321,8 +334,8 @@ extern long lib3ds_io_seek(Lib3dsIo *io, long offset, Lib3dsIoSeek origin);
 extern long lib3ds_io_tell(Lib3dsIo *io);
 extern size_t lib3ds_io_read(Lib3dsIo *io, void *buffer, size_t size);
 extern size_t lib3ds_io_write(Lib3dsIo *io, const void *buffer, size_t size);
-extern void lib3ds_io_log(Lib3dsIo *io, Lib3dsLogLevel level, char *format, ...);
-extern void lib3ds_io_fatal_error(Lib3dsIo *io, char *format, ...);
+extern void lib3ds_io_log(Lib3dsIo *io, Lib3dsLogLevel level, const char *format, ...);
+extern void lib3ds_io_fatal_error(Lib3dsIo *io, const char *format, ...);
 extern void lib3ds_io_read_error(Lib3dsIo *io);
 extern void lib3ds_io_write_error(Lib3dsIo *io);
 

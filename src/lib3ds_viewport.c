@@ -81,7 +81,7 @@ lib3ds_viewport_read(Lib3dsViewport *viewport, Lib3dsIo *io) {
                         break;
 
                     default:
-                        lib3ds_chunk_unknown(chunk);
+                        lib3ds_chunk_unknown(chunk, io);
                 }
             }
             break;
@@ -150,7 +150,7 @@ lib3ds_viewport_read(Lib3dsViewport *viewport, Lib3dsIo *io) {
                     }
 
                     default:
-                        lib3ds_chunk_unknown(chunk);
+                        lib3ds_chunk_unknown(chunk, io);
                 }
             }
             break;
@@ -307,54 +307,5 @@ lib3ds_viewport_write(Lib3dsViewport *viewport, Lib3dsIo *io) {
 
         lib3ds_chunk_write_end(&c, io);
     }
-}
-
-
-/*!
-* Dump viewport.
-*
-* \param vp The viewport to be dumped.
-*
-* \ingroup node
-*/
-void
-lib3ds_viewport_dump(Lib3dsViewport *vp) {
-    Lib3dsView *view;
-    unsigned i;
-    ASSERT(vp);
-
-    printf("  viewport:\n");
-    printf("    layout:\n");
-    printf("      style:       %d\n", vp->layout.style);
-    printf("      active:      %d\n", vp->layout.active);
-    printf("      swap:        %d\n", vp->layout.swap);
-    printf("      swap_prior:  %d\n", vp->layout.swap_prior);
-    printf("      position:    %d,%d\n", vp->layout.position[0], vp->layout.position[1]);
-    printf("      size:        %d,%d\n", vp->layout.size[0], vp->layout.size[1]);
-    printf("      views:       %ld\n", vp->layout.nviews);
-
-    for (i = 0; i < vp->layout.nviews; ++i) {
-        view = &vp->layout.views[i];
-
-        printf("        view %d:\n", i);
-        printf("          type:         %d\n", view->type);
-        printf("          axis_lock:    %d\n", view->axis_lock);
-        printf("          position:     (%d,%d)\n", view->position[0], view->position[1]);
-        printf("          size:         (%d,%d)\n", view->size[0], view->size[1]);
-        printf("          zoom:         %g\n", view->zoom);
-        printf("          center:       (%g,%g,%g)\n", view->center[0], view->center[1], view->center[2]);
-        printf("          horiz_angle:  %g\n", view->horiz_angle);
-        printf("          vert_angle:   %g\n", view->vert_angle);
-        printf("          camera:       %s\n", view->camera);
-    }
-
-    printf("    default_view:\n");
-    printf(" type:         %d\n", vp->default_view.type);
-    printf(" position:     (%g,%g,%g)\n", vp->default_view.position[0], vp->default_view.position[1], vp->default_view.position[2]);
-    printf(" width:        %g\n", vp->default_view.width);
-    printf(" horiz_angle:  %g\n", vp->default_view.horiz_angle);
-    printf(" vert_angle:   %g\n", vp->default_view.vert_angle);
-    printf(" roll_angle:   %g\n", vp->default_view.roll_angle);
-    printf(" camera:       %s\n", vp->default_view.camera);
 }
 

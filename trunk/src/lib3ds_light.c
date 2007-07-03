@@ -60,44 +60,6 @@ lib3ds_light_free(Lib3dsLight *light) {
 /*!
  * \ingroup light
  */
-void
-lib3ds_light_dump(Lib3dsLight *light) {
-    ASSERT(light);
-    printf("  name:             %s\n", light->name);
-    printf("  spot_light:       %s\n", light->spot_light ? "yes" : "no");
-    printf("  see_cone:         %s\n", light->see_cone ? "yes" : "no");
-    printf("  color:            (%f, %f, %f)\n",
-           light->color[0], light->color[1], light->color[2]);
-    printf("  position          (%f, %f, %f)\n",
-           light->position[0], light->position[1], light->position[2]);
-    printf("  spot              (%f, %f, %f)\n",
-           light->spot[0], light->spot[1], light->spot[2]);
-    printf("  roll:             %f\n", light->roll);
-    printf("  off:              %s\n", light->off ? "yes" : "no");
-    printf("  outer_range:      %f\n", light->outer_range);
-    printf("  inner_range:      %f\n", light->inner_range);
-    printf("  multiplier:       %f\n", light->multiplier);
-    printf("  attenuation:      %f\n", light->attenuation);
-    printf("  rectangular_spot: %s\n", light->rectangular_spot ? "yes" : "no");
-    printf("  shadowed:         %s\n", light->shadowed ? "yes" : "no");
-    printf("  shadow_bias:      %f\n", light->shadow_bias);
-    printf("  shadow_filter:    %f\n", light->shadow_filter);
-    printf("  shadow_size:      %d\n", light->shadow_size);
-    printf("  spot_aspect:      %f\n", light->spot_aspect);
-    printf("  use_projector:    %s\n", light->use_projector ? "yes" : "no");
-    printf("  projector:        %s\n", light->projector);
-    printf("  spot_overshoot:   %d\n", (int)light->spot_overshoot);
-    printf("  ray_shadows:      %s\n", light->ray_shadows ? "yes" : "no");
-    printf("  ray_bias:         %f\n", light->ray_bias);
-    printf("  hot_spot:         %f\n", light->hot_spot);
-    printf("  fall_off:         %f\n", light->fall_off);
-    printf("\n");
-}
-
-
-/*!
- * \ingroup light
- */
 static void
 spotlight_read(Lib3dsLight *light, Lib3dsIo *io) {
     Lib3dsChunk c;
@@ -169,7 +131,7 @@ spotlight_read(Lib3dsLight *light, Lib3dsIo *io) {
             }
 
             default:
-                lib3ds_chunk_unknown(chunk);
+                lib3ds_chunk_unknown(chunk, io);
         }
     }
 
@@ -223,7 +185,7 @@ lib3ds_light_read(Lib3dsLight *light, Lib3dsIo *io) {
 
             case LIB3DS_DL_EXCLUDE: {
                 /* FIXME: */
-                lib3ds_chunk_unknown(chunk);
+                lib3ds_chunk_unknown(chunk, io);
                 break;
             }
 
@@ -238,7 +200,7 @@ lib3ds_light_read(Lib3dsLight *light, Lib3dsIo *io) {
             }
 
             default:
-                lib3ds_chunk_unknown(chunk);
+                lib3ds_chunk_unknown(chunk, io);
         }
     }
 

@@ -253,7 +253,7 @@ load_model(void) {
     }
 
     lib3ds_file_eval(file, 0.0f);
-    lib3ds_file_bounding_box_of_nodes(file, TRUE, FALSE, FALSE, bmin, bmax);
+    lib3ds_file_bounding_box_of_nodes(file, 1, 0, 0, bmin, bmax);
     sx = bmax[0] - bmin[0];
     sy = bmax[1] - bmin[1];
     sz = bmax[2] - bmin[2];
@@ -551,14 +551,26 @@ render_node(Lib3dsNode *node) {
                             } else {
                                 tex_mode = 0;
                             }
-                            glMaterialfv(GL_FRONT, GL_AMBIENT, mat->ambient);
-                            glMaterialfv(GL_FRONT, GL_DIFFUSE, mat->diffuse);
-                            glMaterialfv(GL_FRONT, GL_SPECULAR, mat->specular);
+
+                            {
+                                float a[4], d[4], s[4];
+                                int i;
+                                for (i=0; i<3; ++i) {
+                                    a[i] = mat->ambient[i];
+                                    d[i] = mat->diffuse[i];
+                                    s[i] = mat->specular[i];
+                                }
+                                a[3] = d[3] = s[3] = 1.0f;
+                                
+                                glMaterialfv(GL_FRONT, GL_AMBIENT, a);
+                                glMaterialfv(GL_FRONT, GL_DIFFUSE, d);
+                                glMaterialfv(GL_FRONT, GL_SPECULAR, s);
+                            }
                             glMaterialf(GL_FRONT, GL_SHININESS, pow(2, 10.0*mat->shininess));
                         } else {
-                            static const Lib3dsRgba a = {0.7, 0.7, 0.7, 1.0};
-                            static const Lib3dsRgba d = {0.7, 0.7, 0.7, 1.0};
-                            static const Lib3dsRgba s = {1.0, 1.0, 1.0, 1.0};
+                            static const float a[4] = {0.7, 0.7, 0.7, 1.0};
+                            static const float d[4] = {0.7, 0.7, 0.7, 1.0};
+                            static const float s[4] = {1.0, 1.0, 1.0, 1.0};
                             glMaterialfv(GL_FRONT, GL_AMBIENT, a);
                             glMaterialfv(GL_FRONT, GL_DIFFUSE, d);
                             glMaterialfv(GL_FRONT, GL_SPECULAR, s);

@@ -266,50 +266,6 @@ lib3ds_mesh_calculate_normals(Lib3dsMesh *mesh, Lib3dsVector *normals) {
 }
 
 
-/*!
- * This function prints data associated with the specified mesh such as
- * vertex and point lists.
- *
- * \param mesh  Points to a mesh that you wish to view the data for.
- *
- * \return None
- *
- * \warning WIN32: Should only be used in a console window not in a GUI.
- *
- * \ingroup mesh
- */
-void
-lib3ds_mesh_dump(Lib3dsMesh *mesh) {
-    unsigned i;
-    Lib3dsVector p;
-
-    ASSERT(mesh);
-    printf("  %s vertices=%ld faces=%ld\n",
-           mesh->name,
-           mesh->nvertices,
-           mesh->nfaces
-          );
-    printf("  matrix:\n");
-    lib3ds_matrix_dump(mesh->matrix);
-    printf("  point list:\n");
-    for (i = 0; i < mesh->nvertices; ++i) {
-        lib3ds_vector_copy(p, mesh->vertices[i]);
-        printf("    %8f %8f %8f\n", p[0], p[1], p[2]);
-    }
-    printf("  facelist:\n");
-    for (i = 0; i < mesh->nfaces; ++i) {
-        printf("    %4d %4d %4d  smoothing:%X  flags:%X  material:\"%s\"\n",
-               mesh->faces[i].index[0],
-               mesh->faces[i].index[1],
-               mesh->faces[i].index[2],
-               (unsigned) mesh->faces[i].smoothing,
-               mesh->faces[i].flags,
-               mesh->faces[i].material
-              );
-    }
-}
-
-
 static void
 face_array_read(Lib3dsFile *file, Lib3dsMesh *mesh, Lib3dsIo *io) {
     Lib3dsChunk c;
@@ -375,7 +331,7 @@ face_array_read(Lib3dsFile *file, Lib3dsMesh *mesh, Lib3dsIo *io) {
                                         }
 
                 default:
-                    lib3ds_chunk_unknown(chunk);
+                    lib3ds_chunk_unknown(chunk,io);
             }
         }
 
@@ -487,7 +443,7 @@ lib3ds_mesh_read(Lib3dsFile *file, Lib3dsMesh *mesh, Lib3dsIo *io) {
             }
 
             default:
-                lib3ds_chunk_unknown(chunk);
+                lib3ds_chunk_unknown(chunk, io);
         }
     }
 

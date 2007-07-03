@@ -22,17 +22,20 @@
 #include "lib3ds_impl.h"
 
 
-/*!
- * \defgroup ease Ease
- */
-
-
-/*!
- * \ingroup ease
- */
 float
-lib3ds_ease(float fp, float fc, float fn,
-            float ease_from, float ease_to) {
+lib3ds_float_cubic(float a, float p, float q, float b, float t) {
+    double x, y, z, w;
+
+    x = 2 * t * t * t - 3 * t * t + 1;
+    y = -2 * t * t * t + 3 * t * t;
+    z = t * t * t - 2 * t * t + t;
+    w = t * t * t - t * t;
+    return((float)(x*a + y*b + z*p + w*q));
+}
+
+
+float
+lib3ds_float_ease(float fp, float fc, float fn, float ease_from, float ease_to) {
     double s, step;
     double tofrom;
     double a;

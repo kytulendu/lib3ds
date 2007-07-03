@@ -111,43 +111,60 @@ lib3ds_io_write(Lib3dsIo *io, const void *buffer, size_t size) {
 }
 
 
-void lib3ds_io_log(Lib3dsIo *io, Lib3dsLogLevel level, char *format, ...) {
-    va_list args;
+static void 
+lib3ds_io_log_str(Lib3dsIo *io, Lib3dsLogLevel level, const char *str) {
     char msg[1024];
-
-    ASSERT(io);
-    if (!io || !io->log_func) {
-        return;
+    int i;
+    for (i=0; i<2*io->log_indent; ++i) {
+        msg[i] = ' ';
     }
-
-    va_start(args, format);
-    /* FIXME: */ vsprintf(msg, format, args); 
+    msg[io->log_indent] = 0;
+    strcat(msg, str);
     (*io->log_func)(io->self, level, msg);
 }
 
 
-void lib3ds_io_fatal_error(Lib3dsIo *io, char *format, ...) {
-    va_list args;
-    char msg[1024];
-
+void 
+lib3ds_io_log(Lib3dsIo *io, Lib3dsLogLevel level, const char *format, ...) {
     ASSERT(io);
     if (!io || !io->log_func) {
         return;
     }
+    {
+        va_list args;
+        char str[1024];
+        va_start(args, format);
+        /* FIXME: */ vsprintf(str, format, args); 
+        lib3ds_io_log_str(io, level, str);
+    }
+}
 
-    va_start(args, format);
-    /* FIXME: */ vsprintf(msg, format, args); 
-    (*io->log_func)(io->self, LIB3DS_LOG_ERROR, msg);
+
+void 
+lib3ds_io_fatal_error(Lib3dsIo *io, const char *format, ...) {
+    ASSERT(io);
+    if (!io || !io->log_func) {
+        return;
+    }
+    {
+        va_list args;
+        char str[1024];
+        va_start(args, format);
+        /* FIXME: */ vsprintf(str, format, args); 
+        lib3ds_io_log_str(io, LIB3DS_LOG_ERROR, str);
+    }
     longjmp(io->jmpbuf, 1);
 }
 
 
-void lib3ds_io_read_error(Lib3dsIo *io) {
+void 
+lib3ds_io_read_error(Lib3dsIo *io) {
     lib3ds_io_fatal_error(io, "Reading from input stream failed.");
 }
 
 
-void lib3ds_io_write_error(Lib3dsIo *io) {
+void 
+lib3ds_io_write_error(Lib3dsIo *io) {
     lib3ds_io_fatal_error(io, "Writing to output stream failed.");
 }
 

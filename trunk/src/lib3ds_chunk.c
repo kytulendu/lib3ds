@@ -27,51 +27,6 @@
 
 
 /*!
- * \defgroup chunk Chunk Handling
- */
-
-
-static Lib3dsBool enable_dump = FALSE;
-static Lib3dsBool enable_unknown = FALSE;
-static char lib3ds_chunk_level[128] = "";
-
-
-static void
-lib3ds_chunk_debug_enter(Lib3dsChunk *c) {
-    strcat(lib3ds_chunk_level, "  ");
-}
-
-
-static void
-lib3ds_chunk_debug_leave(Lib3dsChunk *c) {
-    lib3ds_chunk_level[strlen(lib3ds_chunk_level)-2] = 0;
-}
-
-
-static void
-lib3ds_chunk_debug_dump(Lib3dsChunk *c) {
-    if (enable_dump) {
-        printf("%s%s (0x%X) size=%lu\n",
-               lib3ds_chunk_level,
-               lib3ds_chunk_name(c->chunk),
-               c->chunk,
-               c->size
-              );
-    }
-}
-
-
-/*!
- * \ingroup chunk
- */
-void
-lib3ds_file_enable_dump(Lib3dsBool enable, Lib3dsBool unknown) {
-    enable_dump = enable;
-    enable_unknown = unknown;
-}
-
-
-/*!
  * \ingroup chunk
  *
  * Reads a 3d-Studio chunk header from a little endian file stream.
@@ -105,10 +60,10 @@ lib3ds_chunk_read_start(Lib3dsChunk *c, Lib3dsWord chunk, Lib3dsIo *io) {
     ASSERT(c);
     ASSERT(io);
     lib3ds_chunk_read(c, io);
-    lib3ds_chunk_debug_enter(c);
     if ((chunk != 0) && (c->chunk != chunk)) {
         lib3ds_io_fatal_error(io, "Unexpected chunk found.");
     }
+    io->log_indent++;
 }
 
 
@@ -130,15 +85,19 @@ lib3ds_chunk_read_next(Lib3dsChunk *c, Lib3dsIo *io) {
 
     if (c->cur >= c->end) {
         ASSERT(c->cur == c->end);
-        return(0);
+        return 0;
     }
 
     lib3ds_io_seek(io, (long)c->cur, LIB3DS_SEEK_SET);
     d.chunk = lib3ds_io_read_word(io);
     d.size = lib3ds_io_read_dword(io);
-    lib3ds_chunk_debug_dump(&d);
     c->cur += d.size;
-    return(d.chunk);
+
+    if (io->log_func) {
+        lib3ds_io_log(io, LIB3DS_LOG_INFO, "%s (0x%X) size=%lu", lib3ds_chunk_name(d.chunk), d.chunk, d.size);
+    }
+
+    return d.chunk;
 }
 
 
@@ -156,7 +115,7 @@ lib3ds_chunk_read_reset(Lib3dsChunk *c, Lib3dsIo *io) {
  */
 void
 lib3ds_chunk_read_end(Lib3dsChunk *c, Lib3dsIo *io) {
-    lib3ds_chunk_debug_leave(c);
+    io->log_indent--;
     lib3ds_io_seek(io, c->end, LIB3DS_SEEK_SET);
 }
 
@@ -207,52 +166,13 @@ lib3ds_chunk_write_end(Lib3dsChunk *c, Lib3dsIo *io) {
 
 
 /*!
-* \ingroup chunk
-*/
-void
-lib3ds_chunk_write_switch(Lib3dsWord chunk, Lib3dsIo *io) {
-    Lib3dsChunk c;
-    c.chunk = chunk;
-    c.size = 6;
-    lib3ds_chunk_write(&c, io);
-}
-
-
-/*!
  * \ingroup chunk
  */
 void
-lib3ds_chunk_unknown(Lib3dsWord chunk) {
-    if (enable_unknown) {
-        printf("%s***WARNING*** Unknown Chunk: %s (0x%X)\n",
-               lib3ds_chunk_level,
-               lib3ds_chunk_name(chunk),
-               chunk
-              );
+lib3ds_chunk_unknown(Lib3dsWord chunk, Lib3dsIo *io) {
+    if (io->log_func) {
+        lib3ds_io_log(io, LIB3DS_LOG_WARN, "Unknown Chunk: %s (0x%X)\n", lib3ds_chunk_name(chunk), chunk);
     }
 }
-
-
-/*!
- * \ingroup chunk
- */
-void
-lib3ds_chunk_dump_info(const char *format, ...) {
-    if (enable_dump) {
-        char s[1024];
-        va_list marker;
-
-        va_start(marker, format);
-        vsprintf(s, format, marker);
-        va_end(marker);
-
-        printf("%s%s\n", lib3ds_chunk_level, s);
-    }
-}
-
-
-
-
-
 
 

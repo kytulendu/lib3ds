@@ -673,21 +673,6 @@ lib3ds_matrix_camera(Lib3dsMatrix matrix, Lib3dsVector pos,
 }
 
 
-/*!
- * \ingroup matrix
- */
-void
-lib3ds_matrix_dump(Lib3dsMatrix matrix) {
-    int i, j;
-
-    for (i = 0; i < 4; ++i) {
-        for (j = 0; j < 4; ++j) {
-            printf("%f ", matrix[j][i]);
-        }
-        printf("\n");
-    }
-}
-
 
 
 

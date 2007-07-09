@@ -22,15 +22,6 @@
 #include "lib3ds_impl.h"
 
 
-/*!
- * \defgroup light Lights
- */
-/*!
-
-
-/*!
- * \ingroup light
- */
 Lib3dsLight*
 lib3ds_light_new(const char *name) {
     Lib3dsLight *light;
@@ -47,9 +38,6 @@ lib3ds_light_new(const char *name) {
 }
 
 
-/*!
- * \ingroup light
- */
 void
 lib3ds_light_free(Lib3dsLight *light) {
     memset(light, 0, sizeof(Lib3dsLight));
@@ -57,9 +45,6 @@ lib3ds_light_free(Lib3dsLight *light) {
 }
 
 
-/*!
- * \ingroup light
- */
 static void
 spotlight_read(Lib3dsLight *light, Lib3dsIo *io) {
     Lib3dsChunk c;
@@ -139,9 +124,6 @@ spotlight_read(Lib3dsLight *light, Lib3dsIo *io) {
 }
 
 
-/*!
- * \ingroup light
- */
 void
 lib3ds_light_read(Lib3dsLight *light, Lib3dsIo *io) {
     Lib3dsChunk c;
@@ -208,9 +190,6 @@ lib3ds_light_read(Lib3dsLight *light, Lib3dsIo *io) {
 }
 
 
-/*!
- * \ingroup light
- */
 void
 lib3ds_light_write(Lib3dsLight *light, Lib3dsIo *io) {
     Lib3dsChunk c;

@@ -23,11 +23,6 @@
 
 
 /*!
- * \defgroup mesh Meshes
- */
-
-
-/*!
  * Create and return a new empty mesh object.
  *
  * Mesh is initialized with the name and an identity matrix; all
@@ -38,8 +33,6 @@
  * \param name Mesh name.  Must not be NULL.  Must be < 64 characters.
  *
  * \return mesh object or NULL on error.
- *
- * \ingroup mesh
  */
 Lib3dsMesh*
 lib3ds_mesh_new(const char *name) {
@@ -63,8 +56,6 @@ lib3ds_mesh_new(const char *name) {
  * Free a mesh object and all of its resources.
  *
  * \param mesh Mesh object to be freed.
- *
- * \ingroup mesh
  */
 void
 lib3ds_mesh_free(Lib3dsMesh *mesh) {
@@ -127,8 +118,6 @@ lib3ds_mesh_alloc_faces(Lib3dsMesh *mesh, Lib3dsWord nfaces) {
  * \param mesh The mesh object
  * \param bmin Returned bounding box
  * \param bmax Returned bounding box
- *
- * \ingroup mesh
  */
 void
 lib3ds_mesh_bounding_box(Lib3dsMesh *mesh, Lib3dsVector bmin, Lib3dsVector bmax) {
@@ -168,8 +157,6 @@ typedef struct Lib3dsFaces {
  * \code
  *   normals[3*j+i]
  * \endcode
- *
- * \ingroup mesh
  */
 void
 lib3ds_mesh_calculate_normals(Lib3dsMesh *mesh, Lib3dsVector *normals) {
@@ -653,9 +640,6 @@ texco_array_write(Lib3dsMesh *mesh, Lib3dsIo *io) {
 }
 
 
-/*!
- * \ingroup mesh
- */
 void
 lib3ds_mesh_write(Lib3dsFile *file, Lib3dsMesh *mesh, Lib3dsIo *io) {
     Lib3dsChunk c;

@@ -22,11 +22,6 @@
 #include "lib3ds_impl.h"
 
 
-/*!
- * \defgroup atmosphere Atmosphere Settings
- */
-
-
 static void
 fog_read(Lib3dsFog *fog, Lib3dsIo *io) {
     Lib3dsChunk c;
@@ -130,9 +125,6 @@ distance_cue_read(Lib3dsDistanceCue *cue, Lib3dsIo *io) {
 }
 
 
-/*!
- * \ingroup atmosphere
- */
 void
 lib3ds_atmosphere_read(Lib3dsAtmosphere *atmosphere, Lib3dsIo *io) {
     Lib3dsChunk c;
@@ -175,9 +167,6 @@ lib3ds_atmosphere_read(Lib3dsAtmosphere *atmosphere, Lib3dsIo *io) {
 }
 
 
-/*!
- * \ingroup atmosphere
- */
 void
 lib3ds_atmosphere_write(Lib3dsAtmosphere *atmosphere, Lib3dsIo *io) {
     if (atmosphere->fog.use) { /*---- LIB3DS_FOG ----*/

@@ -190,7 +190,7 @@ static void
 timer_cb(int value) {
     if (!halt) {
         view_rotz += anim_rotz;
-        current_frame+=0.1;
+        current_frame+=1.0f;
         if (current_frame > file->frames)
             current_frame = 0;
         lib3ds_file_eval(file, current_frame);

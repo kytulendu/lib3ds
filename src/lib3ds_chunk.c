@@ -27,8 +27,6 @@
 
 
 /*!
- * \ingroup chunk
- *
  * Reads a 3d-Studio chunk header from a little endian file stream.
  *
  * \param c  The chunk to store the data.
@@ -52,9 +50,6 @@ lib3ds_chunk_read(Lib3dsChunk *c, Lib3dsIo *io) {
 }
 
 
-/*!
- * \ingroup chunk
- */
 void
 lib3ds_chunk_read_start(Lib3dsChunk *c, Lib3dsWord chunk, Lib3dsIo *io) {
     ASSERT(c);
@@ -67,18 +62,12 @@ lib3ds_chunk_read_start(Lib3dsChunk *c, Lib3dsWord chunk, Lib3dsIo *io) {
 }
 
 
-/*!
- * \ingroup chunk
- */
 void
 lib3ds_chunk_read_tell(Lib3dsChunk *c, Lib3dsIo *io) {
     c->cur = lib3ds_io_tell(io);
 }
 
 
-/*!
- * \ingroup chunk
- */
 Lib3dsWord
 lib3ds_chunk_read_next(Lib3dsChunk *c, Lib3dsIo *io) {
     Lib3dsChunk d;
@@ -101,18 +90,12 @@ lib3ds_chunk_read_next(Lib3dsChunk *c, Lib3dsIo *io) {
 }
 
 
-/*!
- * \ingroup chunk
- */
 void
 lib3ds_chunk_read_reset(Lib3dsChunk *c, Lib3dsIo *io) {
     lib3ds_io_seek(io, -6, LIB3DS_SEEK_CUR);
 }
 
 
-/*!
- * \ingroup chunk
- */
 void
 lib3ds_chunk_read_end(Lib3dsChunk *c, Lib3dsIo *io) {
     io->log_indent--;
@@ -121,8 +104,6 @@ lib3ds_chunk_read_end(Lib3dsChunk *c, Lib3dsIo *io) {
 
 
 /*!
- * \ingroup chunk
- *
  * Writes a 3d-Studio chunk header into a little endian file stream.
  *
  * \param c  The chunk to be written.
@@ -138,9 +119,6 @@ lib3ds_chunk_write(Lib3dsChunk *c, Lib3dsIo *io) {
 }
 
 
-/*!
- * \ingroup chunk
- */
 void
 lib3ds_chunk_write_start(Lib3dsChunk *c, Lib3dsIo *io) {
     ASSERT(c);
@@ -151,9 +129,6 @@ lib3ds_chunk_write_start(Lib3dsChunk *c, Lib3dsIo *io) {
 }
 
 
-/*!
- * \ingroup chunk
- */
 void
 lib3ds_chunk_write_end(Lib3dsChunk *c, Lib3dsIo *io) {
     ASSERT(c);
@@ -165,9 +140,6 @@ lib3ds_chunk_write_end(Lib3dsChunk *c, Lib3dsIo *io) {
 }
 
 
-/*!
- * \ingroup chunk
- */
 void
 lib3ds_chunk_unknown(Lib3dsWord chunk, Lib3dsIo *io) {
     if (io->log_func) {

@@ -82,8 +82,6 @@ fileio_write_func(void *self, const void *buffer, size_t size) {
  * \see lib3ds_file_save
  * \see lib3ds_file_new
  * \see lib3ds_file_free
- *
- * \ingroup file
  */
 Lib3dsFile*
 lib3ds_file_load(const char *filename) {
@@ -138,8 +136,6 @@ lib3ds_file_load(const char *filename) {
  * \return          TRUE on success, FALSE otherwise.
  *
  * \see lib3ds_file_load
- *
- * \ingroup file
  */
 Lib3dsBool
 lib3ds_file_save(Lib3dsFile *file, const char *filename) {
@@ -178,8 +174,6 @@ lib3ds_file_save(Lib3dsFile *file, const char *filename) {
  *
  * \return A pointer to the Lib3dsFile structure.
  *  If the structure cannot be allocated, NULL is returned.
- *
- * \ingroup file
  */
 Lib3dsFile*
 lib3ds_file_new() {
@@ -207,8 +201,6 @@ lib3ds_file_new() {
  * Free a Lib3dsFile object and all of its resources.
  *
  * \param file The Lib3dsFile object to be freed.
- *
- * \ingroup file
  */
 void
 lib3ds_file_free(Lib3dsFile* file) {
@@ -236,8 +228,6 @@ lib3ds_file_free(Lib3dsFile* file) {
  * \param t time value, between 0. and file->frames
  *
  * \see lib3ds_node_eval
- *
- * \ingroup file
  */
 void
 lib3ds_file_eval(Lib3dsFile *file, float t) {
@@ -585,8 +575,6 @@ kfdata_read(Lib3dsFile *file, Lib3dsIo *io) {
  * \param io A Lib3dsIo object previously set up by the caller.
  *
  * \return LIB3DS_TRUE on success, LIB3DS_FALSE on failure.
- *
- * \ingroup file
  */
 Lib3dsBool
 lib3ds_file_read(Lib3dsFile *file, Lib3dsIo *io) {
@@ -873,8 +861,6 @@ kfdata_write(Lib3dsFile *file, Lib3dsIo *io) {
  * \param io A Lib3dsIo object previously set up by the caller.
  *
  * \return LIB3DS_TRUE on success, LIB3DS_FALSE on failure.
- *
- * \ingroup file
  */
 Lib3dsBool
 lib3ds_file_write(Lib3dsFile *file, Lib3dsIo *io) {
@@ -1055,8 +1041,6 @@ lib3ds_file_mesh_by_name(Lib3dsFile *file, const char *name) {
  * \return A pointer to the first matching node, or NULL if not found.
  *
  * \see lib3ds_node_by_name
- *
- * \ingroup file
  */
 Lib3dsNode*
 lib3ds_file_node_by_name(Lib3dsFile *file, const char* name, Lib3dsNodeType type) {
@@ -1087,8 +1071,6 @@ lib3ds_file_node_by_name(Lib3dsFile *file, const char* name, Lib3dsNodeType type
  * \return A pointer to the first matching node, or NULL if not found.
  *
  * \see lib3ds_node_by_id
- *
- * \ingroup file
  */
 Lib3dsNode*
 lib3ds_file_node_by_id(Lib3dsFile *file, Lib3dsWord node_id) {
@@ -1124,8 +1106,6 @@ lib3ds_file_node_by_id(Lib3dsFile *file, Lib3dsWord node_id) {
  *
  * \param file The Lib3dsFile object to be modified.
  * \param node The node to be inserted into file
- *
- * \ingroup file
  */
 void
 lib3ds_file_insert_node(Lib3dsFile *file, Lib3dsNode *node) {
@@ -1188,8 +1168,6 @@ lib3ds_file_insert_node(Lib3dsFile *file, Lib3dsNode *node) {
  * \param node The Lib3dsNode object to be removed from file
  *
  * \return LIB3DS_TRUE on success, LIB3DS_FALSE if node is not found in file
- *
- * \ingroup file
  */
 void
 lib3ds_file_remove_node(Lib3dsFile *file, Lib3dsNode *node) {
@@ -1239,8 +1217,6 @@ lib3ds_file_remove_node(Lib3dsFile *file, Lib3dsNode *node) {
  * \param include_lights    Include lights in bounding box calculation.
  * \param bmin              Returned minimum x,y,z values.
  * \param bmax              Returned maximum x,y,z values.
- *
- * \ingroup file
  */
 void
 lib3ds_file_bounding_box_of_objects(Lib3dsFile *file, Lib3dsBool include_meshes,
@@ -1357,8 +1333,6 @@ file_bounding_box_of_nodes_impl(Lib3dsNode *node, Lib3dsFile *file, Lib3dsBool i
  * \param include_lights    Include lights in bounding box calculation.
  * \param bmin              Returned minimum x,y,z values.
  * \param bmax              Returned maximum x,y,z values.
- *
- * \ingroup file
  */
 void
 lib3ds_file_bounding_box_of_nodes(Lib3dsFile *file, Lib3dsBool include_meshes,

@@ -22,14 +22,6 @@
 #include "lib3ds_impl.h"
 
 
-/*!
- * \defgroup viewport Viewport and default view settings
- */
-
-
-/*!
-* \ingroup viewport
-*/
 void
 lib3ds_viewport_read(Lib3dsViewport *viewport, Lib3dsIo *io) {
     Lib3dsChunk c;
@@ -161,9 +153,6 @@ lib3ds_viewport_read(Lib3dsViewport *viewport, Lib3dsIo *io) {
 }
 
 
-/*!
-* \ingroup viewport
-*/
 void
 lib3ds_viewport_write(Lib3dsViewport *viewport, Lib3dsIo *io) {
     if (viewport->layout.nviews) {

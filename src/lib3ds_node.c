@@ -23,19 +23,12 @@
 
 
 /*!
- * \defgroup node Animation Nodes
- */
-
-
-/*!
  * Create and return a new node object.
  *
  * The node is returned with an identity matrix. All other fields
  * are zero.
  *
  * \return Lib3dsNode
- *
- * \ingroup node
  */
 Lib3dsNode*
 lib3ds_node_new(Lib3dsNodeType type) {
@@ -132,8 +125,6 @@ free_node_and_childs(Lib3dsNode *node) {
  * Free a node and all of its resources.
  *
  * \param node Lib3dsNode object to be freed.
- *
- * \ingroup node
  */
 void
 lib3ds_node_free(Lib3dsNode *node) {
@@ -150,8 +141,6 @@ lib3ds_node_free(Lib3dsNode *node) {
  *
  * \param node Node to be evaluated.
  * \param t time value, between 0. and file->frames
- *
- * \ingroup node
  */
 void
 lib3ds_node_eval(Lib3dsNode *node, float t) {
@@ -275,8 +264,6 @@ lib3ds_node_eval(Lib3dsNode *node, float t) {
  * \param type The target node type
  *
  * \return A pointer to the first matching node, or NULL if not found.
- *
- * \ingroup node
  */
 Lib3dsNode*
 lib3ds_node_by_name(Lib3dsNode *node, const char* name, Lib3dsNodeType type) {
@@ -304,8 +291,6 @@ lib3ds_node_by_name(Lib3dsNode *node, const char* name, Lib3dsNodeType type) {
  * \param node_id The target node id.
  *
  * \return A pointer to the first matching node, or NULL if not found.
- *
- * \ingroup node
  */
 Lib3dsNode*
 lib3ds_node_by_id(Lib3dsNode *node, Lib3dsWord node_id) {
@@ -324,9 +309,6 @@ lib3ds_node_by_id(Lib3dsNode *node, Lib3dsWord node_id) {
 }
 
 
-/*!
-* \ingroup node
-*/
 void
 lib3ds_node_read(Lib3dsNode *node, Lib3dsFile *file, Lib3dsIo *io) {
     Lib3dsChunk c;
@@ -550,9 +532,6 @@ lib3ds_node_read(Lib3dsNode *node, Lib3dsFile *file, Lib3dsIo *io) {
 }
 
 
-/*!
- * \ingroup node
- */
 void
 lib3ds_node_write(Lib3dsNode *node, Lib3dsFile *file, Lib3dsIo *io) {
     Lib3dsChunk c;

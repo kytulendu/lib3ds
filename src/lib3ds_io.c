@@ -22,10 +22,6 @@
 #include "lib3ds_impl.h"
 
 
-/*!
- * \defgroup io Binary Input/Ouput Abstraction Layer
- */
-
 typedef union {
     Lib3dsDword dword_value;
     float float_value;
@@ -170,8 +166,6 @@ lib3ds_io_write_error(Lib3dsIo *io) {
 
 
 /*!
- * \ingroup io
- *
  * Read a byte from a file stream.
  */
 Lib3dsByte
@@ -201,8 +195,6 @@ lib3ds_io_read_word(Lib3dsIo *io) {
 
 
 /*!
- * \ingroup io
- *
  * Read a dword from file a stream in little endian format.
  */
 Lib3dsDword
@@ -221,8 +213,6 @@ lib3ds_io_read_dword(Lib3dsIo *io) {
 
 
 /*!
- * \ingroup io
- *
  * Read a signed byte from a file stream.
  */
 Lib3dsIntb
@@ -236,8 +226,6 @@ lib3ds_io_read_intb(Lib3dsIo *io) {
 
 
 /*!
- * \ingroup io
- *
  * Read a signed word from a file stream in little endian format.
  */
 Lib3dsIntw
@@ -254,8 +242,6 @@ lib3ds_io_read_intw(Lib3dsIo *io) {
 
 
 /*!
- * \ingroup io
- *
  * Read a signed dword a from file stream in little endian format.
  */
 Lib3dsIntd
@@ -274,8 +260,6 @@ lib3ds_io_read_intd(Lib3dsIo *io) {
 
 
 /*!
- * \ingroup io
- *
  * Read a float from a file stream in little endian format.
  */
 float
@@ -294,8 +278,6 @@ lib3ds_io_read_float(Lib3dsIo *io) {
 
 
 /*!
- * \ingroup io
- *
  * Read a vector from a file stream in little endian format.
  *
  * \param io IO input handle.
@@ -310,9 +292,6 @@ lib3ds_io_read_vector(Lib3dsIo *io, Lib3dsVector v) {
 }
 
 
-/*!
- * \ingroup io
- */
 void
 lib3ds_io_read_rgb(Lib3dsIo *io, Lib3dsRgb rgb) {
     ASSERT(io);
@@ -323,8 +302,6 @@ lib3ds_io_read_rgb(Lib3dsIo *io, Lib3dsRgb rgb) {
 
 
 /*!
- * \ingroup io
- *
  * Read a zero-terminated string from a file stream.
  *
  * \param io      IO input handle.
@@ -356,8 +333,6 @@ lib3ds_io_read_string(Lib3dsIo *io, char *s, int buflen) {
 
 
 /*!
- * \ingroup io
- *
  * Writes a byte into a file stream.
  */
 void
@@ -370,8 +345,6 @@ lib3ds_io_write_byte(Lib3dsIo *io, Lib3dsByte b) {
 
 
 /*!
- * \ingroup io
- *
  * Writes a word into a little endian file stream.
  */
 void
@@ -388,8 +361,6 @@ lib3ds_io_write_word(Lib3dsIo *io, Lib3dsWord w) {
 
 
 /*!
- * \ingroup io
- *
  * Writes a dword into a little endian file stream.
  */
 void
@@ -408,8 +379,6 @@ lib3ds_io_write_dword(Lib3dsIo *io, Lib3dsDword d) {
 
 
 /*!
- * \ingroup io
- *
  * Writes a signed byte in a file stream.
  */
 void
@@ -422,8 +391,6 @@ lib3ds_io_write_intb(Lib3dsIo *io, Lib3dsIntb b) {
 
 
 /*!
- * \ingroup io
- *
  * Writes a signed word into a little endian file stream.
  */
 void
@@ -440,8 +407,6 @@ lib3ds_io_write_intw(Lib3dsIo *io, Lib3dsIntw w) {
 
 
 /*!
- * \ingroup io
- *
  * Writes a signed dword into a little endian file stream.
  */
 void
@@ -460,8 +425,6 @@ lib3ds_io_write_intd(Lib3dsIo *io, Lib3dsIntd d) {
 
 
 /*!
- * \ingroup io
- *
  * Writes a float into a little endian file stream.
  */
 void
@@ -482,8 +445,6 @@ lib3ds_io_write_float(Lib3dsIo *io, float l) {
 
 
 /*!
- * \ingroup io
- *
  * Writes a vector into a file stream in little endian format.
  */
 void
@@ -495,9 +456,6 @@ lib3ds_io_write_vector(Lib3dsIo *io, Lib3dsVector v) {
 }
 
 
-/*!
- * \ingroup io
- */
 void
 lib3ds_io_write_rgb(Lib3dsIo *io, Lib3dsRgb rgb) {
     int i;
@@ -508,8 +466,6 @@ lib3ds_io_write_rgb(Lib3dsIo *io, Lib3dsRgb rgb) {
 
 
 /*!
- * \ingroup io
- *
  * Writes a zero-terminated string into a file stream.
  */
 void

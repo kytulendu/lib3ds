@@ -22,11 +22,6 @@
 #include "lib3ds_impl.h"
 
 
-/*!
- * \defgroup background Background Settings
- */
-
-
 static void
 solid_bgnd_read(Lib3dsBackground *background, Lib3dsIo *io) {
     Lib3dsChunk c;
@@ -98,9 +93,6 @@ v_gradient_read(Lib3dsBackground *background, Lib3dsIo *io) {
 }
 
 
-/*!
- * \ingroup background
- */
 void
 lib3ds_background_read(Lib3dsBackground *background, Lib3dsIo *io) {
     Lib3dsChunk c;
@@ -170,9 +162,6 @@ colorf_defined(Lib3dsRgb rgb) {
 }
 
 
-/*!
- * \ingroup background
- */
 void
 lib3ds_background_write(Lib3dsBackground *background, Lib3dsIo *io) {
     if (strlen(background->bitmap.name)) { /*---- LIB3DS_BIT_MAP ----*/

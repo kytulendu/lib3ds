@@ -22,24 +22,6 @@
 #include "lib3ds_impl.h"
 
 
-/*!
- * \defgroup vector Vector Mathematics
- */
-
-
-/*!
- * \typedef Lib3dsVector
- * \ingroup vector
- */
-
-
-/*!
- * Clear a vector to zero.
- *
- * \param c Vector to clear.
- *
- * \ingroup vector
- */
 void
 lib3ds_vector_zero(Lib3dsVector c) {
     int i;
@@ -49,19 +31,11 @@ lib3ds_vector_zero(Lib3dsVector c) {
 }
 
 
-/*!
- * Copy a vector.
- *
- * \param dest Destination vector.
- * \param src Source vector.
- *
- * \ingroup vector
- */
 void
-lib3ds_vector_copy(Lib3dsVector dest, Lib3dsVector src) {
+lib3ds_vector_copy(Lib3dsVector dst, Lib3dsVector src) {
     int i;
     for (i = 0; i < 3; ++i) {
-        dest[i] = src[i];
+        dst[i] = src[i];
     }
 }
 
@@ -70,8 +44,6 @@ lib3ds_vector_copy(Lib3dsVector dest, Lib3dsVector src) {
  * Negate a vector.
  *
  * \param c Vector to negate.
- *
- * \ingroup vector
  */
 void
 lib3ds_vector_neg(Lib3dsVector c) {
@@ -88,8 +60,6 @@ lib3ds_vector_neg(Lib3dsVector c) {
  * \param c Result.
  * \param a First addend.
  * \param b Second addend.
- *
- * \ingroup vector
  */
 void
 lib3ds_vector_add(Lib3dsVector c, Lib3dsVector a, Lib3dsVector b) {
@@ -106,8 +76,6 @@ lib3ds_vector_add(Lib3dsVector c, Lib3dsVector a, Lib3dsVector b) {
  * \param c Result.
  * \param a Addend.
  * \param b Minuend.
- *
- * \ingroup vector
  */
 void
 lib3ds_vector_sub(Lib3dsVector c, Lib3dsVector a, Lib3dsVector b) {
@@ -123,8 +91,6 @@ lib3ds_vector_sub(Lib3dsVector c, Lib3dsVector a, Lib3dsVector b) {
  *
  * \param c Vector to be multiplied.
  * \param k Scalar.
- *
- * \ingroup vector
  */
 void
 lib3ds_vector_scalar(Lib3dsVector c, float k) {
@@ -141,8 +107,6 @@ lib3ds_vector_scalar(Lib3dsVector c, float k) {
  * \param c Result.
  * \param a First vector.
  * \param b Second vector.
- *
- * \ingroup vector
  */
 void
 lib3ds_vector_cross(Lib3dsVector c, Lib3dsVector a, Lib3dsVector b) {
@@ -159,8 +123,6 @@ lib3ds_vector_cross(Lib3dsVector c, Lib3dsVector a, Lib3dsVector b) {
  * \param b Second vector.
  *
  * \return Dot product.
- *
- * \ingroup vector
  */
 float
 lib3ds_vector_dot(Lib3dsVector a, Lib3dsVector b) {
@@ -176,8 +138,6 @@ lib3ds_vector_dot(Lib3dsVector a, Lib3dsVector b) {
  * \param c Vector to square.
  *
  * \return Square of vector.
- *
- * \ingroup vector
  */
 float
 lib3ds_vector_squared(Lib3dsVector c) {
@@ -193,8 +153,6 @@ lib3ds_vector_squared(Lib3dsVector c) {
  * \param c Vector to compute.
  *
  * \return Length of vector.
- *
- * \ingroup vector
  */
 float
 lib3ds_vector_length(Lib3dsVector c) {
@@ -208,8 +166,6 @@ lib3ds_vector_length(Lib3dsVector c) {
  * Scales a vector so that its length is 1.0.
  *
  * \param c Vector to normalize.
- *
- * \ingroup vector
  */
 void
 lib3ds_vector_normalize(Lib3dsVector c) {
@@ -246,8 +202,6 @@ lib3ds_vector_normalize(Lib3dsVector c) {
  * \param a Endpoint of first line.
  * \param b Base point of both lines.
  * \param c Endpoint of second line.
- *
- * \ingroup vector
  */
 void
 lib3ds_vector_normal(Lib3dsVector n, Lib3dsVector a, Lib3dsVector b, Lib3dsVector c) {
@@ -269,8 +223,6 @@ lib3ds_vector_normal(Lib3dsVector n, Lib3dsVector a, Lib3dsVector b, Lib3dsVecto
  * \param c Result.
  * \param m Transformation matrix.
  * \param a Input point.
- *
- * \ingroup vector
  */
 void
 lib3ds_vector_transform(Lib3dsVector c, Lib3dsMatrix m, Lib3dsVector a) {
@@ -291,8 +243,6 @@ lib3ds_vector_transform(Lib3dsVector c, Lib3dsMatrix m, Lib3dsVector a) {
  * \param q Second tangent vector of the spline.
  * \param b Second endpoint of the spline.
  * \param t Spline parameter [0. 1.]
- *
- * \ingroup vector
  */
 void
 lib3ds_vector_cubic(Lib3dsVector c, Lib3dsVector a, Lib3dsVector p, Lib3dsVector q,
@@ -313,8 +263,6 @@ lib3ds_vector_cubic(Lib3dsVector c, Lib3dsVector a, Lib3dsVector p, Lib3dsVector
  * c[i] = min(c[i], a[i]);
  *
  * Computes minimum values of x,y,z independently.
- *
- * \ingroup vector
  */
 void
 lib3ds_vector_min(Lib3dsVector c, Lib3dsVector a) {
@@ -331,8 +279,6 @@ lib3ds_vector_min(Lib3dsVector c, Lib3dsVector a) {
  * c[i] = max(c[i], a[i]);
  *
  * Computes maximum values of x,y,z independently.
- *
- * \ingroup vector
  */
 void
 lib3ds_vector_max(Lib3dsVector c, Lib3dsVector a) {
@@ -345,9 +291,6 @@ lib3ds_vector_max(Lib3dsVector c, Lib3dsVector a) {
 }
 
 
-/*!
- * \ingroup vector
- */
 void
 lib3ds_vector_dump(Lib3dsVector c) {
     fprintf(stderr, "%f %f %f\n", c[0], c[1], c[2]);

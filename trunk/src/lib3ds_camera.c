@@ -23,11 +23,6 @@
 
 
 /*!
- * \defgroup camera Cameras
- */
-
-
-/*!
  * Return a new Lib3dsCamera object.
  *
  * Object is initialized with the given name and fov=45.  All other
@@ -36,8 +31,6 @@
  * \param name Name of this camera.  Must not be NULL.  Must be < 64 characters.
  *
  * \return Lib3dsCamera object or NULL on failure.
- *
- * \ingroup camera
  */
 Lib3dsCamera*
 lib3ds_camera_new(const char *name) {
@@ -60,8 +53,6 @@ lib3ds_camera_new(const char *name) {
  * Free a Lib3dsCamera object and all of its resources.
  *
  * \param camera Lib3dsCamera object to be freed.
- *
- * \ingroup camera
  */
 void
 lib3ds_camera_free(Lib3dsCamera *camera) {
@@ -80,8 +71,6 @@ lib3ds_camera_free(Lib3dsCamera *camera) {
  * \param io A Lib3dsIo object previously set up by the caller.
  *
  * \see lib3ds_file_read
- *
- * \ingroup camera
  */
 void
 lib3ds_camera_read(Lib3dsCamera *camera, Lib3dsIo *io) {
@@ -143,8 +132,6 @@ lib3ds_camera_read(Lib3dsCamera *camera, Lib3dsIo *io) {
  * \param io A Lib3dsIo object previously set up by the caller.
  *
  * \see lib3ds_file_write
- *
- * \ingroup camera
  */
 void
 lib3ds_camera_write(Lib3dsCamera *camera, Lib3dsIo *io) {

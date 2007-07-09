@@ -250,9 +250,6 @@ static Lib3dsChunkTable lib3ds_chunk_table[] = {
 };
 
 
-/*!
-* \ingroup chunk
-*/
 const char*
 lib3ds_chunk_name(Lib3dsWord chunk) {
     Lib3dsChunkTable *p;

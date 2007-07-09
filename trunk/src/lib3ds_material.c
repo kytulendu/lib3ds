@@ -22,11 +22,6 @@
 #include "lib3ds_impl.h"
 
 
-/*!
- * \defgroup material Materials
- */
-
-
 static void
 initialize_texture_map(Lib3dsTextureMap *map) {
     map->flags = 0x10;
@@ -43,8 +38,6 @@ initialize_texture_map(Lib3dsTextureMap *map) {
  *
  * \return A pointer to the Lib3dsMaterial structure.
  *  If the structure cannot be allocated, NULL is returned.
- *
- * \ingroup material
  */
 Lib3dsMaterial*
 lib3ds_material_new() {
@@ -83,9 +76,6 @@ lib3ds_material_new() {
 }
 
 
-/*!
- * \ingroup material
- */
 void
 lib3ds_material_free(Lib3dsMaterial *material) {
     memset(material, 0, sizeof(Lib3dsMaterial));
@@ -272,9 +262,6 @@ texture_map_read(Lib3dsTextureMap *map, Lib3dsIo *io) {
 }
 
 
-/*!
- * \ingroup material
- */
 void
 lib3ds_material_read(Lib3dsMaterial *material, Lib3dsIo *io) {
     Lib3dsChunk c;
@@ -677,9 +664,6 @@ texture_map_write(Lib3dsWord chunk, Lib3dsTextureMap *map, Lib3dsIo *io) {
 }
 
 
-/*!
- * \ingroup material
- */
 void
 lib3ds_material_write(Lib3dsMaterial *material, Lib3dsIo *io) {
     Lib3dsChunk c;

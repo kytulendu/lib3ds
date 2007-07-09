@@ -23,19 +23,7 @@
 
 
 /*!
- * \defgroup quat Quaternion Mathematics
- */
-
-
-/*!
-* \typedef Lib3dsQuat
-* \ingroup quat
-*/
-
-
-/*!
  * Clear a quaternion.
- * \ingroup quat
  */
 void
 lib3ds_quat_zero(Lib3dsQuat c) {
@@ -45,7 +33,6 @@ lib3ds_quat_zero(Lib3dsQuat c) {
 
 /*!
  * Set a quaternion to Identity
- * \ingroup quat
  */
 void
 lib3ds_quat_identity(Lib3dsQuat c) {
@@ -56,7 +43,6 @@ lib3ds_quat_identity(Lib3dsQuat c) {
 
 /*!
  * Copy a quaternion.
- * \ingroup quat
  */
 void
 lib3ds_quat_copy(Lib3dsQuat dest, Lib3dsQuat src) {
@@ -73,8 +59,6 @@ lib3ds_quat_copy(Lib3dsQuat dest, Lib3dsQuat src) {
  * \param c Computed quaternion
  * \param axis Rotation axis
  * \param angle Angle of rotation, radians.
- *
- * \ingroup quat
  */
 void
 lib3ds_quat_axis_angle(Lib3dsQuat c, Lib3dsVector axis, float angle) {
@@ -98,8 +82,6 @@ lib3ds_quat_axis_angle(Lib3dsQuat c, Lib3dsVector axis, float angle) {
 
 /*!
  * Negate a quaternion
- *
- * \ingroup quat
  */
 void
 lib3ds_quat_neg(Lib3dsQuat c) {
@@ -112,8 +94,6 @@ lib3ds_quat_neg(Lib3dsQuat c) {
 
 /*!
  * Compute the absolute value of a quaternion
- *
- * \ingroup quat
  */
 void
 lib3ds_quat_abs(Lib3dsQuat c) {
@@ -126,8 +106,6 @@ lib3ds_quat_abs(Lib3dsQuat c) {
 
 /*!
  * Compute the conjugate of a quaternion
- *
- * \ingroup quat
  */
 void
 lib3ds_quat_cnj(Lib3dsQuat c) {
@@ -143,7 +121,6 @@ lib3ds_quat_cnj(Lib3dsQuat c) {
  *
  * \param c Result
  * \param a,b Inputs
- * \ingroup quat
  */
 void
 lib3ds_quat_mul(Lib3dsQuat c, Lib3dsQuat a, Lib3dsQuat b) {
@@ -156,8 +133,6 @@ lib3ds_quat_mul(Lib3dsQuat c, Lib3dsQuat a, Lib3dsQuat b) {
 
 /*!
  * Multiply a quaternion by a scalar.
- *
- * \ingroup quat
  */
 void
 lib3ds_quat_scalar(Lib3dsQuat c, float k) {
@@ -170,8 +145,6 @@ lib3ds_quat_scalar(Lib3dsQuat c, float k) {
 
 /*!
  * Normalize a quaternion.
- *
- * \ingroup quat
  */
 void
 lib3ds_quat_normalize(Lib3dsQuat c) {
@@ -193,8 +166,6 @@ lib3ds_quat_normalize(Lib3dsQuat c) {
 
 /*!
  * Compute the inverse of a quaternion.
- *
- * \ingroup quat
  */
 void
 lib3ds_quat_inv(Lib3dsQuat c) {
@@ -216,8 +187,6 @@ lib3ds_quat_inv(Lib3dsQuat c) {
 
 /*!
  * Compute the dot-product of a quaternion.
- *
- * \ingroup quat
  */
 float
 lib3ds_quat_dot(Lib3dsQuat a, Lib3dsQuat b) {
@@ -225,27 +194,18 @@ lib3ds_quat_dot(Lib3dsQuat a, Lib3dsQuat b) {
 }
 
 
-/*!
- * \ingroup quat
- */
 float
 lib3ds_quat_squared(Lib3dsQuat c) {
     return(c[0]*c[0] + c[1]*c[1] + c[2]*c[2] + c[3]*c[3]);
 }
 
 
-/*!
- * \ingroup quat
- */
 float
 lib3ds_quat_length(Lib3dsQuat c) {
     return((float)sqrt(c[0]*c[0] + c[1]*c[1] + c[2]*c[2] + c[3]*c[3]));
 }
 
 
-/*!
- * \ingroup quat
- */
 void
 lib3ds_quat_ln(Lib3dsQuat c) {
     double om, s, t;
@@ -267,9 +227,6 @@ lib3ds_quat_ln(Lib3dsQuat c) {
 }
 
 
-/*!
- * \ingroup quat
- */
 void
 lib3ds_quat_ln_dif(Lib3dsQuat c, Lib3dsQuat a, Lib3dsQuat b) {
     Lib3dsQuat invp;
@@ -281,9 +238,6 @@ lib3ds_quat_ln_dif(Lib3dsQuat c, Lib3dsQuat a, Lib3dsQuat b) {
 }
 
 
-/*!
- * \ingroup quat
- */
 void
 lib3ds_quat_exp(Lib3dsQuat c) {
     double om, sinom;
@@ -304,9 +258,6 @@ lib3ds_quat_exp(Lib3dsQuat c) {
 }
 
 
-/*!
- * \ingroup quat
- */
 void
 lib3ds_quat_slerp(Lib3dsQuat c, Lib3dsQuat a, Lib3dsQuat b, float t) {
     double l;
@@ -345,9 +296,6 @@ lib3ds_quat_slerp(Lib3dsQuat c, Lib3dsQuat a, Lib3dsQuat b, float t) {
 }
 
 
-/*!
- * \ingroup quat
- */
 void
 lib3ds_quat_squad(Lib3dsQuat c, Lib3dsQuat a, Lib3dsQuat p, Lib3dsQuat q,
                   Lib3dsQuat b, float t) {
@@ -360,9 +308,6 @@ lib3ds_quat_squad(Lib3dsQuat c, Lib3dsQuat a, Lib3dsQuat p, Lib3dsQuat q,
 }
 
 
-/*!
- * \ingroup quat
- */
 void
 lib3ds_quat_tangent(Lib3dsQuat c, Lib3dsQuat p, Lib3dsQuat q, Lib3dsQuat n) {
     Lib3dsQuat dn, dp, x;
@@ -379,9 +324,6 @@ lib3ds_quat_tangent(Lib3dsQuat c, Lib3dsQuat p, Lib3dsQuat q, Lib3dsQuat n) {
 }
 
 
-/*!
- * \ingroup quat
- */
 void
 lib3ds_quat_dump(Lib3dsQuat q) {
     printf("%f %f %f %f\n", q[0], q[1], q[2], q[3]);

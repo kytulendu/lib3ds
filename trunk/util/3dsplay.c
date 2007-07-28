@@ -253,7 +253,7 @@ load_model(void) {
     }
 
     lib3ds_file_eval(file, 0.0f);
-    lib3ds_file_bounding_box_of_nodes(file, 1, 0, 0, bmin, bmax);
+    lib3ds_file_bounding_box_of_nodes(file, 1, 0, 0, bmin, bmax, NULL);
     sx = bmax[0] - bmin[0];
     sy = bmax[1] - bmin[1];
     sz = bmax[2] - bmin[2];

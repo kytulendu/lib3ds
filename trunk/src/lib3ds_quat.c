@@ -23,15 +23,6 @@
 
 
 /*!
- * Clear a quaternion.
- */
-void
-lib3ds_quat_zero(Lib3dsQuat c) {
-    c[0] = c[1] = c[2] = c[3] = 0.0f;
-}
-
-
-/*!
  * Set a quaternion to Identity
  */
 void
@@ -88,18 +79,6 @@ lib3ds_quat_neg(Lib3dsQuat c) {
     int i;
     for (i = 0; i < 4; ++i) {
         c[i] = -c[i];
-    }
-}
-
-
-/*!
- * Compute the absolute value of a quaternion
- */
-void
-lib3ds_quat_abs(Lib3dsQuat c) {
-    int i;
-    for (i = 0; i < 4; ++i) {
-        c[i] = (float)fabs(c[i]);
     }
 }
 

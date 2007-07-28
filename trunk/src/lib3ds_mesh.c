@@ -123,11 +123,31 @@ void
 lib3ds_mesh_bounding_box(Lib3dsMesh *mesh, Lib3dsVector bmin, Lib3dsVector bmax) {
     unsigned i;
     bmin[0] = bmin[1] = bmin[2] = FLT_MAX;
-    bmax[0] = bmax[1] = bmax[2] = FLT_MIN;
+    bmax[0] = bmax[1] = bmax[2] = -FLT_MAX;
 
     for (i = 0; i < mesh->nvertices; ++i) {
         lib3ds_vector_min(bmin, mesh->vertices[i]);
         lib3ds_vector_max(bmax, mesh->vertices[i]);
+    }
+}
+
+
+void
+lib3ds_mesh_calculate_face_normals(Lib3dsMesh *mesh, Lib3dsVector *face_normals) {
+    unsigned i;
+    Lib3dsFace *f;
+
+    if (!mesh->nfaces) {
+        return;
+    }
+    for (i = 0; i < mesh->nfaces; ++i) {
+        f = &mesh->faces[i];
+        lib3ds_vector_normal(
+            face_normals[i],
+            mesh->vertices[f->index[0]],
+            mesh->vertices[f->index[1]],
+            mesh->vertices[f->index[2]]
+        );
     }
 }
 

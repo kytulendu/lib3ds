@@ -363,12 +363,12 @@ typedef enum Lib3dsMaterialShading {
  * Material
  */
 typedef struct Lib3dsMaterial {
-    Lib3dsUserData user;		/*! Arbitrary user data */
-    char name[64];			    /*! Material name */
-    Lib3dsRgb ambient;			/*! Material ambient reflectivity */
-    Lib3dsRgb diffuse;			/*! Material diffuse reflectivity */
-    Lib3dsRgb specular;		    /*! Material specular reflectivity */
-    float shininess;		    /*! Material specular exponent */
+    Lib3dsUserData user;		/* Arbitrary user data */
+    char name[64];			    /* Material name */
+    Lib3dsRgb ambient;			/* Material ambient reflectivity */
+    Lib3dsRgb diffuse;			/* Material diffuse reflectivity */
+    Lib3dsRgb specular;		    /* Material specular reflectivity */
+    float shininess;		    /* Material specular exponent */
     float shin_strength;
     Lib3dsBool use_blur;
     float blur;
@@ -381,7 +381,7 @@ typedef struct Lib3dsMaterial {
     Lib3dsIntw shading;
     Lib3dsBool soften;
     Lib3dsBool face_map;
-    Lib3dsBool two_sided;		/*! Material visible from back */
+    Lib3dsBool two_sided;		/* Material visible from back */
     Lib3dsBool map_decal;
     Lib3dsBool use_wire;
     Lib3dsBool use_wire_abs;
@@ -484,17 +484,17 @@ typedef struct Lib3dsFace {
  * (A: is 1st vertex, B is 2nd vertex, C is 3rd vertex) 
  */
 typedef enum {
-  LIB3DS_FACE_FLAG_VIS_AC = 0x1,       /*!< Bit 0: Edge visibility AC */
-  LIB3DS_FACE_FLAG_VIS_BC = 0x2,       /*!< Bit 1: Edge visibility BC */
-  LIB3DS_FACE_FLAG_VIS_AB = 0x4,       /*!< Bit 2: Edge visibility AB */
-  LIB3DS_FACE_FLAG_WRAP_U = 0x8,       /*!< Bit 3: Face is at tex U wrap seam */
-  LIB3DS_FACE_FLAG_WRAP_V = 0x10,      /*!< Bit 4: Face is at tex V wrap seam */
+  LIB3DS_FACE_FLAG_VIS_AC = 0x1,       /**< Bit 0: Edge visibility AC */
+  LIB3DS_FACE_FLAG_VIS_BC = 0x2,       /**< Bit 1: Edge visibility BC */
+  LIB3DS_FACE_FLAG_VIS_AB = 0x4,       /**< Bit 2: Edge visibility AB */
+  LIB3DS_FACE_FLAG_WRAP_U = 0x8,       /**< Bit 3: Face is at tex U wrap seam */
+  LIB3DS_FACE_FLAG_WRAP_V = 0x10,      /**< Bit 4: Face is at tex V wrap seam */
   LIB3DS_FACE_FLAG_UNK7 = 0x80,        /* Bit 5-8: Unused ? */
   LIB3DS_FACE_FLAG_UNK10 = 0x400,      /* Bit 9-10: Random ? */
                                        /* Bit 11-12: Unused ? */
-  LIB3DS_FACE_FLAG_SELECT_3 = (1<<13),   /*!< Bit 13: Selection of the face in selection 3*/
-  LIB3DS_FACE_FLAG_SELECT_2 = (1<<14),   /*!< Bit 14: Selection of the face in selection 2*/
-  LIB3DS_FACE_FLAG_SELECT_1 = (1<<15),   /*!< Bit 15: Selection of the face in selection 1*/
+  LIB3DS_FACE_FLAG_SELECT_3 = (1<<13),   /**< Bit 13: Selection of the face in selection 3*/
+  LIB3DS_FACE_FLAG_SELECT_2 = (1<<14),   /**< Bit 14: Selection of the face in selection 2*/
+  LIB3DS_FACE_FLAG_SELECT_1 = (1<<15),   /**< Bit 15: Selection of the face in selection 1*/
 } Lib3dsFaceFlag;
 
 typedef float Lib3dsTexco[2];
@@ -896,12 +896,10 @@ extern LIB3DSAPI void lib3ds_vector_max(Lib3dsVector c, Lib3dsVector a);
 
 /** @name Quaternions */
 /** @{ */
-extern LIB3DSAPI void lib3ds_quat_zero(Lib3dsQuat c);
 extern LIB3DSAPI void lib3ds_quat_identity(Lib3dsQuat c);
 extern LIB3DSAPI void lib3ds_quat_copy(Lib3dsQuat dest, Lib3dsQuat src);
 extern LIB3DSAPI void lib3ds_quat_axis_angle(Lib3dsQuat c, Lib3dsVector axis, float angle);
 extern LIB3DSAPI void lib3ds_quat_neg(Lib3dsQuat c);
-extern LIB3DSAPI void lib3ds_quat_abs(Lib3dsQuat c);
 extern LIB3DSAPI void lib3ds_quat_cnj(Lib3dsQuat c);
 extern LIB3DSAPI void lib3ds_quat_mul(Lib3dsQuat c, Lib3dsQuat a, Lib3dsQuat b);
 extern LIB3DSAPI void lib3ds_quat_scalar(Lib3dsQuat c, float k);
@@ -975,6 +973,7 @@ extern LIB3DSAPI void lib3ds_mesh_alloc_flags(Lib3dsMesh *mesh, Lib3dsWord nflag
 extern LIB3DSAPI void lib3ds_mesh_alloc_texcos(Lib3dsMesh *mesh, Lib3dsWord ntexcos);
 extern LIB3DSAPI void lib3ds_mesh_alloc_faces(Lib3dsMesh *mesh, Lib3dsWord nfaces);
 extern LIB3DSAPI void lib3ds_mesh_bounding_box(Lib3dsMesh *mesh, Lib3dsVector bmin, Lib3dsVector bmax);
+extern LIB3DSAPI void lib3ds_mesh_calculate_face_normals(Lib3dsMesh *mesh, Lib3dsVector *face_normals);
 extern LIB3DSAPI void lib3ds_mesh_calculate_normals(Lib3dsMesh *mesh, Lib3dsVector *normalL);
 
 /** @} */
@@ -1029,7 +1028,7 @@ extern LIB3DSAPI Lib3dsNode* lib3ds_file_node_by_id(Lib3dsFile *file, Lib3dsWord
 extern LIB3DSAPI void lib3ds_file_insert_node(Lib3dsFile *file, Lib3dsNode *node);
 extern LIB3DSAPI void lib3ds_file_remove_node(Lib3dsFile *file, Lib3dsNode *node);
 extern LIB3DSAPI void lib3ds_file_bounding_box_of_objects(Lib3dsFile *file, Lib3dsBool include_meshes, Lib3dsBool include_cameras, Lib3dsBool include_lights, Lib3dsVector bmin, Lib3dsVector bmax);
-extern LIB3DSAPI void lib3ds_file_bounding_box_of_nodes(Lib3dsFile *file, Lib3dsBool include_meshes, Lib3dsBool include_cameras, Lib3dsBool include_lights, Lib3dsVector bmin, Lib3dsVector bmax);
+extern LIB3DSAPI void lib3ds_file_bounding_box_of_nodes(Lib3dsFile *file, Lib3dsBool include_meshes, Lib3dsBool include_cameras, Lib3dsBool include_lights, Lib3dsVector bmin, Lib3dsVector bmax, Lib3dsMatrix matrix);
 
 /** @} */
 

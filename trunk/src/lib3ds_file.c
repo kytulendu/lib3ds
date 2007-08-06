@@ -1028,6 +1028,21 @@ lib3ds_file_mesh_by_name(Lib3dsFile *file, const char *name) {
 }
 
 
+Lib3dsMesh* 
+lib3ds_file_mesh_for_node(Lib3dsFile *file, Lib3dsNode *node) {
+    Lib3dsIntd index;
+
+    if (node->type != LIB3DS_OBJECT_NODE)
+        return NULL;
+
+    index = lib3ds_file_mesh_by_name(file, node->data.object.instance);
+    if (index < 0)
+        index = lib3ds_file_mesh_by_name(file, node->name);
+
+    return (index >= 0)? file->meshes[index] : NULL;
+}
+
+
 /*!
  * Return a node object by name and type.
  *
@@ -1203,6 +1218,40 @@ lib3ds_file_remove_node(Lib3dsFile *file, Lib3dsNode *node) {
         } else {
             p->next = n->next;
         }
+    }
+}
+
+
+static void
+file_minmax_node_id_impl(Lib3dsFile *file, Lib3dsNode *node, Lib3dsWord *min_id, Lib3dsWord *max_id) {
+    Lib3dsNode *p;
+    
+    if (min_id && (*min_id > node->node_id))
+        *min_id = node->node_id;
+    if (max_id && (*max_id < node->node_id))
+        *max_id = node->node_id;
+    
+    p = node->childs;
+    while (p) {
+        file_minmax_node_id_impl(file, p, min_id, max_id);
+        p = p->next;
+    }
+}
+
+
+void 
+lib3ds_file_minmax_node_id(Lib3dsFile *file, Lib3dsWord *min_id, Lib3dsWord *max_id) {
+    Lib3dsNode *p;
+    
+    if (min_id)
+        *min_id = 65535;
+    if (max_id)
+        *max_id = 0;
+
+    p = file->nodes;
+    while (p) {
+        file_minmax_node_id_impl(file, p, min_id, max_id);
+        p = p->next;
     }
 }
 

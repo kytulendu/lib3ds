@@ -543,10 +543,5 @@ main(int argc, char **argv) {
     }
 
     lib3ds_file_free(f);
-    
-    {
-        char buf[255];
-        gets(buf);
-    }
     return 0;
 }

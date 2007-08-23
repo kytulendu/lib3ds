@@ -143,7 +143,7 @@ lib3ds_chunk_write_end(Lib3dsChunk *c, Lib3dsIo *io) {
 void
 lib3ds_chunk_unknown(Lib3dsWord chunk, Lib3dsIo *io) {
     if (io->log_func) {
-        lib3ds_io_log(io, LIB3DS_LOG_WARN, "Unknown Chunk: %s (0x%X)\n", lib3ds_chunk_name(chunk), chunk);
+        lib3ds_io_log(io, LIB3DS_LOG_WARN, "Unknown Chunk: %s (0x%X)", lib3ds_chunk_name(chunk), chunk);
     }
 }
 

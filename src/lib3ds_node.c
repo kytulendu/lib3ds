@@ -72,9 +72,9 @@ free_node_and_childs(Lib3dsNode *node) {
         case LIB3DS_CAMERA_NODE: {
             Lib3dsCameraData *n = &node->data.camera;
             if (n->pos_track)
-                lib3ds_track_free(n->roll_track);
+                lib3ds_track_free(n->pos_track);
             if (n->fov_track)
-                lib3ds_track_free(n->roll_track);
+                lib3ds_track_free(n->fov_track);
             if (n->roll_track)
                 lib3ds_track_free(n->roll_track);
             break;

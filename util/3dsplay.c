@@ -423,7 +423,7 @@ render_node(Lib3dsNode *node) {
             return;
         }
 
-        index = lib3ds_file_mesh_by_name(file, node->data.object.morph);
+        index = lib3ds_file_mesh_by_name(file, node->data.object.instance);
         if (index < 0)
             index = lib3ds_file_mesh_by_name(file, node->name);
         if (index < 0) {
@@ -844,7 +844,7 @@ display(void) {
     */
     if (near <= 0.) near = far * .001;
 
-    gluPerspective(fov, 1.0*gl_width / gl_height, near, far);
+    gluPerspective(fov, 1.0*gl_width / gl_height, 1, 1000);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();

@@ -314,7 +314,7 @@ lib3ds_material_dump(Lib3dsMaterial *material) {
     texture_dump("reflection_mask", &material->reflection_mask);
     printf("  autorefl_map:\n");
     printf("    flags        %X\n", (unsigned)material->autorefl_map.flags);
-    printf("    level        %d\n", (int)material->autorefl_map.level);
+    printf("    level        %d\n", (int)material->autorefl_map.anti_alias);
     printf("    size         %d\n", (int)material->autorefl_map.size);
     printf("    frame_step   %d\n", (int)material->autorefl_map.frame_step);
     printf("\n");
@@ -394,12 +394,12 @@ mesh_dump(Lib3dsMesh *mesh) {
     printf("  facelist:\n");
     for (i = 0; i < mesh->nfaces; ++i) {
         printf("    %4d %4d %4d  smoothing:%X  flags:%X  material:\"%d\"\n",
-            mesh->faces[i].index[0],
-            mesh->faces[i].index[1],
-            mesh->faces[i].index[2],
-            (unsigned) mesh->faces[i].smoothing,
-            mesh->faces[i].flags,
-            mesh->faces[i].material
+            mesh->indices[i][0],
+            mesh->indices[i][1],
+            mesh->indices[i][2],
+            (unsigned) mesh->data[i].smoothing,
+            mesh->data[i].flags,
+            mesh->data[i].material
             );
     }
 }

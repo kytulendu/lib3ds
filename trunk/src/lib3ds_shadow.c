@@ -34,22 +34,12 @@ lib3ds_shadow_read(Lib3dsShadow *shadow, Lib3dsIo *io) {
         }
 
         case LIB3DS_LO_SHADOW_BIAS: {
-            shadow->lo_bias = lib3ds_io_read_float(io);
+            shadow->low_bias = lib3ds_io_read_float(io);
             break;
         }
 
         case LIB3DS_HI_SHADOW_BIAS: {
             shadow->hi_bias = lib3ds_io_read_float(io);
-            break;
-        }
-
-        case LIB3DS_SHADOW_SAMPLES: {
-            shadow->samples = lib3ds_io_read_intw(io);
-            break;
-        }
-
-        case LIB3DS_SHADOW_RANGE: {
-            shadow->range = lib3ds_io_read_intd(io);
             break;
         }
 
@@ -68,12 +58,12 @@ lib3ds_shadow_read(Lib3dsShadow *shadow, Lib3dsIo *io) {
 
 void
 lib3ds_shadow_write(Lib3dsShadow *shadow, Lib3dsIo *io) {
-    if (fabs(shadow->lo_bias) > LIB3DS_EPSILON) { /*---- LIB3DS_LO_SHADOW_BIAS ----*/
+    if (fabs(shadow->low_bias) > LIB3DS_EPSILON) { /*---- LIB3DS_LO_SHADOW_BIAS ----*/
         Lib3dsChunk c;
         c.chunk = LIB3DS_LO_SHADOW_BIAS;
         c.size = 10;
         lib3ds_chunk_write(&c, io);
-        lib3ds_io_write_float(io, shadow->lo_bias);
+        lib3ds_io_write_float(io, shadow->low_bias);
     }
 
     if (fabs(shadow->hi_bias) > LIB3DS_EPSILON) { /*---- LIB3DS_HI_SHADOW_BIAS ----*/
@@ -90,22 +80,6 @@ lib3ds_shadow_write(Lib3dsShadow *shadow, Lib3dsIo *io) {
         c.size = 8;
         lib3ds_chunk_write(&c, io);
         lib3ds_io_write_intw(io, shadow->map_size);
-    }
-
-    if (shadow->samples) { /*---- LIB3DS_SHADOW_SAMPLES ----*/
-        Lib3dsChunk c;
-        c.chunk = LIB3DS_SHADOW_SAMPLES;
-        c.size = 8;
-        lib3ds_chunk_write(&c, io);
-        lib3ds_io_write_intw(io, shadow->samples);
-    }
-
-    if (shadow->range) { /*---- LIB3DS_SHADOW_RANGE ----*/
-        Lib3dsChunk c;
-        c.chunk = LIB3DS_SHADOW_RANGE;
-        c.size = 10;
-        lib3ds_chunk_write(&c, io);
-        lib3ds_io_write_intd(io, shadow->range);
     }
 
     if (fabs(shadow->filter) > LIB3DS_EPSILON) { /*---- LIB3DS_SHADOW_FILTER ----*/

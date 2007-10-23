@@ -487,7 +487,7 @@ lib3ds_material_read(Lib3dsMaterial *material, Lib3dsIo *io) {
 
             case LIB3DS_MAT_ACUBIC: {
                 lib3ds_io_read_intb(io);
-                material->autorefl_map.level = lib3ds_io_read_intb(io);
+                material->autorefl_map.anti_alias = lib3ds_io_read_intb(io);
                 material->autorefl_map.flags = lib3ds_io_read_intw(io);
                 material->autorefl_map.size = lib3ds_io_read_intd(io);
                 material->autorefl_map.frame_step = lib3ds_io_read_intd(io);

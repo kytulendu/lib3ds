@@ -450,7 +450,7 @@ render_node(Lib3dsNode *node) {
                 lib3ds_mesh_calculate_normals(mesh, normalL);
 
                 for (p = 0; p < mesh->nfaces; ++p) {
-                    Lib3dsFace *f = &mesh->faces[p];
+                    Lib3dsFaceData *f = &mesh->data[p];
                     Lib3dsMaterial *mat = 0;
 #ifdef USE_SDL
                     Player_texture *pt = NULL;
@@ -618,11 +618,11 @@ render_node(Lib3dsNode *node) {
                             glNormal3fv(normalL[3*p+i]);
 
                             if (tex_mode) {
-                                glTexCoord2f(mesh->texcos[f->index[i]][1]*pt->scale_x,
-                                             pt->scale_y - mesh->texcos[f->index[i]][0]*pt->scale_y);
+                                glTexCoord2f(mesh->texcos[mesh->indices[p][i]][1]*pt->scale_x,
+                                             pt->scale_y - mesh->texcos[mesh->indices[p][i]][0]*pt->scale_y);
                             }
 
-                            glVertex3fv(mesh->vertices[f->index[i]]);
+                            glVertex3fv(mesh->vertices[mesh->indices[p][i]]);
                         }
                         glEnd();
 

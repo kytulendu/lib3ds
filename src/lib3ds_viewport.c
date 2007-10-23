@@ -80,7 +80,7 @@ lib3ds_viewport_read(Lib3dsViewport *viewport, Lib3dsIo *io) {
         }
 
         case LIB3DS_DEFAULT_VIEW: {
-            memset(&viewport->default_view, 0, sizeof(Lib3dsDefaultView));
+            memset(&viewport->default_view, 0, sizeof(viewport->default_view));
             while ((chunk = lib3ds_chunk_read_next(&c, io)) != 0) {
                 switch (chunk) {
                     case LIB3DS_VIEW_TOP: {

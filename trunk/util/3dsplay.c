@@ -450,14 +450,13 @@ render_node(Lib3dsNode *node) {
                 lib3ds_mesh_calculate_normals(mesh, normalL);
 
                 for (p = 0; p < mesh->nfaces; ++p) {
-                    Lib3dsFaceData *f = &mesh->data[p];
                     Lib3dsMaterial *mat = 0;
 #ifdef USE_SDL
                     Player_texture *pt = NULL;
                     int tex_mode = 0;
 #endif
-                    if (f->material > 0) {
-                        mat = file->materials[f->material];
+                    if (mesh->materials && mesh->materials[p] > 0) {
+                        mat = file->materials[mesh->materials[p]];
                     }
 
                     if (mat != oldmat) {

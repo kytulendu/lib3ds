@@ -393,13 +393,13 @@ mesh_dump(Lib3dsMesh *mesh) {
     }
     printf("  facelist:\n");
     for (i = 0; i < mesh->nfaces; ++i) {
-        printf("    %4d %4d %4d  smoothing:%X  flags:%X  material:\"%d\"\n",
+        printf("    %4d %4d %4d  flags:%X  smoothing:%X  material:\"%d\"\n",
             mesh->indices[i][0],
             mesh->indices[i][1],
             mesh->indices[i][2],
-            (unsigned) mesh->data[i].smoothing,
-            mesh->data[i].flags,
-            mesh->data[i].material
+            mesh->indices[i][3],
+            mesh->smoothing_groups? (unsigned)mesh->smoothing_groups[i] : 0,
+            mesh->materials? mesh->materials[i] : 0
             );
     }
 }

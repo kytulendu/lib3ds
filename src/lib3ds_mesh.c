@@ -59,50 +59,51 @@ lib3ds_mesh_new(const char *name) {
  */
 void
 lib3ds_mesh_free(Lib3dsMesh *mesh) {
-    lib3ds_mesh_alloc_vertices(mesh, 0);
-    lib3ds_mesh_alloc_flags(mesh, 0);
-    lib3ds_mesh_alloc_texcos(mesh, 0);
-    lib3ds_mesh_alloc_faces(mesh, 0);
+    lib3ds_mesh_alloc_vertex_data(mesh, 0, FALSE, FALSE);
+    lib3ds_mesh_alloc_face_data(mesh, 0, FALSE, FALSE);
     memset(mesh, 0, sizeof(Lib3dsMesh));
     free(mesh);
 }
 
 
 void
-lib3ds_mesh_alloc_vertices(Lib3dsMesh *mesh, Lib3dsWord nvertices) {
+lib3ds_mesh_alloc_vertex_data(Lib3dsMesh *mesh, Lib3dsWord nvertices, Lib3dsBool alloc_flags, Lib3dsBool alloc_texcos) {
     assert(mesh);
-    mesh->vertices = realloc(mesh->vertices, sizeof(Lib3dsVector) * nvertices);
-    if (mesh->nvertices < nvertices) {
-        memset(&mesh->vertices[mesh->nvertices], 0, sizeof(Lib3dsVector) * (nvertices - mesh->nvertices));
+    if (mesh->nvertices != nvertices) {
+        mesh->vertices = realloc(mesh->vertices, sizeof(Lib3dsVector) * nvertices);
+        if (mesh->nvertices < nvertices) {
+            memset(&mesh->vertices[mesh->nvertices], 0, sizeof(Lib3dsVector) * (nvertices - mesh->nvertices));
+        }
     }
+
+    {
+        Lib3dsWord new_nflags = alloc_flags? nvertices : 0;
+        Lib3dsWord old_nflags = mesh->vertex_flags? mesh->nvertices : 0;
+        if (old_nflags != new_nflags) {
+            mesh->vertex_flags = realloc(mesh->vertex_flags, sizeof(Lib3dsWord) * new_nflags);
+            if (old_nflags < new_nflags) {
+                memset(&mesh->vertex_flags[old_nflags], 0, sizeof(Lib3dsWord) * (new_nflags - old_nflags));
+            }
+        }
+    }
+
+    {
+        Lib3dsWord new_ntexcos = alloc_texcos? nvertices : 0;
+        Lib3dsWord old_ntexcos = mesh->texcos? mesh->nvertices : 0;
+        if (old_ntexcos != new_ntexcos) {
+            mesh->texcos = realloc(mesh->texcos, 2 * sizeof(float) * new_ntexcos);
+            if (old_ntexcos < new_ntexcos) {
+                memset(&mesh->texcos[old_ntexcos], 0, 2 * sizeof(float) * (new_ntexcos - old_ntexcos));
+            }
+        }
+    }
+
     mesh->nvertices = nvertices;
 }
 
 
-void
-lib3ds_mesh_alloc_flags(Lib3dsMesh *mesh, Lib3dsWord nflags) {
-    assert(mesh);
-    mesh->flags = realloc(mesh->flags, sizeof(Lib3dsWord) * nflags);
-    if (mesh->nflags < nflags) {
-        memset(&mesh->flags[mesh->nflags], 0, sizeof(Lib3dsWord) * (nflags - mesh->nflags));
-    }
-    mesh->nflags = nflags;
-}
-
-
-void
-lib3ds_mesh_alloc_texcos(Lib3dsMesh *mesh, Lib3dsWord ntexcos) {
-    assert(mesh);
-    mesh->texcos = realloc(mesh->texcos, sizeof(Lib3dsTexco) * ntexcos);
-    if (mesh->ntexcos < ntexcos) {
-        memset(&mesh->texcos[mesh->ntexcos], 0, sizeof(Lib3dsTexco) * (ntexcos - mesh->ntexcos));
-    }
-    mesh->ntexcos = ntexcos;
-}
-
-
-void
-lib3ds_mesh_alloc_faces(Lib3dsMesh *mesh, Lib3dsWord nfaces) {
+void 
+lib3ds_mesh_alloc_face_data(Lib3dsMesh *mesh, Lib3dsWord nfaces, Lib3dsBool alloc_materials, Lib3dsBool alloc_smoothing_groups) {
 	//TODO
 	//assert(mesh);
     //mesh->faces = realloc(mesh->faces, sizeof(Lib3dsFace) * nfaces);
@@ -177,6 +178,7 @@ typedef struct Lib3dsFaces {
  *   normals[3*j+i]
  * \endcode
  */
+#if 0
 void
 lib3ds_mesh_calculate_normals(Lib3dsMesh *mesh, Lib3dsVector *normals) {
     Lib3dsFaces **fl;
@@ -268,6 +270,7 @@ lib3ds_mesh_calculate_normals(Lib3dsMesh *mesh, Lib3dsVector *normals) {
     free(fa);
     free(fl);
 }
+#endif
 
 
 static void
@@ -279,16 +282,15 @@ face_array_read(Lib3dsFile *file, Lib3dsMesh *mesh, Lib3dsIo *io) {
 
     lib3ds_chunk_read_start(&c, LIB3DS_FACE_ARRAY, io);
 
-    lib3ds_mesh_alloc_faces(mesh, 0);
+    lib3ds_mesh_alloc_face_data(mesh, 0, FALSE, FALSE);
     faces = lib3ds_io_read_word(io);
     if (faces) {
-        lib3ds_mesh_alloc_faces(mesh, faces);
+        lib3ds_mesh_alloc_face_data(mesh, faces, FALSE, FALSE);
         for (i = 0; i < faces; ++i) {
-            mesh->data[i].material = -1;
             mesh->indices[i][0] = lib3ds_io_read_word(io);
             mesh->indices[i][1] = lib3ds_io_read_word(io);
             mesh->indices[i][2] = lib3ds_io_read_word(io);
-            mesh->data[i].flags = lib3ds_io_read_word(io);
+            mesh->indices[i][3] = lib3ds_io_read_word(io);
         }
         lib3ds_chunk_read_tell(&c, io);
 
@@ -296,11 +298,12 @@ face_array_read(Lib3dsFile *file, Lib3dsMesh *mesh, Lib3dsIo *io) {
             switch (chunk) {
                 case LIB3DS_SMOOTH_GROUP: {
                     unsigned i;
+                    lib3ds_mesh_alloc_face_data(mesh, mesh->nfaces, mesh->materials != NULL, TRUE);
                     for (i = 0; i < mesh->nfaces; ++i) {
-                        mesh->data[i].smoothing = lib3ds_io_read_dword(io);
+                        mesh->smoothing_groups[i] = lib3ds_io_read_dword(io);
                     }
                     break;
-                                          }
+                }
 
                 case LIB3DS_MSH_MAT_GROUP: {
                     char name[64];
@@ -309,6 +312,10 @@ face_array_read(Lib3dsFile *file, Lib3dsMesh *mesh, Lib3dsIo *io) {
                     unsigned index;
                     int material;
 
+                    if (mesh->materials == NULL) {
+                        lib3ds_mesh_alloc_face_data(mesh, mesh->nfaces, TRUE, mesh->smoothing_groups != NULL);
+                    }
+
                     lib3ds_io_read_string(io, name, 64);
                     material = lib3ds_file_material_by_name(file, name);
 
@@ -316,13 +323,13 @@ face_array_read(Lib3dsFile *file, Lib3dsMesh *mesh, Lib3dsIo *io) {
                     for (i = 0; i < faces; ++i) {
                         index = lib3ds_io_read_word(io);
                         if (index < mesh->nfaces) {
-                            mesh->data[index].material = material;
+                            mesh->materials[index] = material;
                         } else {
                             assert(0);
                         }
                     }
                     break;
-                                           }
+                }
 
                 case LIB3DS_MSH_BOXMAP: {
                     lib3ds_io_read_string(io, mesh->box_map.front, 64);
@@ -374,13 +381,10 @@ lib3ds_mesh_read(Lib3dsFile *file, Lib3dsMesh *mesh, Lib3dsIo *io) {
                 unsigned i;
                 unsigned nvertices;
 
-                lib3ds_mesh_alloc_vertices(mesh, 0);
                 nvertices = lib3ds_io_read_word(io);
-                if (nvertices) {
-                    lib3ds_mesh_alloc_vertices(mesh, nvertices);
-                    for (i = 0; i < mesh->nvertices; ++i) {
-                        lib3ds_io_read_vector(io, mesh->vertices[i]);
-                    }
+                lib3ds_mesh_alloc_vertex_data(mesh, nvertices, mesh->vertex_flags != NULL, mesh->texcos != NULL);
+                for (i = 0; i < mesh->nvertices; ++i) {
+                    lib3ds_io_read_vector(io, mesh->vertices[i]);
                 }
                 break;
             }
@@ -389,13 +393,14 @@ lib3ds_mesh_read(Lib3dsFile *file, Lib3dsMesh *mesh, Lib3dsIo *io) {
                 unsigned i;
                 unsigned nflags;
 
-                lib3ds_mesh_alloc_flags(mesh, 0);
                 nflags = lib3ds_io_read_word(io);
-                if (nflags) {
-                    lib3ds_mesh_alloc_flags(mesh, nflags);
-                    for (i = 0; i < mesh->nflags; ++i) {
-                        mesh->flags[i] = lib3ds_io_read_word(io);
+                if (!mesh->nvertices || (mesh->nvertices == nflags)) {
+                    lib3ds_mesh_alloc_vertex_data(mesh, nflags, TRUE, mesh->texcos != NULL);
+                    for (i = 0; i < nflags; ++i) {
+                        mesh->vertex_flags[i] = lib3ds_io_read_word(io);
                     }
+                } else {
+                    //TODO: warning
                 }
                 break;
             }
@@ -434,10 +439,9 @@ lib3ds_mesh_read(Lib3dsFile *file, Lib3dsMesh *mesh, Lib3dsIo *io) {
                 unsigned i;
                 unsigned ntexcos;
 
-                lib3ds_mesh_alloc_texcos(mesh, 0);
                 ntexcos = lib3ds_io_read_word(io);
-                if (ntexcos) {
-                    lib3ds_mesh_alloc_texcos(mesh, ntexcos);
+                if (!mesh->nvertices || (mesh->nvertices == ntexcos)) {
+                    lib3ds_mesh_alloc_vertex_data(mesh, ntexcos, mesh->vertex_flags != NULL, TRUE);
                     for (i = 0; i < mesh->ntexcos; ++i) {
                         mesh->texcos[i][0] = lib3ds_io_read_float(io);
                         mesh->texcos[i][1] = lib3ds_io_read_float(io);
@@ -519,17 +523,16 @@ flag_array_write(Lib3dsMesh *mesh, Lib3dsIo *io) {
     Lib3dsChunk c;
     unsigned i;
 
-    if (!mesh->nflags || !mesh->flags) {
+    if (!mesh->nvertices || !mesh->vertex_flags) {
         return;
     }
-    ASSERT(mesh->nflags < 0x10000);
     c.chunk = LIB3DS_POINT_FLAG_ARRAY;
-    c.size = 8 + 2 * mesh->nflags;
+    c.size = 8 + 2 * mesh->nvertices;
     lib3ds_chunk_write(&c, io);
 
-    lib3ds_io_write_word(io, (Lib3dsWord) mesh->nflags);
-    for (i = 0; i < mesh->nflags; ++i) {
-        lib3ds_io_write_word(io, mesh->flags[i]);
+    lib3ds_io_write_word(io, (Lib3dsWord) mesh->nvertices);
+    for (i = 0; i < mesh->nvertices; ++i) {
+        lib3ds_io_write_word(io, mesh->vertex_flags[i]);
     }
 }
 
@@ -553,11 +556,11 @@ face_array_write(Lib3dsFile *file, Lib3dsMesh *mesh, Lib3dsIo *io) {
             lib3ds_io_write_word(io, mesh->indices[i][0]);
             lib3ds_io_write_word(io, mesh->indices[i][1]);
             lib3ds_io_write_word(io, mesh->indices[i][2]);
-            lib3ds_io_write_word(io, mesh->data[i].flags);
+            lib3ds_io_write_word(io, mesh->indices[i][3]);
         }
     }
 
-    {
+    if (mesh->materials) {
         /*---- MSH_MAT_GROUP ----*/
         Lib3dsChunk c;
         unsigned i, j;
@@ -566,23 +569,23 @@ face_array_write(Lib3dsFile *file, Lib3dsMesh *mesh, Lib3dsIo *io) {
         assert(matf);
 
         for (i = 0; i < mesh->nfaces; ++i) {
-            if (!matf[i] && (mesh->data[i].material >= 0) && (mesh->data[i].material < file->nmaterials)) {
+            if (!matf[i] && (mesh->materials[i] >= 0) && (mesh->materials[i] < file->nmaterials)) {
                 matf[i] = 1;
                 num = 1;
 
                 for (j = i + 1; j < mesh->nfaces; ++j) {
-                    if (mesh->data[i].material == mesh->data[j].material) ++num;
+                    if (mesh->materials[i] == mesh->materials[j]) ++num;
                 }
 
                 c.chunk = LIB3DS_MSH_MAT_GROUP;
-                c.size = 6 + (Lib3dsDword) strlen(file->materials[mesh->data[i].material]->name) + 1 + 2 + 2 * num;
+                c.size = 6 + (Lib3dsDword) strlen(file->materials[mesh->materials[i]]->name) + 1 + 2 + 2 * num;
                 lib3ds_chunk_write(&c, io);
-                lib3ds_io_write_string(io, file->materials[mesh->data[i].material]->name);
+                lib3ds_io_write_string(io, file->materials[mesh->materials[i]]->name);
                 lib3ds_io_write_word(io, num);
                 lib3ds_io_write_word(io, (Lib3dsWord) i);
 
                 for (j = i + 1; j < mesh->nfaces; ++j) {
-                    if (mesh->data[i].material == mesh->data[j].material) {
+                    if (mesh->materials[i] == mesh->materials[j]) {
                         lib3ds_io_write_word(io, (Lib3dsWord) j);
                         matf[j] = 1;
                     }
@@ -593,7 +596,7 @@ face_array_write(Lib3dsFile *file, Lib3dsMesh *mesh, Lib3dsIo *io) {
         free(matf);
     }
 
-    {
+    if (mesh->smoothing_groups) {
         /*---- SMOOTH_GROUP ----*/
         Lib3dsChunk c;
         unsigned i;
@@ -603,7 +606,7 @@ face_array_write(Lib3dsFile *file, Lib3dsMesh *mesh, Lib3dsIo *io) {
         lib3ds_chunk_write(&c, io);
 
         for (i = 0; i < mesh->nfaces; ++i) {
-            lib3ds_io_write_dword(io, mesh->data[i].smoothing);
+            lib3ds_io_write_dword(io, mesh->smoothing_groups[i]);
         }
     }
 

@@ -226,7 +226,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)\$(ProjectName)-2_0d.dll"
+				OutputFile="$(OutDir)\$(ProjectName)-2_0.dll"
 				Version="2.0"
 				LinkIncremental="1"
 				GenerateDebugInformation="false"
@@ -307,7 +307,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)\$(ProjectName)-2_0d.dll"
+				OutputFile="$(OutDir)\$(ProjectName)-2_0.dll"
 				Version="2.0"
 				LinkIncremental="1"
 				GenerateDebugInformation="false"

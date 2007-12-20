@@ -399,7 +399,7 @@ mesh_dump(Lib3dsMesh *mesh) {
             mesh->indices[i][2],
             mesh->indices[i][3],
             mesh->smoothing_groups? (unsigned)mesh->smoothing_groups[i] : 0,
-            mesh->materials? mesh->materials[i] : 0
+            mesh->material_map? mesh->material_map[i] : 0
             );
     }
 }

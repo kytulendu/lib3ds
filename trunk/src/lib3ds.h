@@ -49,7 +49,7 @@ typedef unsigned __int16 Lib3dsWord;
 typedef unsigned __int32 Lib3dsDword;
 typedef signed __int8 Lib3dsIntb;
 typedef signed __int16 Lib3dsIntw;
-typedef signed __int16 Lib3dsIntd;
+typedef signed __int32 Lib3dsIntd;
 #else
 typedef int32_t Lib3dsBool;
 typedef uint8_t Lib3dsByte;
@@ -405,23 +405,27 @@ typedef enum Lib3dsFaceFlags {
   LIB3DS_FACE_SELECT_1 = (1<<15),    /* Bit 15: Selection of the face in selection 1*/
 } Lib3dsFaceFlags;
 
+
 /* Triangular mesh object */
 typedef struct Lib3dsMesh {
-    Lib3dsUserData user;    	     /* Arbitrary user data */
-    char name[64];		             /* Mesh name. Don't use more than 8 characters  */
-    Lib3dsDword object_flags;        /* @see Lib3dsObjectFlags */ 
-    Lib3dsByte color;
-    Lib3dsMatrix matrix;    	     /* Transformation matrix for mesh data */
-    Lib3dsWord nvertices;		     /* Number of vertices in vertex array */
-    Lib3dsVector *vertices;	         /* Point list */
-    Lib3dsWord *vertex_flags;		 /* Per-vertex flag array */
-    Lib3dsWord ntexcos;		         /* Number of UV texture coordinates */
-    float (*texcos)[2];              /* UV texture coordinates array */
-    Lib3dsWord nfaces;	             /* Number of faces in face array */
-	Lib3dsWord (*indices)[4];        /* Array */ 
-	Lib3dsIntw *materials;
-	Lib3dsDword *smoothing_groups;
-	struct { 
+    Lib3dsUserData  user;    	         /* Arbitrary user data */
+    char            name[64];		     /* Mesh name. Don't use more than 8 characters  */
+    Lib3dsDword     object_flags;        /* @see Lib3dsObjectFlags */ 
+    Lib3dsByte      color;
+    Lib3dsMatrix    matrix;    	         /* Transformation matrix for mesh data */
+
+    Lib3dsWord      nvertices;		     /* Number of vertices in vertex array */
+    Lib3dsVector*   vertices;	         /* Point list */
+    Lib3dsWord*     vertex_flags;		 /* Per-vertex flag array */
+    float           (*texcos)[2];        /* UV texture coordinates array */
+    
+    Lib3dsWord      nfaces;	             /* Number of faces in face array */
+	Lib3dsWord      (*indices)[3];       /* Array */
+    Lib3dsWord*     face_flags;
+    Lib3dsIntw*     material_map;
+    Lib3dsDword*    smoothing_groups;
+
+    struct { 
 		char front[64];
 		char back[64];
 		char left[64];
@@ -854,8 +858,8 @@ extern LIB3DSAPI void lib3ds_light_free(Lib3dsLight *mesh);
 
 extern LIB3DSAPI Lib3dsMesh* lib3ds_mesh_new(const char *name);
 extern LIB3DSAPI void lib3ds_mesh_free(Lib3dsMesh *mesh);
-extern LIB3DSAPI void lib3ds_mesh_alloc_vertex_data(Lib3dsMesh *mesh, Lib3dsWord nvertices, Lib3dsBool alloc_flags, Lib3dsBool alloc_texcos);
-extern LIB3DSAPI void lib3ds_mesh_alloc_face_data(Lib3dsMesh *mesh, Lib3dsWord nfaces, Lib3dsBool alloc_materials, Lib3dsBool alloc_smoothing_groups);
+extern LIB3DSAPI void lib3ds_mesh_alloc_vertex_data(Lib3dsMesh *mesh, Lib3dsWord nvertices, int flags, int texcos);
+extern LIB3DSAPI void lib3ds_mesh_alloc_face_data(Lib3dsMesh *mesh, Lib3dsWord nfaces, int flags, int material_map, int smoothing_groups);
 extern LIB3DSAPI void lib3ds_mesh_bounding_box(Lib3dsMesh *mesh, Lib3dsVector bmin, Lib3dsVector bmax);
 extern LIB3DSAPI void lib3ds_mesh_calculate_face_normals(Lib3dsMesh *mesh, Lib3dsVector *face_normals);
 extern LIB3DSAPI void lib3ds_mesh_calculate_normals(Lib3dsMesh *mesh, Lib3dsVector *normalL);

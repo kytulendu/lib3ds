@@ -455,8 +455,8 @@ render_node(Lib3dsNode *node) {
                     Player_texture *pt = NULL;
                     int tex_mode = 0;
 #endif
-                    if (mesh->materials && mesh->materials[p] > 0) {
-                        mat = file->materials[mesh->materials[p]];
+                    if (mesh->material_map && mesh->material_map[p] > 0) {
+                        mat = file->materials[mesh->material_map[p]];
                     }
 
                     if (mat != oldmat) {

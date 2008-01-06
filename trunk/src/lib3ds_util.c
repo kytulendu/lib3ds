@@ -22,6 +22,19 @@
 #include "lib3ds_impl.h"
 
 
+void* lib3ds_util_realloc_array(void *ptr, int old_size, int new_size, int element_size) {
+    if (!ptr)
+        old_size = 0;
+    if (old_size != new_size) {
+        ptr = realloc(ptr, element_size * new_size);
+        if (old_size < new_size) {
+            memset((char*)ptr + element_size * old_size, 0, element_size * (new_size - old_size));
+        }
+    }
+    return ptr;
+}
+
+
 void lib3ds_util_reserve_array(void ***ptr, Lib3dsIntd *n, Lib3dsIntd *size,
                                Lib3dsIntd new_size, Lib3dsBool force, Lib3dsFreeFunc free_func) {
     assert(ptr && n && size);

@@ -405,6 +405,18 @@ typedef enum Lib3dsFaceFlags {
   LIB3DS_FACE_SELECT_1 = (1<<15),    /* Bit 15: Selection of the face in selection 1*/
 } Lib3dsFaceFlags;
 
+typedef struct Lib3dsVertex {
+    float tex[2];
+    float pos[3];
+    Lib3dsDword flags;
+} Lib3dsVertex; 
+
+typedef struct Lib3dsFace {
+    Lib3dsWord index[3];
+    Lib3dsWord flags;
+    Lib3dsIntd material;
+    Lib3dsDword smoothing_group;
+} Lib3dsFace; 
 
 /* Triangular mesh object */
 typedef struct Lib3dsMesh {
@@ -413,18 +425,10 @@ typedef struct Lib3dsMesh {
     Lib3dsDword     object_flags;        /* @see Lib3dsObjectFlags */ 
     Lib3dsByte      color;
     Lib3dsMatrix    matrix;    	         /* Transformation matrix for mesh data */
-
     Lib3dsWord      nvertices;		     /* Number of vertices in vertex array */
-    Lib3dsVector*   vertices;	         /* Point list */
-    Lib3dsWord*     vertex_flags;		 /* Per-vertex flag array */
-    float           (*texcos)[2];        /* UV texture coordinates array */
-    
+    Lib3dsVertex*   vertices;	         /* Point list */
     Lib3dsWord      nfaces;	             /* Number of faces in face array */
-	Lib3dsWord      (*indices)[3];       /* Array */
-    Lib3dsWord*     face_flags;
-    Lib3dsIntw*     material_map;
-    Lib3dsDword*    smoothing_groups;
-
+	Lib3dsFace*     faces;               /* Array */
     struct { 
 		char front[64];
 		char back[64];
@@ -481,41 +485,31 @@ typedef enum Lib3dsTrackType {
     LIB3DS_TRACK_MORPH   = 5,
 } Lib3dsTrackType;
 
-typedef struct Lib3dsFloatKeyData {
-    float value;
-    float dd;
-    float ds;
-} Lib3dsFloatKeyData;
-
-typedef struct Lib3dsVectorKeyData {
-    Lib3dsVector value;
-    Lib3dsVector dd;
-    Lib3dsVector ds;
-} Lib3dsVectorKeyData;
-
-typedef struct Lib3dsQuatKeyData {
-    float angle;
-    Lib3dsQuat axis;
-    Lib3dsQuat quat;
-    Lib3dsQuat a;
-    Lib3dsQuat b;
-} Lib3dsQuatKeyData;
-
-typedef struct Lib3dsMorphKeyData {
-    char name[64];
-} Lib3dsMorphKeyData;
-
-typedef union Lib3dsKeyData {
-    Lib3dsFloatKeyData f;
-    Lib3dsVectorKeyData v;
-    Lib3dsQuatKeyData q;
-    Lib3dsMorphKeyData m;
-} Lib3dsKeyData;
-
 typedef struct Lib3dsKey {
     Lib3dsIntd frame;
     Lib3dsTcb tcb;
-    Lib3dsKeyData data;
+    union {
+        struct {
+            float value;
+            float dd;
+            float ds;
+        } f;
+        struct{
+            Lib3dsVector value;
+            Lib3dsVector dd;
+            Lib3dsVector ds;
+        } v;
+        struct {
+            float angle;
+            Lib3dsQuat axis;
+            Lib3dsQuat quat;
+            Lib3dsQuat a;
+            Lib3dsQuat b;
+        } q;
+        struct {
+            char name[64];
+        } m;
+    } data;
 } Lib3dsKey;
 
 typedef struct Lib3dsTrack {
@@ -526,99 +520,13 @@ typedef struct Lib3dsTrack {
 } Lib3dsTrack;
 
 typedef enum Lib3dsNodeType {
-    LIB3DS_UNKNOWN_NODE = 0,
-    LIB3DS_AMBIENT_NODE = 1,
-    LIB3DS_OBJECT_NODE  = 2,
-    LIB3DS_CAMERA_NODE  = 3,
-    LIB3DS_TARGET_NODE  = 4,
-    LIB3DS_LIGHT_NODE   = 5,
-    LIB3DS_SPOT_NODE    = 6
+    LIB3DS_AMBIENT_NODE = 0,
+    LIB3DS_OBJECT_NODE  = 1,
+    LIB3DS_CAMERA_NODE  = 2,
+    LIB3DS_TARGET_NODE  = 3,
+    LIB3DS_LIGHT_NODE   = 4,
+    LIB3DS_SPOT_NODE    = 5
 } Lib3dsNodeType;
-
-/*!
- * Scene graph ambient color node data
- */
-typedef struct Lib3dsAmbientData {
-    Lib3dsRgb col;
-    Lib3dsTrack *col_track;
-} Lib3dsAmbientData;
-
-/*!
- * Scene graph object instance node data
- */
-typedef struct Lib3dsObjectData {
-    Lib3dsVector pivot;
-    char instance[64];
-    Lib3dsVector bbox_min;
-    Lib3dsVector bbox_max;
-    Lib3dsBool hide;
-    Lib3dsVector pos;
-    Lib3dsQuat rot;
-    Lib3dsVector scl;
-    float morph_smooth;
-    char morph[64];
-    Lib3dsTrack *pos_track;
-    Lib3dsTrack *rot_track;
-    Lib3dsTrack *scl_track;
-    Lib3dsTrack *morph_track;
-    Lib3dsTrack *hide_track;
-} Lib3dsObjectData;
-
-/*!
- * Scene graph camera node data
- */
-typedef struct Lib3dsCameraData {
-    Lib3dsVector pos;
-    float fov;
-    float roll;
-    Lib3dsTrack *pos_track;
-    Lib3dsTrack *fov_track;
-    Lib3dsTrack *roll_track;
-} Lib3dsCameraData;
-
-/*!
- * Scene graph camera target node data
- */
-typedef struct Lib3dsTargetData {
-    Lib3dsVector pos;
-    Lib3dsTrack *pos_track;
-} Lib3dsTargetData;
-
-/*!
- * Scene graph light node data
- */
-typedef struct Lib3dsLightData {
-    Lib3dsVector pos;
-    Lib3dsRgb col;
-    float hotspot;
-    float falloff;
-    float roll;
-    Lib3dsTrack *pos_track;
-    Lib3dsTrack *col_track;
-    Lib3dsTrack *hotspot_track;
-    Lib3dsTrack *falloff_track;
-    Lib3dsTrack *roll_track;
-} Lib3dsLightData;
-
-/*!
- * Scene graph spotlight target node data
- */
-typedef struct Lib3dsSpotData {
-    Lib3dsVector pos;
-    Lib3dsTrack *pos_track;
-} Lib3dsSpotData;
-
-/*!
- * Scene graph node data union
- */
-typedef union Lib3dsNodeData {
-    Lib3dsAmbientData ambient;
-    Lib3dsObjectData object;
-    Lib3dsCameraData camera;
-    Lib3dsTargetData target;
-    Lib3dsLightData light;
-    Lib3dsSpotData spot;
-} Lib3dsNodeData;
 
 #define LIB3DS_NO_PARENT 65535
 
@@ -654,8 +562,68 @@ typedef struct Lib3dsNode {
     Lib3dsWord flags2;
     Lib3dsWord parent_id;
     Lib3dsMatrix matrix;
-    Lib3dsNodeData data;
 } Lib3dsNode;
+
+typedef struct Lib3dsAmbientNode {
+    Lib3dsNode base;
+    Lib3dsRgb col;
+    Lib3dsTrack *col_track;
+} Lib3dsAmbientNode;
+
+typedef struct Lib3dsObjectNode {
+    Lib3dsNode base;
+    Lib3dsVector pivot;
+    char instance[64];
+    Lib3dsVector bbox_min;
+    Lib3dsVector bbox_max;
+    Lib3dsBool hide;
+    Lib3dsVector pos;
+    Lib3dsQuat rot;
+    Lib3dsVector scl;
+    float morph_smooth;
+    char morph[64];
+    Lib3dsTrack *pos_track;
+    Lib3dsTrack *rot_track;
+    Lib3dsTrack *scl_track;
+    Lib3dsTrack *morph_track;
+    Lib3dsTrack *hide_track;
+} Lib3dsObjectNode;
+
+typedef struct Lib3dsCameraNode {
+    Lib3dsNode base;
+    Lib3dsVector pos;
+    float fov;
+    float roll;
+    Lib3dsTrack *pos_track;
+    Lib3dsTrack *fov_track;
+    Lib3dsTrack *roll_track;
+} Lib3dsCameraNode;
+
+typedef struct Lib3dsTargetNode {
+    Lib3dsNode base;
+    Lib3dsVector pos;
+    Lib3dsTrack *pos_track;
+} Lib3dsTargetNode;
+
+typedef struct Lib3dsLightNode {
+    Lib3dsNode base;
+    Lib3dsVector pos;
+    Lib3dsRgb col;
+    float hotspot;
+    float falloff;
+    float roll;
+    Lib3dsTrack *pos_track;
+    Lib3dsTrack *col_track;
+    Lib3dsTrack *hotspot_track;
+    Lib3dsTrack *falloff_track;
+    Lib3dsTrack *roll_track;
+} Lib3dsLightNode;
+
+typedef struct Lib3dsSpotNode {
+    Lib3dsNode base;
+    Lib3dsVector pos;
+    Lib3dsTrack *pos_track;
+} Lib3dsSpotNode;
 
 /*!
     3DS file structure 
@@ -858,8 +826,8 @@ extern LIB3DSAPI void lib3ds_light_free(Lib3dsLight *mesh);
 
 extern LIB3DSAPI Lib3dsMesh* lib3ds_mesh_new(const char *name);
 extern LIB3DSAPI void lib3ds_mesh_free(Lib3dsMesh *mesh);
-extern LIB3DSAPI void lib3ds_mesh_alloc_vertex_data(Lib3dsMesh *mesh, Lib3dsWord nvertices, int flags, int texcos);
-extern LIB3DSAPI void lib3ds_mesh_alloc_face_data(Lib3dsMesh *mesh, Lib3dsWord nfaces, int flags, int material_map, int smoothing_groups);
+extern LIB3DSAPI void lib3ds_mesh_alloc_vertices(Lib3dsMesh *mesh, Lib3dsWord nvertices);
+extern LIB3DSAPI void lib3ds_mesh_alloc_faces(Lib3dsMesh *mesh, Lib3dsWord nfaces);
 extern LIB3DSAPI void lib3ds_mesh_bounding_box(Lib3dsMesh *mesh, Lib3dsVector bmin, Lib3dsVector bmax);
 extern LIB3DSAPI void lib3ds_mesh_calculate_face_normals(Lib3dsMesh *mesh, Lib3dsVector *face_normals);
 extern LIB3DSAPI void lib3ds_mesh_calculate_normals(Lib3dsMesh *mesh, Lib3dsVector *normalL);

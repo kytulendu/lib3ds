@@ -384,6 +384,7 @@ extern void lib3ds_node_write(Lib3dsNode *node, Lib3dsFile *file, Lib3dsIo *io);
 
 typedef void (*Lib3dsFreeFunc)(void *ptr);
 
+extern void* lib3ds_util_realloc_array(void *ptr, int old_size, int new_size, int element_size);
 extern void lib3ds_util_reserve_array(void ***ptr, Lib3dsIntd *n, Lib3dsIntd *size, Lib3dsIntd new_size, Lib3dsBool force, Lib3dsFreeFunc free_func);
 extern void lib3ds_util_insert_array(void ***ptr, Lib3dsIntd *n, Lib3dsIntd *size, void *element, Lib3dsIntd index);
 extern void lib3ds_util_remove_array(void ***ptr, Lib3dsIntd *n, Lib3dsIntd index, Lib3dsFreeFunc free_func);

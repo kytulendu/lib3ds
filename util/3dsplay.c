@@ -418,12 +418,13 @@ render_node(Lib3dsNode *node) {
     if (node->type == LIB3DS_OBJECT_NODE) {
         Lib3dsIntd index;
         Lib3dsMesh *mesh;
+        Lib3dsObjectNode *n = (Lib3dsObjectNode*)node;
 
         if (strcmp(node->name, "$$$DUMMY") == 0) {
             return;
         }
 
-        index = lib3ds_file_mesh_by_name(file, node->data.object.instance);
+        index = lib3ds_file_mesh_by_name(file, n->instance);
         if (index < 0)
             index = lib3ds_file_mesh_by_name(file, node->name);
         if (index < 0) {
@@ -455,8 +456,8 @@ render_node(Lib3dsNode *node) {
                     Player_texture *pt = NULL;
                     int tex_mode = 0;
 #endif
-                    if (mesh->material_map && mesh->material_map[p] > 0) {
-                        mat = file->materials[mesh->material_map[p]];
+                    if (mesh->faces[p].material > 0) {
+                        mat = file->materials[mesh->faces[p].material];
                     }
 
                     if (mat != oldmat) {
@@ -617,11 +618,12 @@ render_node(Lib3dsNode *node) {
                             glNormal3fv(normalL[3*p+i]);
 
                             if (tex_mode) {
-                                glTexCoord2f(mesh->texcos[mesh->indices[p][i]][1]*pt->scale_x,
-                                             pt->scale_y - mesh->texcos[mesh->indices[p][i]][0]*pt->scale_y);
+                                glTexCoord2f(
+                                    mesh->vertices[mesh->faces[p].index[i]].tex[1]*pt->scale_x,
+                                    pt->scale_y - mesh->vertices[mesh->faces[p].index[i]].tex[0]*pt->scale_y);
                             }
 
-                            glVertex3fv(mesh->vertices[mesh->indices[p][i]]);
+                            glVertex3fv(mesh->vertices[mesh->faces[p].index[i]].pos);
                         }
                         glEnd();
 
@@ -637,12 +639,9 @@ render_node(Lib3dsNode *node) {
         }
 
         if (mesh->user.d) {
-            Lib3dsObjectData *d;
-
             glPushMatrix();
-            d = &node->data.object;
             glMultMatrixf(&node->matrix[0][0]);
-            glTranslatef(-d->pivot[0], -d->pivot[1], -d->pivot[2]);
+            glTranslatef(-n->pivot[0], -n->pivot[1], -n->pivot[2]);
             glCallList(mesh->user.d);
             /* glutSolidSphere(50.0, 20,20); */
             glPopMatrix();
@@ -668,12 +667,15 @@ light_update(Lib3dsLight *l) {
     sn = lib3ds_file_node_by_name(file, l->name, LIB3DS_SPOT_NODE);
 
     if (ln != NULL) {
-        memcpy(l->color, ln->data.light.col, sizeof(Lib3dsRgb));
-        memcpy(l->position, ln->data.light.pos, sizeof(Lib3dsVector));
+        Lib3dsLightNode *n = (Lib3dsLightNode*)ln;
+        memcpy(l->color, n->col, sizeof(Lib3dsRgb));
+        memcpy(l->position, n->pos, sizeof(Lib3dsVector));
     }
 
-    if (sn != NULL)
-        memcpy(l->spot, sn->data.spot.pos, sizeof(Lib3dsVector));
+    if (sn != NULL) {
+        Lib3dsSpotNode *n = (Lib3dsSpotNode*)sn;
+        memcpy(l->spot, n->pos, sizeof(Lib3dsVector));
+    }
 }
 
 
@@ -769,7 +771,8 @@ draw_light(const GLfloat *pos, const GLfloat *color) {
 */
 static void
 display(void) {
-    Lib3dsNode *c, *t;
+    Lib3dsTargetNode *t;
+    Lib3dsCameraNode *c;
     float fov, roll;
     float near, far, dist;
     float *campos;
@@ -801,16 +804,16 @@ display(void) {
 
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, file->ambient);
 
-    c = lib3ds_file_node_by_name(file, camera, LIB3DS_CAMERA_NODE);
-    t = lib3ds_file_node_by_name(file, camera, LIB3DS_TARGET_NODE);
+    c = (Lib3dsCameraNode*)lib3ds_file_node_by_name(file, camera, LIB3DS_CAMERA_NODE);
+    t = (Lib3dsTargetNode*)lib3ds_file_node_by_name(file, camera, LIB3DS_TARGET_NODE);
 
-    if (t != NULL)
-        tgt = t->data.target.pos;
-
+    if (t != NULL) {
+        tgt = t->pos;
+    }
     if (c != NULL) {
-        fov = c->data.camera.fov;
-        roll = c->data.camera.roll;
-        campos = c->data.camera.pos;
+        fov = c->fov;
+        roll = c->roll;
+        campos = c->pos;
     }
 
     if ((camidx = lib3ds_file_camera_by_name(file, camera)) == -1)

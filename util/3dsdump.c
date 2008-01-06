@@ -388,18 +388,18 @@ mesh_dump(Lib3dsMesh *mesh) {
     matrix_dump(mesh->matrix);
     printf("  point list:\n");
     for (i = 0; i < mesh->nvertices; ++i) {
-        lib3ds_vector_copy(p, mesh->vertices[i]);
+        lib3ds_vector_copy(p, mesh->vertices[i].pos);
         printf("    %8f %8f %8f\n", p[0], p[1], p[2]);
     }
     printf("  facelist:\n");
     for (i = 0; i < mesh->nfaces; ++i) {
         printf("    %4d %4d %4d  flags:%X  smoothing:%X  material:\"%d\"\n",
-            mesh->indices[i][0],
-            mesh->indices[i][1],
-            mesh->indices[i][2],
-            mesh->indices[i][3],
-            mesh->smoothing_groups? (unsigned)mesh->smoothing_groups[i] : 0,
-            mesh->material_map? mesh->material_map[i] : 0
+            mesh->faces[i].index[0],
+            mesh->faces[i].index[1],
+            mesh->faces[i].index[2],
+            mesh->faces[i].flags,
+            mesh->faces[i].smoothing_group,
+            mesh->faces[i].material
             );
     }
 }
@@ -414,7 +414,8 @@ dump_instances(Lib3dsNode *node, const char* parent) {
     strcat(name, ".");
     strcat(name, node->name);
     if (node->type == LIB3DS_OBJECT_NODE) {
-        printf("  %s : %s\n", name, node->data.object.instance);
+        Lib3dsObjectNode *n = (Lib3dsObjectNode*)node;
+        printf("  %s : %s\n", name, n->instance);
     }
     for (p = node->childs; p != 0; p = p->next) {
         dump_instances(p, parent);
@@ -443,10 +444,11 @@ node_dump(Lib3dsNode *node, Lib3dsIntd level) {
     l[2*level] = 0;
 
     if (node->type == LIB3DS_OBJECT_NODE) {
+        Lib3dsObjectNode *n = (Lib3dsObjectNode*)node; 
         printf("%s%s [%s] (%s)\n",
             l,
             node->name,
-            node->data.object.instance,
+            n->instance,
             node_names_table[node->type]
         );
     } else {

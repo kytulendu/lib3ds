@@ -1031,11 +1031,13 @@ lib3ds_file_mesh_by_name(Lib3dsFile *file, const char *name) {
 Lib3dsMesh* 
 lib3ds_file_mesh_for_node(Lib3dsFile *file, Lib3dsNode *node) {
     Lib3dsIntd index;
+    Lib3dsObjectNode *n;
 
     if (node->type != LIB3DS_OBJECT_NODE)
         return NULL;
+    n = (Lib3dsObjectNode*)node;
 
-    index = lib3ds_file_mesh_by_name(file, node->data.object.instance);
+    index = lib3ds_file_mesh_by_name(file, n->instance);
     if (index < 0)
         index = lib3ds_file_mesh_by_name(file, node->name);
 
@@ -1314,8 +1316,9 @@ file_bounding_box_of_nodes_impl(Lib3dsNode *node, Lib3dsFile *file, Lib3dsBool i
         case LIB3DS_OBJECT_NODE:
             if (include_meshes) {
                 Lib3dsIntd index;
+                Lib3dsObjectNode *n = (Lib3dsObjectNode*)node;
 
-                index = lib3ds_file_mesh_by_name(file, node->data.object.instance);
+                index = lib3ds_file_mesh_by_name(file, n->instance);
                 if (index < 0)
                     index = lib3ds_file_mesh_by_name(file, node->name);
                 if (index >= 0) {
@@ -1329,11 +1332,11 @@ file_bounding_box_of_nodes_impl(Lib3dsNode *node, Lib3dsFile *file, Lib3dsBool i
                     lib3ds_matrix_inv(inv_matrix);
                     lib3ds_matrix_copy(M, matrix);
                     lib3ds_matrix_mult(M, node->matrix);
-                    lib3ds_matrix_translate_xyz(M, -node->data.object.pivot[0], -node->data.object.pivot[1], -node->data.object.pivot[2]);
+                    lib3ds_matrix_translate_xyz(M, -n->pivot[0], -n->pivot[1], -n->pivot[2]);
                     lib3ds_matrix_mult(M, inv_matrix);
 
                     for (i = 0; i < mesh->nvertices; ++i) {
-                        lib3ds_vector_transform(v, M, mesh->vertices[i]);
+                        lib3ds_vector_transform(v, M, mesh->vertices[i].pos);
                         lib3ds_vector_min(bmin, v);
                         lib3ds_vector_max(bmax, v);
                     }

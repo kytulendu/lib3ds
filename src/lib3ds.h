@@ -661,16 +661,13 @@ typedef struct Lib3dsFile {
 } Lib3dsFile; 
 
 
-/*! @functiongroup Floating Point Math */
-
 /*! 
-    @function lib3ds_float_ease
-        Calculates the ease in/out function.
+    Calculates the ease in/out function.
     @param fp
         [in] Previous frame number.
-    @param fp
+    @param fc
         [in] Current frame number.
-    @param fp
+    @param fn
         [in] Next frame number.
     @param ease_from
         [in] Ease in value [0, 1.0]
@@ -687,7 +684,6 @@ extern LIB3DSAPI float lib3ds_float_ease(
     float ease_to);
 
 /*! 
-    @function lib3ds_float_cubic
     @param a
         [in] First point.
     @param p
@@ -706,11 +702,8 @@ extern LIB3DSAPI float lib3ds_float_cubic(
     float b, 
     float t);
 
-/*! @functiongroup Vector Math */
-
 /*! 
-    @function lib3ds_vector_zero 
-        Sets all components of a vector to zero.
+    Sets all components of a vector to zero.
     @param c
          [in/out] The pointer to the vector. 
  */
@@ -718,9 +711,8 @@ extern LIB3DSAPI void lib3ds_vector_zero(
     Lib3dsVector c );
 
 /*! 
-    @function lib3ds_vector_copy 
-        Copies all components of a vector to another vector.
-    @param dst
+    Copies all components of a vector to another vector.
+    @param dest
         [out] The destination vector.
     @param src
         [in] The source vector. 
@@ -730,8 +722,7 @@ extern LIB3DSAPI void lib3ds_vector_copy(
     Lib3dsVector src );
 
 /*! 
-    @function lib3ds_vector_neg
-        Negates all components of a vector.
+    Negates all components of a vector.
     @param c
         [in/out] The pointer to the vector. 
  */
@@ -799,10 +790,9 @@ extern LIB3DSAPI void lib3ds_matrix_rotate(Lib3dsMatrix m, Lib3dsQuat q);
 extern LIB3DSAPI void lib3ds_matrix_rotate_axis(Lib3dsMatrix m, Lib3dsVector axis, float angle);
 extern LIB3DSAPI void lib3ds_matrix_camera(Lib3dsMatrix matrix, Lib3dsVector pos, Lib3dsVector tgt, float roll);
 extern LIB3DSAPI void lib3ds_vector_transform(Lib3dsVector c, Lib3dsMatrix m, Lib3dsVector a);
-/** @} */
 
 /** @} */
-/** @defgroup io IO Handling */
+/** @name io IO Handling */
 /** @{ */
 
 extern LIB3DSAPI Lib3dsIo* lib3ds_io_new(void *self, Lib3dsIoSeekFunc seek_func, Lib3dsIoTellFunc tell_func,
@@ -811,7 +801,7 @@ extern LIB3DSAPI Lib3dsIo* lib3ds_io_new(void *self, Lib3dsIoSeekFunc seek_func,
 extern LIB3DSAPI void lib3ds_io_free(Lib3dsIo *io);
 
 /** @} */
-/** @defgroup objects Materials, Cameras, Lights, Meshes */
+/** @name Objects */
 /** @{ */
 
 
@@ -833,7 +823,7 @@ extern LIB3DSAPI void lib3ds_mesh_calculate_face_normals(Lib3dsMesh *mesh, Lib3d
 extern LIB3DSAPI void lib3ds_mesh_calculate_normals(Lib3dsMesh *mesh, Lib3dsVector *normalL);
 
 /** @} */
-/** @defgroup nodes Hierachy, Keyframing */
+/** @name Hierachy, Keyframing */
 /** @{ */
 
 extern LIB3DSAPI Lib3dsTrack* lib3ds_track_new(Lib3dsTrackType type, Lib3dsDword nkeys);
@@ -853,14 +843,9 @@ extern LIB3DSAPI Lib3dsNode* lib3ds_node_by_name(Lib3dsNode *node, const char* n
 extern LIB3DSAPI Lib3dsNode* lib3ds_node_by_id(Lib3dsNode *node, Lib3dsWord node_id);
 
 /** @} */
-/** @defgroup files Files */
+/** @name Files */
 /** @{ */
 
-/*
-    sdsd
-    dsdsdssd
-    dsdd
-*/
 extern LIB3DSAPI Lib3dsFile* lib3ds_file_load(
     const char *filename);
 

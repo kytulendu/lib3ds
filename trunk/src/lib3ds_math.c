@@ -23,7 +23,7 @@
 
 
 float
-lib3ds_float_ease(float fp, float fc, float fn, float ease_from, float ease_to) {
+lib3ds_math_ease(float fp, float fc, float fn, float ease_from, float ease_to) {
     double s, step;
     double tofrom;
     double a;
@@ -48,4 +48,19 @@ lib3ds_float_ease(float fp, float fc, float fn, float ease_from, float ease_to) 
         }
     }
     return((float)s);
+}
+
+
+void
+lib3ds_math_cubic_interp(float *v, float *a, float *p, float *q, float *b, int n, float t) {
+    float x, y, z, w;
+    int i;
+
+    x = 2 * t * t * t - 3 * t * t + 1;
+    y = -2 * t * t * t + 3 * t * t;
+    z = t * t * t - 2 * t * t + t;
+    w = t * t * t - t * t;
+    for (i = 0; i < n; ++i) {
+        v[i] = x * a[i] + y * b[i] + z * p[i] + w * q[i];
+    }
 }

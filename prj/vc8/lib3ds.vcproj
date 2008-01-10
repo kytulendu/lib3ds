@@ -375,10 +375,6 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\lib3ds_ease.c"
-			>
-		</File>
-		<File
 			RelativePath="..\..\src\lib3ds_file.c"
 			>
 		</File>
@@ -396,6 +392,10 @@
 		</File>
 		<File
 			RelativePath="..\..\src\lib3ds_material.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\lib3ds_math.c"
 			>
 		</File>
 		<File

@@ -618,185 +618,7 @@ typedef struct Lib3dsFile {
     Lib3dsNode*         nodes;
 } Lib3dsFile; 
 
-/** 
-    Calculates the ease in/out function.
-    @param fp
-        [in] Previous frame number.
-    @param fc
-        [in] Current frame number.
-    @param fn
-        [in] Next frame number.
-    @param ease_from
-        [in] Ease in value [0, 1.0]
-    @param ease_to
-        [in] Ease out value [0, 1.0]
-    @return
-        The calculated value of the function.
- */
-extern LIB3DSAPI float lib3ds_float_ease(
-    float fp, 
-    float fc, 
-    float fn, 
-    float ease_from, 
-    float ease_to
-);
-
-/*! 
-    @param a
-        [in] First point.
-    @param p
-        [in] Tangent of first point.
-    @param q
-        [in] Tangent of second point.
-    @param b
-        [in] Second point.
-    @param t
-        [in] 
- */
-extern LIB3DSAPI float lib3ds_float_cubic(
-    float a, 
-    float p, 
-    float q, 
-    float b, 
-    float t);
-
-extern LIB3DSAPI void lib3ds_vector_make(
-    float c[3],
-    float x,
-    float y,
-    float z);
-
-/*! 
-    Sets all components of a vector to zero.
-    @param c
-         [in/out] The pointer to the vector. 
- */
-extern LIB3DSAPI void lib3ds_vector_zero(
-    float c[3] );
-
-/** Copies all components of a vector to another vector. */
-extern LIB3DSAPI void lib3ds_vector_copy( 
-    float dest[3],  /**< [out] The destination vector.*/
-    float src[3]    /**< [in] The source vector. */
-);
-
-/*! 
-    Negates all components of a vector.
-    @param c
-        [in/out] The pointer to the vector. 
- */
-extern LIB3DSAPI void lib3ds_vector_neg(
-    float c[3]);
-
-extern LIB3DSAPI void lib3ds_vector_add(float c[3], float a[3], float b[3]);
-extern LIB3DSAPI void lib3ds_vector_sub(float c[3], float a[3], float b[3]);
-extern LIB3DSAPI void lib3ds_vector_scalar(float c[3], float k);
-extern LIB3DSAPI void lib3ds_vector_cross(float c[3], float a[3], float b[3]);
-extern LIB3DSAPI float lib3ds_vector_dot(float a[3], float b[3]);
-extern LIB3DSAPI float lib3ds_vector_length(float c[3]);
-extern LIB3DSAPI void lib3ds_vector_normalize(float c[3]);
-extern LIB3DSAPI void lib3ds_vector_normal(float n[3], float a[3], float b[3], float c[3]);
-extern LIB3DSAPI void lib3ds_vector_cubic(float c[3], float a[3], float p[3], float q[3], float b[3], float t);
-extern LIB3DSAPI void lib3ds_vector_min(float c[3], float a[3]);
-extern LIB3DSAPI void lib3ds_vector_max(float c[3], float a[3]);
-extern LIB3DSAPI void lib3ds_vector_transform(float c[3], float m[4][4], float a[3]);
-
-/** @name Quaternions */
-/** @{ */
-extern LIB3DSAPI void lib3ds_quat_identity(float c[4]);
-extern LIB3DSAPI void lib3ds_quat_copy(float dest[4], float src[4]);
-extern LIB3DSAPI void lib3ds_quat_axis_angle(float c[4], float axis[3], float angle);
-extern LIB3DSAPI void lib3ds_quat_neg(float c[4]);
-extern LIB3DSAPI void lib3ds_quat_cnj(float c[4]);
-extern LIB3DSAPI void lib3ds_quat_mul(float c[4], float a[4], float b[4]);
-extern LIB3DSAPI void lib3ds_quat_scalar(float c[4], float k);
-extern LIB3DSAPI void lib3ds_quat_normalize(float c[4]);
-extern LIB3DSAPI void lib3ds_quat_inv(float c[4]);
-extern LIB3DSAPI float lib3ds_quat_dot(float a[4], float b[4]);
-extern LIB3DSAPI float lib3ds_quat_norm(float c[4]);
-extern LIB3DSAPI void lib3ds_quat_ln(float c[4]);
-extern LIB3DSAPI void lib3ds_quat_ln_dif(float c[4], float a[4], float b[4]);
-extern LIB3DSAPI void lib3ds_quat_exp(float c[4]);
-extern LIB3DSAPI void lib3ds_quat_slerp(float c[4], float a[4], float b[4], float t);
-extern LIB3DSAPI void lib3ds_quat_squad(float c[4], float a[4], float p[4], float q[4], float b[4], float t);
-extern LIB3DSAPI void lib3ds_quat_tangent(float c[4], float p[4], float q[4], float n[4]);
-/** @} */
-
-/** @name Matrices */
-/** @{ */
-extern LIB3DSAPI void lib3ds_matrix_zero(float m[4][4]);
-extern LIB3DSAPI void lib3ds_matrix_identity(float  m[4][4]);
-extern LIB3DSAPI void lib3ds_matrix_copy(float dest[4][4], float src[4][4]);
-extern LIB3DSAPI void lib3ds_matrix_neg(float m[4][4]);
-extern LIB3DSAPI void lib3ds_matrix_transpose(float m[4][4]);
-extern LIB3DSAPI void lib3ds_matrix_add(float m[4][4], float a[4][4], float b[4][4]);
-extern LIB3DSAPI void lib3ds_matrix_sub(float m[4][4], float a[4][4], float b[4][4]);
-extern LIB3DSAPI void lib3ds_matrix_mult(float m[4][4], float a[4][4], float b[4][4]);
-extern LIB3DSAPI void lib3ds_matrix_scalar(float m[4][4], float k);
-extern LIB3DSAPI float lib3ds_matrix_det(float m[4][4]);
-extern LIB3DSAPI Lib3dsBool lib3ds_matrix_inv(float m[4][4]);
-extern LIB3DSAPI void lib3ds_matrix_translate(float m[4][4], float x, float y, float z);
-extern LIB3DSAPI void lib3ds_matrix_scale(float m[4][4], float x, float y, float z);
-extern LIB3DSAPI void lib3ds_matrix_rotate_quat(float m[4][4], float q[4]);
-extern LIB3DSAPI void lib3ds_matrix_rotate(float m[4][4], float angle, float ax, float ay, float az);
-extern LIB3DSAPI void lib3ds_matrix_camera(float m[4][4], float pos[3], float tgt[3], float roll);
-
-/** @} */
-/** @name io IO Handling */
-/** @{ */
-
-extern LIB3DSAPI Lib3dsIo* lib3ds_io_new(void *self, Lib3dsIoSeekFunc seek_func, Lib3dsIoTellFunc tell_func,
-                                         Lib3dsIoReadFunc read_func, Lib3dsIoWriteFunc write_func,
-                                         Lib3dsIoLogFunc log_func);
-extern LIB3DSAPI void lib3ds_io_free(Lib3dsIo *io);
-
-/** @} */
-/** @name Objects */
-/** @{ */
-
-
-extern LIB3DSAPI Lib3dsMaterial* lib3ds_material_new();
-extern LIB3DSAPI void lib3ds_material_free(Lib3dsMaterial *material);
-
-extern LIB3DSAPI Lib3dsCamera* lib3ds_camera_new(const char *name);
-extern LIB3DSAPI void lib3ds_camera_free(Lib3dsCamera *mesh);
-
-extern LIB3DSAPI Lib3dsLight* lib3ds_light_new(const char *name);
-extern LIB3DSAPI void lib3ds_light_free(Lib3dsLight *mesh);
-
-extern LIB3DSAPI Lib3dsMesh* lib3ds_mesh_new(const char *name);
-extern LIB3DSAPI void lib3ds_mesh_free(Lib3dsMesh *mesh);
-extern LIB3DSAPI void lib3ds_mesh_resize_vertices(Lib3dsMesh *mesh, int nvertices);
-extern LIB3DSAPI void lib3ds_mesh_resize_faces(Lib3dsMesh *mesh, int nfaces);
-extern LIB3DSAPI void lib3ds_mesh_bounding_box(Lib3dsMesh *mesh, float bmin[3], float bmax[3]);
-extern LIB3DSAPI void lib3ds_mesh_calculate_face_normals(Lib3dsMesh *mesh, float (*face_normals)[3]);
-extern LIB3DSAPI void lib3ds_mesh_calculate_normals(Lib3dsMesh *mesh, float (*normalL)[3]);
-
-/** @} */
-/** @name Hierachy, Keyframing */
-/** @{ */
-
-extern LIB3DSAPI Lib3dsTrack* lib3ds_track_new(Lib3dsNode *node, Lib3dsTrackType type, Lib3dsDword nkeys);
-extern LIB3DSAPI void lib3ds_track_free(Lib3dsTrack *track);
-extern LIB3DSAPI void lib3ds_track_resize(Lib3dsTrack *track, int nkeys);
-extern LIB3DSAPI void lib3ds_track_eval_bool(Lib3dsTrack *track, Lib3dsBool *b, float t);
-extern LIB3DSAPI void lib3ds_track_eval_float(Lib3dsTrack *track, float *f, float t);
-extern LIB3DSAPI void lib3ds_track_eval_vector(Lib3dsTrack *track, float v[3], float t);
-extern LIB3DSAPI void lib3ds_track_eval_quat(Lib3dsTrack *track, float q[4], float t);
-
-extern LIB3DSAPI Lib3dsNode* lib3ds_node_new(Lib3dsNodeType type);
-extern LIB3DSAPI void lib3ds_node_free(Lib3dsNode *node);
-extern LIB3DSAPI void lib3ds_node_eval(Lib3dsNode *node, float t);
-extern LIB3DSAPI Lib3dsNode* lib3ds_node_by_name(Lib3dsNode *node, const char* name, Lib3dsNodeType type);
-extern LIB3DSAPI Lib3dsNode* lib3ds_node_by_id(Lib3dsNode *node, Lib3dsWord node_id);
-
-/** @} */
-/** @name Files */
-/** @{ */
-
-extern LIB3DSAPI Lib3dsFile* lib3ds_file_load(
-    const char *filename);
-
+extern LIB3DSAPI Lib3dsFile* lib3ds_file_load(const char *filename);
 extern LIB3DSAPI Lib3dsBool lib3ds_file_save(Lib3dsFile *file, const char *filename);
 extern LIB3DSAPI Lib3dsFile* lib3ds_file_new();
 extern LIB3DSAPI void lib3ds_file_free(Lib3dsFile *file);
@@ -828,7 +650,167 @@ extern LIB3DSAPI void lib3ds_file_minmax_node_id(Lib3dsFile *file, Lib3dsWord *m
 extern LIB3DSAPI void lib3ds_file_bounding_box_of_objects(Lib3dsFile *file, Lib3dsBool include_meshes, Lib3dsBool include_cameras, Lib3dsBool include_lights, float bmin[3], float bmax[3]);
 extern LIB3DSAPI void lib3ds_file_bounding_box_of_nodes(Lib3dsFile *file, Lib3dsBool include_meshes, Lib3dsBool include_cameras, Lib3dsBool include_lights, float bmin[3], float bmax[3], float matrix[4][4]);
 
-/** @} */
+extern LIB3DSAPI Lib3dsMaterial* lib3ds_material_new();
+extern LIB3DSAPI void lib3ds_material_free(Lib3dsMaterial *material);
+
+extern LIB3DSAPI Lib3dsCamera* lib3ds_camera_new(const char *name);
+extern LIB3DSAPI void lib3ds_camera_free(Lib3dsCamera *mesh);
+
+extern LIB3DSAPI Lib3dsLight* lib3ds_light_new(const char *name);
+extern LIB3DSAPI void lib3ds_light_free(Lib3dsLight *mesh);
+
+extern LIB3DSAPI Lib3dsMesh* lib3ds_mesh_new(const char *name);
+extern LIB3DSAPI void lib3ds_mesh_free(Lib3dsMesh *mesh);
+extern LIB3DSAPI void lib3ds_mesh_resize_vertices(Lib3dsMesh *mesh, int nvertices);
+extern LIB3DSAPI void lib3ds_mesh_resize_faces(Lib3dsMesh *mesh, int nfaces);
+extern LIB3DSAPI void lib3ds_mesh_bounding_box(Lib3dsMesh *mesh, float bmin[3], float bmax[3]);
+extern LIB3DSAPI void lib3ds_mesh_calculate_face_normals(Lib3dsMesh *mesh, float (*face_normals)[3]);
+extern LIB3DSAPI void lib3ds_mesh_calculate_normals(Lib3dsMesh *mesh, float (*normalL)[3]);
+
+extern LIB3DSAPI Lib3dsNode* lib3ds_node_new(Lib3dsNodeType type);
+extern LIB3DSAPI void lib3ds_node_free(Lib3dsNode *node);
+extern LIB3DSAPI void lib3ds_node_eval(Lib3dsNode *node, float t);
+extern LIB3DSAPI Lib3dsNode* lib3ds_node_by_name(Lib3dsNode *node, const char* name, Lib3dsNodeType type);
+extern LIB3DSAPI Lib3dsNode* lib3ds_node_by_id(Lib3dsNode *node, Lib3dsWord node_id);
+
+extern LIB3DSAPI Lib3dsTrack* lib3ds_track_new(Lib3dsNode *node, Lib3dsTrackType type, Lib3dsDword nkeys);
+extern LIB3DSAPI void lib3ds_track_free(Lib3dsTrack *track);
+extern LIB3DSAPI void lib3ds_track_resize(Lib3dsTrack *track, int nkeys);
+extern LIB3DSAPI void lib3ds_track_eval_bool(Lib3dsTrack *track, Lib3dsBool *b, float t);
+extern LIB3DSAPI void lib3ds_track_eval_float(Lib3dsTrack *track, float *f, float t);
+extern LIB3DSAPI void lib3ds_track_eval_vector(Lib3dsTrack *track, float v[3], float t);
+extern LIB3DSAPI void lib3ds_track_eval_quat(Lib3dsTrack *track, float q[4], float t);
+
+extern LIB3DSAPI Lib3dsIo* lib3ds_io_new(void *self, Lib3dsIoSeekFunc seek_func, Lib3dsIoTellFunc tell_func,
+                                         Lib3dsIoReadFunc read_func, Lib3dsIoWriteFunc write_func,
+                                         Lib3dsIoLogFunc log_func);
+extern LIB3DSAPI void lib3ds_io_free(Lib3dsIo *io);
+
+/** 
+    Calculates the ease in/out function. See Lib3dsKey for details. 
+    \param fp 
+        [in] Previous frame number.
+    \param fc
+        [in] Current frame number.
+    \param fn
+        [in] Next frame number. 
+    \param ease_from
+        [in] Ease in value [0, 1.0] 
+    \param ease_to
+        [in] Ease out value [0, 1.0]
+*/
+extern LIB3DSAPI float lib3ds_math_ease(
+    float fp,
+    float fc,
+    float fn,
+    float ease_from,
+    float ease_to);
+
+/**  
+    Computes a point on a n-dimensional cubic hermite spline. 
+    \param v,   
+        [out] Result 
+    \param a,   
+        [in] First point of the spline.
+    \param p   
+        [in] Tangent at the first point of the spline.
+    \param q
+        [in] Tangent at the second point of the spline.
+    \param b
+        [in] Second point of the spline.
+    \param n
+        [in] Dimension
+    \param t
+        [in] Parameter value [0...1] 
+*/
+extern LIB3DSAPI void lib3ds_math_cubic_interp(
+    float *v,
+    float *a,
+    float *p,
+    float *q,
+    float *b,
+    int n,
+    float t);
+
+extern LIB3DSAPI void lib3ds_vector_make(
+    float c[3],
+    float x,
+    float y,
+    float z);
+
+/** 
+    Sets all components of a vector to zero. 
+    \param c
+        The Pointer to the vector.
+*/
+extern LIB3DSAPI void lib3ds_vector_zero(
+    float c[3]);
+
+/** 
+    Copies all components of a vector to another vector. 
+    \param dst
+        [out] The destination vector.
+    \param src
+        [in] The source vector.
+*/
+extern LIB3DSAPI void lib3ds_vector_copy( 
+    float dest[3],  
+    float src[3]);
+
+/** 
+    Negates all components of a vector. 
+    \param c
+        The Pointer to the vector.
+*/
+extern LIB3DSAPI void lib3ds_vector_neg(
+    float c[3]);
+
+extern LIB3DSAPI void lib3ds_vector_add(float c[3], float a[3], float b[3]);
+extern LIB3DSAPI void lib3ds_vector_sub(float c[3], float a[3], float b[3]);
+extern LIB3DSAPI void lib3ds_vector_scalar(float c[3], float k);
+extern LIB3DSAPI void lib3ds_vector_cross(float c[3], float a[3], float b[3]);
+extern LIB3DSAPI float lib3ds_vector_dot(float a[3], float b[3]);
+extern LIB3DSAPI float lib3ds_vector_length(float c[3]);
+extern LIB3DSAPI void lib3ds_vector_normalize(float c[3]);
+extern LIB3DSAPI void lib3ds_vector_normal(float n[3], float a[3], float b[3], float c[3]);
+extern LIB3DSAPI void lib3ds_vector_min(float c[3], float a[3]);
+extern LIB3DSAPI void lib3ds_vector_max(float c[3], float a[3]);
+extern LIB3DSAPI void lib3ds_vector_transform(float c[3], float m[4][4], float a[3]);
+
+extern LIB3DSAPI void lib3ds_quat_identity(float c[4]);
+extern LIB3DSAPI void lib3ds_quat_copy(float dest[4], float src[4]);
+extern LIB3DSAPI void lib3ds_quat_axis_angle(float c[4], float axis[3], float angle);
+extern LIB3DSAPI void lib3ds_quat_neg(float c[4]);
+extern LIB3DSAPI void lib3ds_quat_cnj(float c[4]);
+extern LIB3DSAPI void lib3ds_quat_mul(float c[4], float a[4], float b[4]);
+extern LIB3DSAPI void lib3ds_quat_scalar(float c[4], float k);
+extern LIB3DSAPI void lib3ds_quat_normalize(float c[4]);
+extern LIB3DSAPI void lib3ds_quat_inv(float c[4]);
+extern LIB3DSAPI float lib3ds_quat_dot(float a[4], float b[4]);
+extern LIB3DSAPI float lib3ds_quat_norm(float c[4]);
+extern LIB3DSAPI void lib3ds_quat_ln(float c[4]);
+extern LIB3DSAPI void lib3ds_quat_ln_dif(float c[4], float a[4], float b[4]);
+extern LIB3DSAPI void lib3ds_quat_exp(float c[4]);
+extern LIB3DSAPI void lib3ds_quat_slerp(float c[4], float a[4], float b[4], float t);
+extern LIB3DSAPI void lib3ds_quat_squad(float c[4], float a[4], float p[4], float q[4], float b[4], float t);
+extern LIB3DSAPI void lib3ds_quat_tangent(float c[4], float p[4], float q[4], float n[4]);
+
+extern LIB3DSAPI void lib3ds_matrix_zero(float m[4][4]);
+extern LIB3DSAPI void lib3ds_matrix_identity(float  m[4][4]);
+extern LIB3DSAPI void lib3ds_matrix_copy(float dest[4][4], float src[4][4]);
+extern LIB3DSAPI void lib3ds_matrix_neg(float m[4][4]);
+extern LIB3DSAPI void lib3ds_matrix_transpose(float m[4][4]);
+extern LIB3DSAPI void lib3ds_matrix_add(float m[4][4], float a[4][4], float b[4][4]);
+extern LIB3DSAPI void lib3ds_matrix_sub(float m[4][4], float a[4][4], float b[4][4]);
+extern LIB3DSAPI void lib3ds_matrix_mult(float m[4][4], float a[4][4], float b[4][4]);
+extern LIB3DSAPI void lib3ds_matrix_scalar(float m[4][4], float k);
+extern LIB3DSAPI float lib3ds_matrix_det(float m[4][4]);
+extern LIB3DSAPI Lib3dsBool lib3ds_matrix_inv(float m[4][4]);
+extern LIB3DSAPI void lib3ds_matrix_translate(float m[4][4], float x, float y, float z);
+extern LIB3DSAPI void lib3ds_matrix_scale(float m[4][4], float x, float y, float z);
+extern LIB3DSAPI void lib3ds_matrix_rotate_quat(float m[4][4], float q[4]);
+extern LIB3DSAPI void lib3ds_matrix_rotate(float m[4][4], float angle, float ax, float ay, float az);
+extern LIB3DSAPI void lib3ds_matrix_camera(float m[4][4], float pos[3], float tgt[3], float roll);
 
 #ifdef __cplusplus
 }

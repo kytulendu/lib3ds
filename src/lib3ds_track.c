@@ -301,21 +301,6 @@ lib3ds_track_eval_bool(Lib3dsTrack *track, Lib3dsBool *b, float t) {
 }
 
 
-static void
-float_cubic(int n, float *v, float *a, float *p, float *q, float *b, float t) {
-    float x, y, z, w;
-    int i;
-
-    x = 2 * t * t * t - 3 * t * t + 1;
-    y = -2 * t * t * t + 3 * t * t;
-    z = t * t * t - 2 * t * t + t;
-    w = t * t * t - t * t;
-    for (i = 0; i < n; ++i) {
-        v[i] = x * a[i] + y * b[i] + z * p[i] + w * q[i];
-    }
-}
-
-
 static void 
 track_eval_linear(Lib3dsTrack *track, float *value, float t) {
     Lib3dsKey pp, p0, p1, pn;
@@ -342,13 +327,13 @@ track_eval_linear(Lib3dsTrack *track, float *value, float t) {
     pos_key_setup(track->type, pp.frame>=0? &pp : NULL, &p0, &p1, ddp, dsp);
     pos_key_setup(track->type, &p0, &p1, pn.frame>=0? &pn : NULL, ddn, dsn);
 
-    float_cubic(
-        track->type,
+    lib3ds_math_cubic_interp(
         value,
         p0.value,
         ddp,
         dsn,
         p1.value,
+        track->type,
         u
     );
 }

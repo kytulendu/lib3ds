@@ -188,7 +188,7 @@ fileio_log_func(Lib3dsIo *io, Lib3dsLogLevel level, char *msg)
 
 
 static void
-matrix_dump(Lib3dsMatrix matrix) {
+matrix_dump(float matrix[4][4]) {
     int i, j;
 
     for (i = 0; i < 4; ++i) {
@@ -376,7 +376,7 @@ light_dump(Lib3dsLight *light) {
 static void
 mesh_dump(Lib3dsMesh *mesh) {
     int i;
-    Lib3dsVector p;
+    float p[3];
 
     assert(mesh);
     printf("  %s vertices=%ld faces=%ld\n",

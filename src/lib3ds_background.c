@@ -55,7 +55,7 @@ v_gradient_read(Lib3dsBackground *background, Lib3dsIo *io) {
     Lib3dsChunk c;
     Lib3dsWord chunk;
     int index[2];
-    Lib3dsRgb col[2][3];
+    float col[2][3][3];
     int have_lin = 0;
 
     lib3ds_chunk_read_start(&c, LIB3DS_V_GRADIENT, io);
@@ -135,7 +135,7 @@ lib3ds_background_read(Lib3dsBackground *background, Lib3dsIo *io) {
 
 
 static void
-colorf_write(Lib3dsRgb rgb, Lib3dsIo *io) {
+colorf_write(float rgb[3], Lib3dsIo *io) {
     Lib3dsChunk c;
 
     c.chunk = LIB3DS_COLOR_F;
@@ -151,7 +151,7 @@ colorf_write(Lib3dsRgb rgb, Lib3dsIo *io) {
 
 
 static Lib3dsBool
-colorf_defined(Lib3dsRgb rgb) {
+colorf_defined(float rgb[3]) {
     int i;
     for (i = 0; i < 3; ++i) {
         if (fabs(rgb[i]) > LIB3DS_EPSILON) {

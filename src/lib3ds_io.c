@@ -284,7 +284,7 @@ lib3ds_io_read_float(Lib3dsIo *io) {
  * \param v  The vector to store the data.
  */
 void
-lib3ds_io_read_vector(Lib3dsIo *io, Lib3dsVector v) {
+lib3ds_io_read_vector(Lib3dsIo *io, float v[3]) {
     ASSERT(io);
     v[0] = lib3ds_io_read_float(io);
     v[1] = lib3ds_io_read_float(io);
@@ -293,7 +293,7 @@ lib3ds_io_read_vector(Lib3dsIo *io, Lib3dsVector v) {
 
 
 void
-lib3ds_io_read_rgb(Lib3dsIo *io, Lib3dsRgb rgb) {
+lib3ds_io_read_rgb(Lib3dsIo *io, float rgb[3]) {
     ASSERT(io);
     rgb[0] = lib3ds_io_read_float(io);
     rgb[1] = lib3ds_io_read_float(io);
@@ -448,7 +448,7 @@ lib3ds_io_write_float(Lib3dsIo *io, float l) {
  * Writes a vector into a file stream in little endian format.
  */
 void
-lib3ds_io_write_vector(Lib3dsIo *io, Lib3dsVector v) {
+lib3ds_io_write_vector(Lib3dsIo *io, float v[3]) {
     int i;
     for (i = 0; i < 3; ++i) {
         lib3ds_io_write_float(io, v[i]);
@@ -457,7 +457,7 @@ lib3ds_io_write_vector(Lib3dsIo *io, Lib3dsVector v) {
 
 
 void
-lib3ds_io_write_rgb(Lib3dsIo *io, Lib3dsRgb rgb) {
+lib3ds_io_write_rgb(Lib3dsIo *io, float rgb[3]) {
     int i;
     for (i = 0; i < 3; ++i) {
         lib3ds_io_write_float(io, rgb[i]);

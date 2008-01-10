@@ -346,8 +346,8 @@ extern Lib3dsIntb lib3ds_io_read_intb(Lib3dsIo *io);
 extern Lib3dsIntw lib3ds_io_read_intw(Lib3dsIo *io);
 extern Lib3dsIntd lib3ds_io_read_intd(Lib3dsIo *io);
 extern float lib3ds_io_read_float(Lib3dsIo *io);
-extern void lib3ds_io_read_vector(Lib3dsIo *io, Lib3dsVector v);
-extern void lib3ds_io_read_rgb(Lib3dsIo *io, Lib3dsRgb rgb);
+extern void lib3ds_io_read_vector(Lib3dsIo *io, float v[3]);
+extern void lib3ds_io_read_rgb(Lib3dsIo *io, float rgb[3]);
 extern void lib3ds_io_read_string(Lib3dsIo *io, char *s, int buflen);
 
 extern void lib3ds_io_write_byte(Lib3dsIo *io, Lib3dsByte b);
@@ -357,8 +357,8 @@ extern void lib3ds_io_write_intb(Lib3dsIo *io, Lib3dsIntb b);
 extern void lib3ds_io_write_intw(Lib3dsIo *io, Lib3dsIntw w);
 extern void lib3ds_io_write_intd(Lib3dsIo *io, Lib3dsIntd d);
 extern void lib3ds_io_write_float(Lib3dsIo *io, float l);
-extern void lib3ds_io_write_vector(Lib3dsIo *io, Lib3dsVector v);
-extern void lib3ds_io_write_rgb(Lib3dsIo *io, Lib3dsRgb rgb);
+extern void lib3ds_io_write_vector(Lib3dsIo *io, float v[3]);
+extern void lib3ds_io_write_rgb(Lib3dsIo *io, float rgb[3]);
 extern void lib3ds_io_write_string(Lib3dsIo *io, const char *s);
 
 extern void lib3ds_atmosphere_read(Lib3dsAtmosphere *atmosphere, Lib3dsIo *io);

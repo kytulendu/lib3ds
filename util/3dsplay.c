@@ -79,7 +79,7 @@ static int show_lights = 0;
 
 static int cameraList, lightList; /* Icon display lists */
 
-static Lib3dsVector bmin, bmax;
+static float bmin[3], bmax[3];
 static float sx, sy, sz, size; /* bounding box dimensions */
 static float cx, cy, cz;  /* bounding box center */
 
@@ -439,11 +439,11 @@ render_node(Lib3dsNode *node) {
             glNewList(mesh->user_id, GL_COMPILE);
 
             {
-                unsigned p;
-                Lib3dsVector *normalL = malloc(3 * sizeof(Lib3dsVector) * mesh->nfaces);
+                int p;
+                float (*normalL)[3] = malloc(3 * 3 * sizeof(float) * mesh->nfaces);
                 Lib3dsMaterial *oldmat = (Lib3dsMaterial *) - 1;
                 {
-                    Lib3dsMatrix M;
+                    float M[4][4];
                     lib3ds_matrix_copy(M, mesh->matrix);
                     lib3ds_matrix_inv(M);
                     glMultMatrixf(&M[0][0]);
@@ -599,7 +599,7 @@ render_node(Lib3dsNode *node) {
 
 #if 0
                         {
-                            Lib3dsVector v1, n, v2;
+                            float v1[3], n[3], v2[3];
                             glBegin(GL_LINES);
                             for (i = 0; i < 3; ++i) {
                                 lib3ds_vector_copy(v1, mesh->vertices[f->points[i]]);
@@ -668,13 +668,13 @@ light_update(Lib3dsLight *l) {
 
     if (ln != NULL) {
         Lib3dsLightNode *n = (Lib3dsLightNode*)ln;
-        memcpy(l->color, n->color, sizeof(Lib3dsRgb));
-        memcpy(l->position, n->pos, sizeof(Lib3dsVector));
+        memcpy(l->color, n->color, 3 * sizeof(float));
+        memcpy(l->position, n->pos, 3 * sizeof(float));
     }
 
     if (sn != NULL) {
         Lib3dsSpotNode *n = (Lib3dsSpotNode*)sn;
-        memcpy(l->spot, n->pos, sizeof(Lib3dsVector));
+        memcpy(l->spot, n->pos, 3* sizeof(float));
     }
 }
 
@@ -682,7 +682,7 @@ light_update(Lib3dsLight *l) {
 
 
 static void
-draw_bounds(Lib3dsVector tgt) {
+draw_bounds(float tgt[3]) {
     double cx, cy, cz;
     double lx, ly, lz;
 
@@ -777,10 +777,10 @@ display(void) {
     float near, far, dist;
     float *campos;
     float *tgt;
-    Lib3dsMatrix M;
+    float M[4][4];
     Lib3dsIntd camidx;
     Lib3dsCamera *cam;
-    Lib3dsVector v;
+    float v[3];
     Lib3dsNode *p;
 
     if (file != NULL && file->background.use_solid)

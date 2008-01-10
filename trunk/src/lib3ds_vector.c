@@ -22,8 +22,16 @@
 #include "lib3ds_impl.h"
 
 
+void 
+lib3ds_vector_make(float c[3], float x, float y, float z) {
+    c[0] = x;
+    c[1] = y;
+    c[2] = z;
+}
+
+
 void
-lib3ds_vector_zero(Lib3dsVector c) {
+lib3ds_vector_zero(float c[3]) {
     int i;
     for (i = 0; i < 3; ++i) {
         c[i] = 0.0f;
@@ -32,7 +40,7 @@ lib3ds_vector_zero(Lib3dsVector c) {
 
 
 void
-lib3ds_vector_copy(Lib3dsVector dst, Lib3dsVector src) {
+lib3ds_vector_copy(float dst[3], float src[3]) {
     int i;
     for (i = 0; i < 3; ++i) {
         dst[i] = src[i];
@@ -46,7 +54,7 @@ lib3ds_vector_copy(Lib3dsVector dst, Lib3dsVector src) {
  * \param c Vector to negate.
  */
 void
-lib3ds_vector_neg(Lib3dsVector c) {
+lib3ds_vector_neg(float c[3]) {
     int i;
     for (i = 0; i < 3; ++i) {
         c[i] = -c[i];
@@ -62,7 +70,7 @@ lib3ds_vector_neg(Lib3dsVector c) {
  * \param b Second addend.
  */
 void
-lib3ds_vector_add(Lib3dsVector c, Lib3dsVector a, Lib3dsVector b) {
+lib3ds_vector_add(float c[3], float a[3], float b[3]) {
     int i;
     for (i = 0; i < 3; ++i) {
         c[i] = a[i] + b[i];
@@ -78,7 +86,7 @@ lib3ds_vector_add(Lib3dsVector c, Lib3dsVector a, Lib3dsVector b) {
  * \param b Minuend.
  */
 void
-lib3ds_vector_sub(Lib3dsVector c, Lib3dsVector a, Lib3dsVector b) {
+lib3ds_vector_sub(float c[3], float a[3], float b[3]) {
     int i;
     for (i = 0; i < 3; ++i) {
         c[i] = a[i] - b[i];
@@ -93,7 +101,7 @@ lib3ds_vector_sub(Lib3dsVector c, Lib3dsVector a, Lib3dsVector b) {
  * \param k Scalar.
  */
 void
-lib3ds_vector_scalar(Lib3dsVector c, float k) {
+lib3ds_vector_scalar(float c[3], float k) {
     int i;
     for (i = 0; i < 3; ++i) {
         c[i] *= k;
@@ -109,7 +117,7 @@ lib3ds_vector_scalar(Lib3dsVector c, float k) {
  * \param b Second vector.
  */
 void
-lib3ds_vector_cross(Lib3dsVector c, Lib3dsVector a, Lib3dsVector b) {
+lib3ds_vector_cross(float c[3], float a[3], float b[3]) {
     c[0] = a[1] * b[2] - a[2] * b[1];
     c[1] = a[2] * b[0] - a[0] * b[2];
     c[2] = a[0] * b[1] - a[1] * b[0];
@@ -125,23 +133,8 @@ lib3ds_vector_cross(Lib3dsVector c, Lib3dsVector a, Lib3dsVector b) {
  * \return Dot product.
  */
 float
-lib3ds_vector_dot(Lib3dsVector a, Lib3dsVector b) {
+lib3ds_vector_dot(float a[3], float b[3]) {
     return(a[0]*b[0] + a[1]*b[1] + a[2]*b[2]);
-}
-
-
-/*!
- * Compute square of vector.
- *
- * Computes x*x + y*y + z*z.
- *
- * \param c Vector to square.
- *
- * \return Square of vector.
- */
-float
-lib3ds_vector_squared(Lib3dsVector c) {
-    return(c[0]*c[0] + c[1]*c[1] + c[2]*c[2]);
 }
 
 
@@ -155,7 +148,7 @@ lib3ds_vector_squared(Lib3dsVector c) {
  * \return Length of vector.
  */
 float
-lib3ds_vector_length(Lib3dsVector c) {
+lib3ds_vector_length(float c[3]) {
     return((float)sqrt(c[0]*c[0] + c[1]*c[1] + c[2]*c[2]));
 }
 
@@ -168,7 +161,7 @@ lib3ds_vector_length(Lib3dsVector c) {
  * \param c Vector to normalize.
  */
 void
-lib3ds_vector_normalize(Lib3dsVector c) {
+lib3ds_vector_normalize(float c[3]) {
     float l, m;
 
     l = (float)sqrt(c[0] * c[0] + c[1] * c[1] + c[2] * c[2]);
@@ -204,8 +197,8 @@ lib3ds_vector_normalize(Lib3dsVector c) {
  * \param c Endpoint of second line.
  */
 void
-lib3ds_vector_normal(Lib3dsVector n, Lib3dsVector a, Lib3dsVector b, Lib3dsVector c) {
-    Lib3dsVector p, q;
+lib3ds_vector_normal(float n[3], float a[3], float b[3], float c[3]) {
+    float p[3], q[3];
 
     lib3ds_vector_sub(p, c, b);
     lib3ds_vector_sub(q, a, b);
@@ -225,7 +218,7 @@ lib3ds_vector_normal(Lib3dsVector n, Lib3dsVector a, Lib3dsVector b, Lib3dsVecto
  * \param a Input point.
  */
 void
-lib3ds_vector_transform(Lib3dsVector c, Lib3dsMatrix m, Lib3dsVector a) {
+lib3ds_vector_transform(float c[3], float m[4][4], float a[3]) {
     c[0] = m[0][0] * a[0] + m[1][0] * a[1] + m[2][0] * a[2] + m[3][0];
     c[1] = m[0][1] * a[0] + m[1][1] * a[1] + m[2][1] * a[2] + m[3][1];
     c[2] = m[0][2] * a[0] + m[1][2] * a[1] + m[2][2] * a[2] + m[3][2];
@@ -245,8 +238,7 @@ lib3ds_vector_transform(Lib3dsVector c, Lib3dsMatrix m, Lib3dsVector a) {
  * \param t Spline parameter [0. 1.]
  */
 void
-lib3ds_vector_cubic(Lib3dsVector c, Lib3dsVector a, Lib3dsVector p, Lib3dsVector q,
-                    Lib3dsVector b, float t) {
+lib3ds_vector_cubic(float c[3], float a[3], float p[3], float q[3], float b[3], float t) {
     double x, y, z, w;
 
     x = 2 * t * t * t - 3 * t * t + 1;
@@ -265,7 +257,7 @@ lib3ds_vector_cubic(Lib3dsVector c, Lib3dsVector a, Lib3dsVector p, Lib3dsVector
  * Computes minimum values of x,y,z independently.
  */
 void
-lib3ds_vector_min(Lib3dsVector c, Lib3dsVector a) {
+lib3ds_vector_min(float c[3], float a[3]) {
     int i;
     for (i = 0; i < 3; ++i) {
         if (a[i] < c[i]) {
@@ -281,7 +273,7 @@ lib3ds_vector_min(Lib3dsVector c, Lib3dsVector a) {
  * Computes maximum values of x,y,z independently.
  */
 void
-lib3ds_vector_max(Lib3dsVector c, Lib3dsVector a) {
+lib3ds_vector_max(float c[3], float a[3]) {
     int i;
     for (i = 0; i < 3; ++i) {
         if (a[i] > c[i]) {
@@ -292,7 +284,7 @@ lib3ds_vector_max(Lib3dsVector c, Lib3dsVector a) {
 
 
 void
-lib3ds_vector_dump(Lib3dsVector c) {
+lib3ds_vector_dump(float c[3]) {
     fprintf(stderr, "%f %f %f\n", c[0], c[1], c[2]);
 }
 

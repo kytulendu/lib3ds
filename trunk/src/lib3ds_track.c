@@ -63,7 +63,7 @@ static void
 pos_key_setup(int n, Lib3dsKey *pp, Lib3dsKey *pc, Lib3dsKey *pn, float *dd, float *ds) {
     float tm, cm, cp, bm, bp, tmcm, tmcp, ksm, ksp, kdm, kdp, c;
     float dt, fp, fn;
-    Lib3dsVector delm, delp;
+    float delm[3], delp[3];
     int i;
 
     assert(pc);
@@ -111,10 +111,10 @@ pos_key_setup(int n, Lib3dsKey *pp, Lib3dsKey *pc, Lib3dsKey *pn, float *dd, flo
 
 
 static void 
-rot_key_setup(Lib3dsKey *prev, Lib3dsKey *cur, Lib3dsKey *next, Lib3dsQuat a, Lib3dsQuat b) {
+rot_key_setup(Lib3dsKey *prev, Lib3dsKey *cur, Lib3dsKey *next, float a[4], float b[4]) {
     float tm, cm, cp, bm, bp, tmcm, tmcp, ksm, ksp, kdm, kdp, c;
     float dt, fp, fn;
-    Lib3dsQuat q, qm, qp, qa, qb;
+    float q[4], qm[4], qp[4], qa[4], qb[4];
     int i;
 
     assert(cur);
@@ -176,8 +176,8 @@ rot_key_setup(Lib3dsKey *prev, Lib3dsKey *cur, Lib3dsKey *next, Lib3dsQuat a, Li
 
 
 static void
-quat_for_index(Lib3dsTrack *track, int index, Lib3dsQuat q) {
-    Lib3dsQuat p;
+quat_for_index(Lib3dsTrack *track, int index, float q[4]) {
+    float p[4];
     int i;
     lib3ds_quat_identity(q);
     for (i = 0; i <= index; ++i) {
@@ -258,7 +258,7 @@ setup_segment(Lib3dsTrack *track, int index, Lib3dsKey *pp, Lib3dsKey *p0, Lib3d
     }
 
     if (track->type == LIB3DS_TRACK_QUAT) {
-        Lib3dsQuat q;
+        float q[4];
         if (pp->frame >= 0) {
             quat_for_index(track, ip, pp->value);
         } else {
@@ -365,23 +365,23 @@ lib3ds_track_eval_float(Lib3dsTrack *track, float *f, float t) {
 
 
 void 
-lib3ds_track_eval_vector(Lib3dsTrack *track, Lib3dsVector p, float t) {
-    lib3ds_vector_zero(p);
+lib3ds_track_eval_vector(Lib3dsTrack *track, float v[3], float t) {
+    lib3ds_vector_zero(v);
     if (track) {
         assert(track->type == LIB3DS_TRACK_VECTOR);
-        track_eval_linear(track, p, t);
+        track_eval_linear(track, v, t);
     }
 }
 
 
 void 
-lib3ds_track_eval_quat(Lib3dsTrack *track, Lib3dsQuat q, float t) {
+lib3ds_track_eval_quat(Lib3dsTrack *track, float q[4], float t) {
     lib3ds_quat_identity(q);
     if (track) {
         Lib3dsKey pp, p0, p1, pn;
         float u;
         int index;
-        Lib3dsQuat ap, bp, an, bn;
+        float ap[4], bp[4], an[4], bn[4];
 
         assert(track->type == LIB3DS_TRACK_QUAT);
 

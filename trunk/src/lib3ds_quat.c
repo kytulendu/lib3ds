@@ -26,7 +26,7 @@
  * Set a quaternion to Identity
  */
 void
-lib3ds_quat_identity(Lib3dsQuat c) {
+lib3ds_quat_identity(float c[4]) {
     c[0] = c[1] = c[2] = 0.0f;
     c[3] = 1.0f;
 }
@@ -36,7 +36,7 @@ lib3ds_quat_identity(Lib3dsQuat c) {
  * Copy a quaternion.
  */
 void
-lib3ds_quat_copy(Lib3dsQuat dest, Lib3dsQuat src) {
+lib3ds_quat_copy(float dest[4], float src[4]) {
     int i;
     for (i = 0; i < 4; ++i) {
         dest[i] = src[i];
@@ -52,7 +52,7 @@ lib3ds_quat_copy(Lib3dsQuat dest, Lib3dsQuat src) {
  * \param angle Angle of rotation, radians.
  */
 void
-lib3ds_quat_axis_angle(Lib3dsQuat c, Lib3dsVector axis, float angle) {
+lib3ds_quat_axis_angle(float c[4], float axis[3], float angle) {
     double omega, s;
     double l;
 
@@ -75,7 +75,7 @@ lib3ds_quat_axis_angle(Lib3dsQuat c, Lib3dsVector axis, float angle) {
  * Negate a quaternion
  */
 void
-lib3ds_quat_neg(Lib3dsQuat c) {
+lib3ds_quat_neg(float c[4]) {
     int i;
     for (i = 0; i < 4; ++i) {
         c[i] = -c[i];
@@ -87,7 +87,7 @@ lib3ds_quat_neg(Lib3dsQuat c) {
  * Compute the conjugate of a quaternion
  */
 void
-lib3ds_quat_cnj(Lib3dsQuat c) {
+lib3ds_quat_cnj(float c[4]) {
     int i;
     for (i = 0; i < 3; ++i) {
         c[i] = -c[i];
@@ -102,8 +102,8 @@ lib3ds_quat_cnj(Lib3dsQuat c) {
  * \param a,b Inputs
  */
 void
-lib3ds_quat_mul(Lib3dsQuat c, Lib3dsQuat a, Lib3dsQuat b) {
-    Lib3dsQuat qa, qb;
+lib3ds_quat_mul(float c[4], float a[4], float b[4]) {
+    float qa[4], qb[4];
     lib3ds_quat_copy(qa, a);
     lib3ds_quat_copy(qb, b);
     c[0] = qa[3] * qb[0] + qa[0] * qb[3] + qa[1] * qb[2] - qa[2] * qb[1];
@@ -117,7 +117,7 @@ lib3ds_quat_mul(Lib3dsQuat c, Lib3dsQuat a, Lib3dsQuat b) {
  * Multiply a quaternion by a scalar.
  */
 void
-lib3ds_quat_scalar(Lib3dsQuat c, float k) {
+lib3ds_quat_scalar(float c[4], float k) {
     int i;
     for (i = 0; i < 4; ++i) {
         c[i] *= k;
@@ -129,7 +129,7 @@ lib3ds_quat_scalar(Lib3dsQuat c, float k) {
  * Normalize a quaternion.
  */
 void
-lib3ds_quat_normalize(Lib3dsQuat c) {
+lib3ds_quat_normalize(float c[4]) {
     double l, m;
 
     l = sqrt(c[0] * c[0] + c[1] * c[1] + c[2] * c[2] + c[3] * c[3]);
@@ -150,7 +150,7 @@ lib3ds_quat_normalize(Lib3dsQuat c) {
  * Compute the inverse of a quaternion.
  */
 void
-lib3ds_quat_inv(Lib3dsQuat c) {
+lib3ds_quat_inv(float c[4]) {
     double l, m;
 
     l = sqrt(c[0] * c[0] + c[1] * c[1] + c[2] * c[2] + c[3] * c[3]);
@@ -171,25 +171,19 @@ lib3ds_quat_inv(Lib3dsQuat c) {
  * Compute the dot-product of a quaternion.
  */
 float
-lib3ds_quat_dot(Lib3dsQuat a, Lib3dsQuat b) {
+lib3ds_quat_dot(float a[4], float b[4]) {
     return(a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3]);
 }
 
 
 float
-lib3ds_quat_squared(Lib3dsQuat c) {
+lib3ds_quat_norm(float c[4]) {
     return(c[0]*c[0] + c[1]*c[1] + c[2]*c[2] + c[3]*c[3]);
 }
 
 
-float
-lib3ds_quat_length(Lib3dsQuat c) {
-    return((float)sqrt(c[0]*c[0] + c[1]*c[1] + c[2]*c[2] + c[3]*c[3]));
-}
-
-
 void
-lib3ds_quat_ln(Lib3dsQuat c) {
+lib3ds_quat_ln(float c[4]) {
     double om, s, t;
 
     s = sqrt(c[0] * c[0] + c[1] * c[1] + c[2] * c[2]);
@@ -210,8 +204,8 @@ lib3ds_quat_ln(Lib3dsQuat c) {
 
 
 void
-lib3ds_quat_ln_dif(Lib3dsQuat c, Lib3dsQuat a, Lib3dsQuat b) {
-    Lib3dsQuat invp;
+lib3ds_quat_ln_dif(float c[4], float a[4], float b[4]) {
+    float invp[4];
 
     lib3ds_quat_copy(invp, a);
     lib3ds_quat_inv(invp);
@@ -221,7 +215,7 @@ lib3ds_quat_ln_dif(Lib3dsQuat c, Lib3dsQuat a, Lib3dsQuat b) {
 
 
 void
-lib3ds_quat_exp(Lib3dsQuat c) {
+lib3ds_quat_exp(float c[4]) {
     double om, sinom;
 
     om = sqrt(c[0] * c[0] + c[1] * c[1] + c[2] * c[2]);
@@ -241,11 +235,11 @@ lib3ds_quat_exp(Lib3dsQuat c) {
 
 
 void
-lib3ds_quat_slerp(Lib3dsQuat c, Lib3dsQuat a, Lib3dsQuat b, float t) {
+lib3ds_quat_slerp(float c[4], float a[4], float b[4], float t) {
     double l;
     double om, sinom;
     double sp, sq;
-    Lib3dsQuat q;
+    float q[4];
 
     l = a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3];
     if ((1.0 + l) > LIB3DS_EPSILON) {
@@ -279,10 +273,9 @@ lib3ds_quat_slerp(Lib3dsQuat c, Lib3dsQuat a, Lib3dsQuat b, float t) {
 
 
 void
-lib3ds_quat_squad(Lib3dsQuat c, Lib3dsQuat a, Lib3dsQuat p, Lib3dsQuat q,
-                  Lib3dsQuat b, float t) {
-    Lib3dsQuat ab;
-    Lib3dsQuat pq;
+lib3ds_quat_squad(float c[4], float a[4], float p[4], float q[4], float b[4], float t) {
+    float ab[4];
+    float pq[4];
 
     lib3ds_quat_slerp(ab, a, b, t);
     lib3ds_quat_slerp(pq, p, q, t);
@@ -291,8 +284,8 @@ lib3ds_quat_squad(Lib3dsQuat c, Lib3dsQuat a, Lib3dsQuat p, Lib3dsQuat q,
 
 
 void
-lib3ds_quat_tangent(Lib3dsQuat c, Lib3dsQuat p, Lib3dsQuat q, Lib3dsQuat n) {
-    Lib3dsQuat dn, dp, x;
+lib3ds_quat_tangent(float c[4], float p[4], float q[4], float n[4]) {
+    float dn[4], dp[4], x[4];
     int i;
 
     lib3ds_quat_ln_dif(dn, q, n);
@@ -307,7 +300,7 @@ lib3ds_quat_tangent(Lib3dsQuat c, Lib3dsQuat p, Lib3dsQuat q, Lib3dsQuat n) {
 
 
 void
-lib3ds_quat_dump(Lib3dsQuat q) {
+lib3ds_quat_dump(float q[4]) {
     printf("%f %f %f %f\n", q[0], q[1], q[2], q[3]);
 }
 

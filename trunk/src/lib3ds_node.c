@@ -163,7 +163,7 @@ lib3ds_node_eval(Lib3dsNode *node, float t) {
         }
 
         case LIB3DS_OBJECT_NODE: {
-            Lib3dsMatrix M;
+            float M[4][4];
             Lib3dsObjectNode *n = (Lib3dsObjectNode*)node;
 
             lib3ds_track_eval_vector(n->pos_track, n->pos, t);
@@ -177,13 +177,12 @@ lib3ds_node_eval(Lib3dsNode *node, float t) {
             //lib3ds_track_eval_morph(n->morph_track, n->morph, t);
 
             lib3ds_matrix_identity(M);
-            lib3ds_matrix_translate(M, n->pos);
-            lib3ds_matrix_rotate(M, n->rot);
-            lib3ds_matrix_scale(M, n->scl);
+            lib3ds_matrix_translate(M, n->pos[0], n->pos[1], n->pos[2]);
+            lib3ds_matrix_rotate_quat(M, n->rot);
+            lib3ds_matrix_scale(M, n->scl[0], n->scl[1], n->scl[2]);
 
             if (node->parent) {
-                lib3ds_matrix_copy(node->matrix, node->parent->matrix);
-                lib3ds_matrix_mult(node->matrix, M);
+                lib3ds_matrix_mult(node->matrix, node->parent->matrix, M);
             } else {
                 lib3ds_matrix_copy(node->matrix, M);
             }
@@ -200,7 +199,7 @@ lib3ds_node_eval(Lib3dsNode *node, float t) {
             } else {
                 lib3ds_matrix_identity(node->matrix);
             }
-            lib3ds_matrix_translate(node->matrix, n->pos);
+            lib3ds_matrix_translate(node->matrix, n->pos[0], n->pos[1], n->pos[2]);
             break;
         }
 
@@ -212,7 +211,7 @@ lib3ds_node_eval(Lib3dsNode *node, float t) {
             } else {
                 lib3ds_matrix_identity(node->matrix);
             }
-            lib3ds_matrix_translate(node->matrix, n->pos);
+            lib3ds_matrix_translate(node->matrix, n->pos[0], n->pos[1], n->pos[2]);
             break;
         }
 
@@ -228,7 +227,7 @@ lib3ds_node_eval(Lib3dsNode *node, float t) {
             } else {
                 lib3ds_matrix_identity(node->matrix);
             }
-            lib3ds_matrix_translate(node->matrix, n->pos);
+            lib3ds_matrix_translate(node->matrix, n->pos[0], n->pos[1], n->pos[2]);
             break;
         }
 
@@ -240,7 +239,7 @@ lib3ds_node_eval(Lib3dsNode *node, float t) {
             } else {
                 lib3ds_matrix_identity(node->matrix);
             }
-            lib3ds_matrix_translate(node->matrix, n->pos);
+            lib3ds_matrix_translate(node->matrix, n->pos[0], n->pos[1], n->pos[2]);
             break;
         }
     }

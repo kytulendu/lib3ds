@@ -95,7 +95,7 @@ lib3ds_mesh_resize_faces(Lib3dsMesh *mesh, int nfaces) {
  * \param bmax Returned bounding box
  */
 void
-lib3ds_mesh_bounding_box(Lib3dsMesh *mesh, Lib3dsVector bmin, Lib3dsVector bmax) {
+lib3ds_mesh_bounding_box(Lib3dsMesh *mesh, float bmin[3], float bmax[3]) {
     int i;
     bmin[0] = bmin[1] = bmin[2] = FLT_MAX;
     bmax[0] = bmax[1] = bmax[2] = -FLT_MAX;
@@ -108,7 +108,7 @@ lib3ds_mesh_bounding_box(Lib3dsMesh *mesh, Lib3dsVector bmin, Lib3dsVector bmax)
 
 
 void
-lib3ds_mesh_calculate_face_normals(Lib3dsMesh *mesh, Lib3dsVector *face_normals) {
+lib3ds_mesh_calculate_face_normals(Lib3dsMesh *mesh, float (*face_normals)[3]) {
     int i;
 
     if (!mesh->nfaces) {
@@ -138,11 +138,11 @@ typedef struct Lib3dsFaces {
  * \param mesh      A pointer to the mesh to calculate the normals for.
  * \param normals   A pointer to a buffer to store the calculated
  *                  normals. The buffer must have the size:
- *                  3*sizeof(Lib3dsVector)*mesh->nfaces.
+ *                  3*3*sizeof(float)*mesh->nfaces.
  *
  * To allocate the normal buffer do for example the following:
  * \code
- *  Lib3dsVector *normals = malloc(3*sizeof(Lib3dsVector)*mesh->nfaces);
+ *  Lib3dsVector *normals = malloc(3*3*sizeof(float)*mesh->nfaces);
  * \endcode
  *
  * To access the normal of the i-th vertex of the j-th face do the
@@ -152,12 +152,12 @@ typedef struct Lib3dsFaces {
  * \endcode
  */
 void
-lib3ds_mesh_calculate_normals(Lib3dsMesh *mesh, Lib3dsVector *normals) {
+lib3ds_mesh_calculate_normals(Lib3dsMesh *mesh, float (*normals)[3]) {
     Lib3dsFaces **fl;
     Lib3dsFaces *fa;
-    Lib3dsVector *fn;
+    float (*fn)[3];
     int i, j, k;
-    Lib3dsVector *N;
+    float (*N)[3];
     int N_size = 128;
 
     if (!mesh->nfaces) {
@@ -166,8 +166,8 @@ lib3ds_mesh_calculate_normals(Lib3dsMesh *mesh, Lib3dsVector *normals) {
 
     fl = calloc(sizeof(Lib3dsFaces*), mesh->nvertices);
     fa = calloc(sizeof(Lib3dsFaces), 3 * mesh->nfaces);
-    fn = calloc(sizeof(Lib3dsVector), mesh->nfaces);
-    N = calloc(sizeof(Lib3dsVector), N_size);
+    fn = calloc(3 * sizeof(float), mesh->nfaces);
+    N = calloc(3 * sizeof(float), N_size);
 
     k = 0;
     for (i = 0; i < mesh->nfaces; ++i) {
@@ -193,7 +193,7 @@ lib3ds_mesh_calculate_normals(Lib3dsMesh *mesh, Lib3dsVector *normals) {
     for (i = 0; i < mesh->nfaces; ++i) {
         Lib3dsFace *f = &mesh->faces[i];
         for (j = 0; j < 3; ++j) {
-            Lib3dsVector n;
+            float n[3];
             Lib3dsFaces *p;
             Lib3dsFace *pf;
             int k, l;
@@ -211,7 +211,7 @@ lib3ds_mesh_calculate_normals(Lib3dsMesh *mesh, Lib3dsVector *normals) {
                     for (l = 0; l < k; ++l) {
                         if (l >= N_size) {
                             N_size *= 2;
-                            N = realloc(N, sizeof(Lib3dsVector) * N_size);
+                            N = realloc(N, 3 * sizeof(float) * N_size);
                         }
                         if (fabs(lib3ds_vector_dot(N[l], fn[p->index]) - 1.0) < 1e-5) {
                             found = 1;
@@ -425,16 +425,16 @@ lib3ds_mesh_read(Lib3dsFile *file, Lib3dsMesh *mesh, Lib3dsIo *io) {
     if (lib3ds_matrix_det(mesh->matrix) < 0.0) {
         /* Flip X coordinate of vertices if mesh matrix
            has negative determinant */
-        Lib3dsMatrix inv_matrix, M;
-        Lib3dsVector tmp;
+        float inv_matrix[4][4], M[4][4];
+        float tmp[3];
         int i;
 
         lib3ds_matrix_copy(inv_matrix, mesh->matrix);
         lib3ds_matrix_inv(inv_matrix);
 
         lib3ds_matrix_copy(M, mesh->matrix);
-        lib3ds_matrix_scale_xyz(M, -1.0f, 1.0f, 1.0f);
-        lib3ds_matrix_mult(M, inv_matrix);
+        lib3ds_matrix_scale(M, -1.0f, 1.0f, 1.0f);
+        lib3ds_matrix_mult(M, M, inv_matrix);
 
         for (i = 0; i < mesh->nvertices; ++i) {
             lib3ds_vector_transform(tmp, M, mesh->vertices[i].pos);
@@ -468,14 +468,14 @@ point_array_write(Lib3dsMesh *mesh, Lib3dsIo *io) {
     } else {
         /* Flip X coordinate of vertices if mesh matrix
            has negative determinant */
-        Lib3dsMatrix inv_matrix, M;
-        Lib3dsVector tmp;
+        float inv_matrix[4][4], M[4][4];
+        float tmp[3];
 
         lib3ds_matrix_copy(inv_matrix, mesh->matrix);
         lib3ds_matrix_inv(inv_matrix);
         lib3ds_matrix_copy(M, mesh->matrix);
-        lib3ds_matrix_scale_xyz(M, -1.0f, 1.0f, 1.0f);
-        lib3ds_matrix_mult(M, inv_matrix);
+        lib3ds_matrix_scale(M, -1.0f, 1.0f, 1.0f);
+        lib3ds_matrix_mult(M, M, inv_matrix);
 
         for (i = 0; i < mesh->nvertices; ++i) {
             lib3ds_vector_transform(tmp, M, mesh->vertices[i].pos);

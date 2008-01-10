@@ -85,7 +85,7 @@ lib3ds_material_free(Lib3dsMaterial *material) {
 
 
 static void
-color_read(Lib3dsRgb rgb, Lib3dsIo *io) {
+color_read(float rgb[3], Lib3dsIo *io) {
     Lib3dsChunk c;
     Lib3dsWord chunk;
     Lib3dsBool have_lin = FALSE;
@@ -505,7 +505,7 @@ lib3ds_material_read(Lib3dsMaterial *material, Lib3dsIo *io) {
 
 
 static void
-color_write(Lib3dsRgb rgb, Lib3dsIo *io) {
+color_write(float rgb[3], Lib3dsIo *io) {
     Lib3dsChunk c;
 
     c.chunk = LIB3DS_COLOR_24;

@@ -23,13 +23,13 @@
 
 
 Lib3dsTrack* 
-lib3ds_track_new(Lib3dsTrackType type, Lib3dsDword nkeys) {
+lib3ds_track_new(Lib3dsNode *node, Lib3dsTrackType type, Lib3dsDword nkeys) {
     Lib3dsTrack *track = (Lib3dsTrack*)calloc(sizeof(Lib3dsTrack), 1);
+    track->user_type = 'TRCK';
+    track->node = node;
     track->type = type;
-    if (type != LIB3DS_TRACK_UNKNOWN) {
-        lib3ds_track_resize(track, nkeys);
-    }
-    return(track);
+    lib3ds_track_resize(track, nkeys);
+    return track;
 }
 
 
@@ -43,11 +43,11 @@ lib3ds_track_free(Lib3dsTrack *track) {
 
 
 void 
-lib3ds_track_resize(Lib3dsTrack *track, Lib3dsDword nkeys) {
+lib3ds_track_resize(Lib3dsTrack *track, int nkeys) {
     char *p;
 
     assert(track);
-    if ((track->nkeys == nkeys) || (track->type == LIB3DS_TRACK_UNKNOWN))
+    if (track->nkeys == nkeys)
         return;
 
     p = (char*)realloc(track->keys, sizeof(Lib3dsKey) * nkeys);
@@ -60,47 +60,7 @@ lib3ds_track_resize(Lib3dsTrack *track, Lib3dsDword nkeys) {
 
 
 static void 
-float_key_setup(Lib3dsKey *pp, Lib3dsKey *pc, Lib3dsKey *pn) {
-    float tm, cm, cp, bm, bp, tmcm, tmcp, ksm, ksp, kdm, kdp, c;
-    float dt, fp, fn;
-    float delm, delp;
-
-    assert(pc);
-    fp = fn = 1.0f;
-    if (pp && pn) {
-        dt = 0.5f * (pn->frame - pp->frame);
-        fp = (float)(pc->frame - pp->frame) / dt;
-        fn = (float)(pn->frame - pc->frame) / dt;
-        c  = (float)fabs(pc->tcb.cont);
-        fp = fp + c - c * fp;
-        fn = fn + c - c * fn;
-    }
-
-    cm = 1.0f - pc->tcb.cont;
-    tm = 0.5f * (1.0f - pc->tcb.tens);
-    cp = 2.0f - cm;
-    bm = 1.0f - pc->tcb.bias;
-    bp = 2.0f - bm;
-    tmcm = tm * cm;
-    tmcp = tm * cp;
-    ksm = tmcm * bp * fp;
-    ksp = tmcp * bm * fp;
-    kdm = tmcp * bp * fn;
-    kdp = tmcm * bm * fn;
-
-    delm = delp = 0;
-    if (pp) delm = pc->data.f.value - pp->data.f.value;
-    if (pn) delp = pn->data.f.value - pc->data.f.value;
-    if (!pp) delm = delp;
-    if (!pn) delp = delm;
-
-    pc->data.f.ds = ksm * delm + ksp * delp;
-    pc->data.f.dd = kdm * delm + kdp * delp;
-}
-
-
-static void 
-pos_key_setup(Lib3dsKey *pp, Lib3dsKey *pc, Lib3dsKey *pn) {
+pos_key_setup(int n, Lib3dsKey *pp, Lib3dsKey *pc, Lib3dsKey *pn, float *dd, float *ds) {
     float tm, cm, cp, bm, bp, tmcm, tmcp, ksm, ksp, kdm, kdp, c;
     float dt, fp, fn;
     Lib3dsVector delm, delp;
@@ -112,15 +72,15 @@ pos_key_setup(Lib3dsKey *pp, Lib3dsKey *pc, Lib3dsKey *pn) {
         dt = 0.5f * (pn->frame - pp->frame);
         fp = (float)(pc->frame - pp->frame) / dt;
         fn = (float)(pn->frame - pc->frame) / dt;
-        c  = (float)fabs(pc->tcb.cont);
+        c  = (float)fabs(pc->cont);
         fp = fp + c - c * fp;
         fn = fn + c - c * fn;
     }
 
-    cm = 1.0f - pc->tcb.cont;
-    tm = 0.5f * (1.0f - pc->tcb.tens);
+    cm = 1.0f - pc->cont;
+    tm = 0.5f * (1.0f - pc->tens);
     cp = 2.0f - cm;
-    bm = 1.0f - pc->tcb.bias;
+    bm = 1.0f - pc->bias;
     bp = 2.0f - bm;
     tmcm = tm * cm;
     tmcp = tm * cp;
@@ -129,22 +89,29 @@ pos_key_setup(Lib3dsKey *pp, Lib3dsKey *pc, Lib3dsKey *pn) {
     kdm = tmcp * bp * fn;
     kdp = tmcm * bm * fn;
 
-    lib3ds_vector_zero(delm);
-    lib3ds_vector_zero(delp);
-    if (pp) lib3ds_vector_sub(delm, pc->data.v.value, pp->data.v.value);
-    if (pn) lib3ds_vector_sub(delp, pn->data.v.value, pc->data.v.value);
-    if (!pp) lib3ds_vector_copy(delm, delp);
-    if (!pn) lib3ds_vector_copy(delp, delm);
+    for (i = 0; i < n; ++i) delm[i] = delp[i] = 0;
+    if (pp) {
+        for (i = 0; i < n; ++i) delm[i] = pc->value[i] - pp->value[i];
+    }
+    if (pn) {
+        for (i = 0; i < n; ++i) delp[i] = pn->value[i] - pc->value[i];
+    }
+    if (!pp) {
+        for (i = 0; i < n; ++i) delm[i] = delp[i];
+    }
+    if (!pn) {
+        for (i = 0; i < n; ++i) delp[i] = delm[i];
+    }
 
-    for (i = 0; i < 3; ++i) {
-        pc->data.v.ds[i] = ksm * delm[i] + ksp * delp[i];
-        pc->data.v.dd[i] = kdm * delm[i] + kdp * delp[i];
+    for (i = 0; i < n; ++i) {
+        ds[i] = ksm * delm[i] + ksp * delp[i];
+        dd[i] = kdm * delm[i] + kdp * delp[i];
     }
 }
 
 
 static void 
-rot_key_setup(Lib3dsKey *prev, Lib3dsKey *cur, Lib3dsKey *next) {
+rot_key_setup(Lib3dsKey *prev, Lib3dsKey *cur, Lib3dsKey *next, Lib3dsQuat a, Lib3dsQuat b) {
     float tm, cm, cp, bm, bp, tmcm, tmcp, ksm, ksp, kdm, kdp, c;
     float dt, fp, fn;
     Lib3dsQuat q, qm, qp, qa, qb;
@@ -152,42 +119,42 @@ rot_key_setup(Lib3dsKey *prev, Lib3dsKey *cur, Lib3dsKey *next) {
 
     assert(cur);
     if (prev) {
-        if (cur->data.q.angle > LIB3DS_TWOPI - LIB3DS_EPSILON) {
-            lib3ds_quat_axis_angle(qm, cur->data.q.axis, 0.0f);
+        if (cur->value[3] > LIB3DS_TWOPI - LIB3DS_EPSILON) {
+            lib3ds_quat_axis_angle(qm, cur->value, 0.0f);
             lib3ds_quat_ln(qm);
         } else {
-            lib3ds_quat_copy(q, prev->data.q.quat);
-            if (lib3ds_quat_dot(q, cur->data.q.quat) < 0) lib3ds_quat_neg(q);
-            lib3ds_quat_ln_dif(qm, q, cur->data.q.quat);
+            lib3ds_quat_copy(q, prev->value);
+            if (lib3ds_quat_dot(q, cur->value) < 0) lib3ds_quat_neg(q);
+            lib3ds_quat_ln_dif(qm, q, cur->value);
         }
     }
     if (next) {
-        if (next->data.q.angle > LIB3DS_TWOPI - LIB3DS_EPSILON) {
-            lib3ds_quat_axis_angle(qp, next->data.q.axis, 0.0f);
+        if (next->value[3] > LIB3DS_TWOPI - LIB3DS_EPSILON) {
+            lib3ds_quat_axis_angle(qp, next->value, 0.0f);
             lib3ds_quat_ln(qp);
         } else {
-            lib3ds_quat_copy(q, next->data.q.quat);
-            if (lib3ds_quat_dot(q, cur->data.q.quat) < 0) lib3ds_quat_neg(q);
-            lib3ds_quat_ln_dif(qp, cur->data.q.quat, q);
+            lib3ds_quat_copy(q, next->value);
+            if (lib3ds_quat_dot(q, cur->value) < 0) lib3ds_quat_neg(q);
+            lib3ds_quat_ln_dif(qp, cur->value, q);
         }
     }
     if (!prev) lib3ds_quat_copy(qm, qp);
     if (!next) lib3ds_quat_copy(qp, qm);
 
     fp = fn = 1.0f;
-    cm = 1.0f - cur->tcb.cont;
+    cm = 1.0f - cur->cont;
     if (prev && next) {
         dt = 0.5f * (next->frame - prev->frame);
         fp = (float)(cur->frame - prev->frame) / dt;
         fn = (float)(next->frame - cur->frame) / dt;
-        c  = (float)fabs(cur->tcb.cont);
+        c  = (float)fabs(cur->cont);
         fp = fp + c - c * fp;
         fn = fn + c - c * fn;
     }
 
-    tm = 0.5f * (1.0f - cur->tcb.tens);
+    tm = 0.5f * (1.0f - cur->tens);
     cp = 2.0f - cm;
-    bm = 1.0f - cur->tcb.bias;
+    bm = 1.0f - cur->bias;
     bp = 2.0f - bm;
     tmcm = tm * cm;
     tmcp = tm * cp;
@@ -203,83 +170,35 @@ rot_key_setup(Lib3dsKey *prev, Lib3dsKey *cur, Lib3dsKey *next) {
     lib3ds_quat_exp(qa);
     lib3ds_quat_exp(qb);
 
-    lib3ds_quat_mul(cur->data.q.a, cur->data.q.quat, qa);
-    lib3ds_quat_mul(cur->data.q.b, cur->data.q.quat, qb);
+    lib3ds_quat_mul(a, cur->value, qa);
+    lib3ds_quat_mul(b, cur->value, qb);
 }
 
 
-void 
-lib3ds_track_setup(Lib3dsTrack *track) {
-    unsigned i;
-    Lib3dsKey keyp, keyn;
-    Lib3dsKey *pp, *pn;
-
-    assert(track);
-    if (track->type == LIB3DS_TRACK_QUAT) {
-        Lib3dsQuat q;
-        for (i = 0; i < track->nkeys; ++i) {
-            lib3ds_quat_axis_angle(q, track->keys[i].data.q.axis, track->keys[i].data.q.angle);
-            if (i > 0) {
-                lib3ds_quat_mul(track->keys[i].data.q.quat, q, track->keys[i-1].data.q.quat);
-            } else {
-                lib3ds_quat_copy(track->keys[i].data.q.quat, q);
-            }
-        }
-    }
-
-    if (track->nkeys <= 1)
-        return;
-
-    for (i = 0; i < track->nkeys; ++i) {
-        pp = pn = 0;
-        if (i > 0) {
-            pp = &track->keys[i-1];
-        } else {
-            if (track->flags & LIB3DS_SMOOTH) {
-                keyp = track->keys[track->nkeys-2];
-                keyp.frame = track->keys[track->nkeys-2].frame - (track->keys[track->nkeys-1].frame - track->keys[0].frame);
-                pp = &keyp;
-            }
-        }
-        if (i < track->nkeys - 1) {
-            pn = &track->keys[i+1];
-        } else {
-            if (track->flags & LIB3DS_SMOOTH) {
-                keyn = track->keys[1];
-                keyn.frame = track->keys[1].frame + (track->keys[track->nkeys-1].frame - track->keys[0].frame);
-                pn = &keyn;
-            }
-        }
-
-        switch (track->type) {
-            case LIB3DS_TRACK_FLOAT:
-                float_key_setup(pp, &track->keys[i], pn);
-                break;
-
-            case LIB3DS_TRACK_VECTOR:
-                pos_key_setup(pp, &track->keys[i], pn);
-                break;
-
-            case LIB3DS_TRACK_QUAT:
-                rot_key_setup(pp, &track->keys[i], pn);
-                break;
-
-            default:
-                break;
-        }
+static void
+quat_for_index(Lib3dsTrack *track, int index, Lib3dsQuat q) {
+    Lib3dsQuat p;
+    int i;
+    lib3ds_quat_identity(q);
+    for (i = 0; i <= index; ++i) {
+        lib3ds_quat_axis_angle(p, track->keys[i].value, track->keys[i].value[3]);
+        lib3ds_quat_mul(q, p, q);
     }
 }
 
 
 static int 
 find_index(Lib3dsTrack *track, float t, float *u) {
-    unsigned i;
+    int i;
     float nt;
     Lib3dsIntd t0, t1;
 
     assert(track);
     assert(track->nkeys > 0);
-
+    
+    if (track->nkeys <= 1)
+        return -1;
+    
     t0 = track->keys[0].frame;
     t1 = track->keys[track->nkeys-1].frame;
     if (track->flags & LIB3DS_REPEAT) {
@@ -308,148 +227,201 @@ find_index(Lib3dsTrack *track, float t, float *u) {
 }
 
 
+static void 
+setup_segment(Lib3dsTrack *track, int index, Lib3dsKey *pp, Lib3dsKey *p0, Lib3dsKey *p1, Lib3dsKey *pn) {
+    int ip, in;
+    
+    pp->frame = pn->frame = -1;
+    if (index >= 2) {
+        ip = index - 2;
+        *pp = track->keys[index - 2];
+    } else {
+        if (track->flags & LIB3DS_SMOOTH) {
+            ip = track->nkeys - 2;
+            *pp = track->keys[track->nkeys - 2];
+            pp->frame = track->keys[track->nkeys - 2].frame - (track->keys[track->nkeys - 1].frame - track->keys[0].frame);
+        }
+    }
+
+    *p0 = track->keys[index - 1];
+    *p1 = track->keys[index];
+
+    if (index < (int)track->nkeys - 1) {
+        in = index + 1;
+        *pn = track->keys[index + 1];
+    } else {
+        if (track->flags & LIB3DS_SMOOTH) {
+            in = 1;
+            *pn = track->keys[1];
+            pn->frame = track->keys[1].frame + (track->keys[track->nkeys-1].frame - track->keys[0].frame);
+        }
+    }
+
+    if (track->type == LIB3DS_TRACK_QUAT) {
+        Lib3dsQuat q;
+        if (pp->frame >= 0) {
+            quat_for_index(track, ip, pp->value);
+        } else {
+            lib3ds_quat_identity(pp->value);
+        }
+
+        quat_for_index(track, index - 1, p0->value);
+        lib3ds_quat_axis_angle(q, track->keys[index].value, track->keys[index].value[3]);
+        lib3ds_quat_mul(p1->value, q, p0->value);
+
+        if (pn->frame >= 0) {
+            lib3ds_quat_axis_angle(q, track->keys[in].value, track->keys[in].value[3]);
+            lib3ds_quat_mul(pn->value, q, p1->value);
+        } else {
+            lib3ds_quat_identity(pn->value);
+        }
+    }
+}
+
+
 void 
 lib3ds_track_eval_bool(Lib3dsTrack *track, Lib3dsBool *b, float t) {
-    unsigned index;
-    float u;
-
     *b = FALSE;
-    if (!track) return;
+    if (track) {
+        int index;
+        float u;
+        assert(track->type == LIB3DS_TRACK_BOOL);
 
+        index = find_index(track, t, &u);
+        if (index < 0) {
+            *b = FALSE;
+            return;
+        }
+        if (index >= track->nkeys) {
+            *b = !(track->nkeys & 1);
+            return;
+        }
+        *b = !(index & 1);
+    }
+}
+
+
+static void
+float_cubic(int n, float *v, float *a, float *p, float *q, float *b, float t) {
+    float x, y, z, w;
+    int i;
+
+    x = 2 * t * t * t - 3 * t * t + 1;
+    y = -2 * t * t * t + 3 * t * t;
+    z = t * t * t - 2 * t * t + t;
+    w = t * t * t - t * t;
+    for (i = 0; i < n; ++i) {
+        v[i] = x * a[i] + y * b[i] + z * p[i] + w * q[i];
+    }
+}
+
+
+static void 
+track_eval_linear(Lib3dsTrack *track, float *value, float t) {
+    Lib3dsKey pp, p0, p1, pn;
+    float u;
+    int index;
+    float dsp[3], ddp[3], dsn[3], ddn[3];
+
+    assert(track);
     index = find_index(track, t, &u);
+
     if (index < 0) {
-        *b = FALSE;
+        int i;
+        for (i = 0; i < track->type; ++i) value[i] = track->keys[0].value[i];
         return;
     }
     if (index >= track->nkeys) {
-        *b = !(track->nkeys & 1);
+        int i;
+        for (i = 0; i < track->type; ++i) value[i] = track->keys[track->nkeys-1].value[i];
         return;
     }
-    *b = !(index & 1);
+
+    setup_segment(track, index, &pp, &p0, &p1, &pn);
+
+    pos_key_setup(track->type, pp.frame>=0? &pp : NULL, &p0, &p1, ddp, dsp);
+    pos_key_setup(track->type, &p0, &p1, pn.frame>=0? &pn : NULL, ddn, dsn);
+
+    float_cubic(
+        track->type,
+        value,
+        p0.value,
+        ddp,
+        dsn,
+        p1.value,
+        u
+    );
 }
 
 
 void 
 lib3ds_track_eval_float(Lib3dsTrack *track, float *f, float t) {
-    unsigned index;
-    float u;
-
     *f = 0;
-    if (!track) return;
-
-    index = find_index(track, t, &u);
-    if (index < 0) {
-        *f = track->keys[0].data.f.value;
-        return;
+    if (track) {
+        assert(track->type == LIB3DS_TRACK_FLOAT);
+        track_eval_linear(track, f, t);
     }
-    if (index >= track->nkeys) {
-        *f = track->keys[track->nkeys-1].data.f.value;
-        return;
-    }
-    *f = lib3ds_float_cubic(
-             track->keys[index-1].data.f.value,
-             track->keys[index-1].data.f.dd,
-             track->keys[index].data.f.ds,
-             track->keys[index].data.f.value,
-             u
-         );
 }
 
 
 void 
 lib3ds_track_eval_vector(Lib3dsTrack *track, Lib3dsVector p, float t) {
-    unsigned index;
-    float u;
-
     lib3ds_vector_zero(p);
-    if (!track) return;
-
-    index = find_index(track, t, &u);
-    if (index < 0) {
-        lib3ds_vector_copy(p, track->keys[0].data.v.value);
-        return;
+    if (track) {
+        assert(track->type == LIB3DS_TRACK_VECTOR);
+        track_eval_linear(track, p, t);
     }
-    if (index >= track->nkeys) {
-        lib3ds_vector_copy(p, track->keys[track->nkeys-1].data.v.value);
-        return;
-    }
-    lib3ds_vector_cubic(
-        p,
-        track->keys[index-1].data.v.value,
-        track->keys[index-1].data.v.dd,
-        track->keys[index].data.v.ds,
-        track->keys[index].data.v.value,
-        u
-    );
 }
 
 
 void 
 lib3ds_track_eval_quat(Lib3dsTrack *track, Lib3dsQuat q, float t) {
-    int index;
-    float u;
-
     lib3ds_quat_identity(q);
-    if (!track) return;
+    if (track) {
+        Lib3dsKey pp, p0, p1, pn;
+        float u;
+        int index;
+        Lib3dsQuat ap, bp, an, bn;
 
-    index = find_index(track, t, &u);
-    if (index < 0) {
-        lib3ds_quat_copy(q, track->keys[0].data.q.quat);
-        return;
+        assert(track->type == LIB3DS_TRACK_QUAT);
+
+        index = find_index(track, t, &u);
+        if (index < 0) {
+            lib3ds_quat_axis_angle(q, track->keys[0].value, track->keys[0].value[3]);
+            return;
+        }
+        if (index >= track->nkeys) { 
+            quat_for_index(track, track->nkeys - 1, q);
+            return;
+        }
+
+        setup_segment(track, index, &pp, &p0, &p1, &pn);
+
+        rot_key_setup(pp.frame>=0? &pp : NULL, &p0, &p1, ap, bp);
+        rot_key_setup(&p0, &p1, pn.frame>=0? &pn : NULL, an, bn);
+
+        lib3ds_quat_squad(q, p0.value, ap, bn, p1.value, u);
     }
-    if (index >= (int)track->nkeys) {
-        lib3ds_quat_copy(q, track->keys[track->nkeys-1].data.q.quat);
-        return;
-    }
-    lib3ds_quat_squad(
-        q,
-        track->keys[index-1].data.q.quat,
-        track->keys[index-1].data.q.a,
-        track->keys[index].data.q.b,
-        track->keys[index].data.q.quat,
-        u
-    );
-}
-
-
-void 
-lib3ds_track_eval_morph(Lib3dsTrack *track, char *name, float t) {
-    int index;
-    float u;
-
-    strcpy(name, "");
-    if (!track) return;
-
-    index = find_index(track, t, &u);
-    if (index < 0) {
-        strcpy(name, track->keys[0].data.m.name);
-        return;
-    }
-    if (index >= (int)track->nkeys) {
-        strcpy(name, track->keys[track->nkeys-1].data.m.name);
-        return;
-    }
-    strcpy(name, track->keys[index-1].data.m.name);
 }
 
 
 static void 
-tcb_read(Lib3dsTcb *tcb, Lib3dsIo *io) {
-    tcb->flags = lib3ds_io_read_word(io);
-    if (tcb->flags & LIB3DS_USE_TENSION) {
-        tcb->tens = lib3ds_io_read_float(io);
+tcb_read(Lib3dsKey *key, Lib3dsIo *io) {
+    key->flags = lib3ds_io_read_word(io);
+    if (key->flags & LIB3DS_USE_TENSION) {
+        key->tens = lib3ds_io_read_float(io);
     }
-    if (tcb->flags & LIB3DS_USE_CONTINUITY) {
-        tcb->cont = lib3ds_io_read_float(io);
+    if (key->flags & LIB3DS_USE_CONTINUITY) {
+        key->cont = lib3ds_io_read_float(io);
     }
-    if (tcb->flags & LIB3DS_USE_BIAS) {
-        tcb->bias = lib3ds_io_read_float(io);
+    if (key->flags & LIB3DS_USE_BIAS) {
+        key->bias = lib3ds_io_read_float(io);
     }
-    if (tcb->flags & LIB3DS_USE_EASE_TO) {
-        tcb->ease_to = lib3ds_io_read_float(io);
+    if (key->flags & LIB3DS_USE_EASE_TO) {
+        key->ease_to = lib3ds_io_read_float(io);
     }
-    if (tcb->flags & LIB3DS_USE_EASE_FROM) {
-        tcb->ease_from = lib3ds_io_read_float(io);
+    if (key->flags & LIB3DS_USE_EASE_FROM) {
+        key->ease_from = lib3ds_io_read_float(io);
     }
 }
 
@@ -469,75 +441,73 @@ lib3ds_track_read(Lib3dsTrack *track, Lib3dsIo *io) {
         case LIB3DS_TRACK_BOOL:
             for (i = 0; i < nkeys; ++i) {
                 track->keys[i].frame = lib3ds_io_read_intd(io);
-                tcb_read(&track->keys[i].tcb, io);
+                tcb_read(&track->keys[i], io);
             }
             break;
 
         case LIB3DS_TRACK_FLOAT:
             for (i = 0; i < nkeys; ++i) {
                 track->keys[i].frame = lib3ds_io_read_intd(io);
-                tcb_read(&track->keys[i].tcb, io);
-                track->keys[i].data.f.value = lib3ds_io_read_float(io);
+                tcb_read(&track->keys[i], io);
+                track->keys[i].value[0] = lib3ds_io_read_float(io);
             }
             break;
 
         case LIB3DS_TRACK_VECTOR:
             for (i = 0; i < nkeys; ++i) {
                 track->keys[i].frame = lib3ds_io_read_intd(io);
-                tcb_read(&track->keys[i].tcb, io);
-                lib3ds_io_read_vector(io, track->keys[i].data.v.value);
+                tcb_read(&track->keys[i], io);
+                lib3ds_io_read_vector(io, track->keys[i].value);
             }
             break;
 
         case LIB3DS_TRACK_QUAT:
             for (i = 0; i < nkeys; ++i) {
                 track->keys[i].frame = lib3ds_io_read_intd(io);
-                tcb_read(&track->keys[i].tcb, io);
-                track->keys[i].data.q.angle = lib3ds_io_read_float(io);
-                lib3ds_io_read_vector(io, track->keys[i].data.q.axis);
+                tcb_read(&track->keys[i], io);
+                track->keys[i].value[3] = lib3ds_io_read_float(io);
+                lib3ds_io_read_vector(io, track->keys[i].value);
             }
             break;
 
-        case LIB3DS_TRACK_MORPH:
+        /*case LIB3DS_TRACK_MORPH:
             for (i = 0; i < nkeys; ++i) {
                 track->keys[i].frame = lib3ds_io_read_intd(io);
                 tcb_read(&track->keys[i].tcb, io);
                 lib3ds_io_read_string(io, track->keys[i].data.m.name, 64);
             }
-            break;
+            break;*/
 
         default:
             break;
     }
-
-    lib3ds_track_setup(track);
 }
 
 
 void
-tcb_write(Lib3dsTcb *tcb, Lib3dsIo *io) {
-    lib3ds_io_write_word(io, tcb->flags);
-    if (tcb->flags&LIB3DS_USE_TENSION) {
-        lib3ds_io_write_float(io, tcb->tens);
+tcb_write(Lib3dsKey *key, Lib3dsIo *io) {
+    lib3ds_io_write_word(io, key->flags);
+    if (key->flags & LIB3DS_USE_TENSION) {
+        lib3ds_io_write_float(io, key->tens);
     }
-    if (tcb->flags&LIB3DS_USE_CONTINUITY) {
-        lib3ds_io_write_float(io, tcb->cont);
+    if (key->flags & LIB3DS_USE_CONTINUITY) {
+        lib3ds_io_write_float(io, key->cont);
     }
-    if (tcb->flags&LIB3DS_USE_BIAS) {
-        lib3ds_io_write_float(io, tcb->bias);
+    if (key->flags & LIB3DS_USE_BIAS) {
+        lib3ds_io_write_float(io, key->bias);
     }
-    if (tcb->flags&LIB3DS_USE_EASE_TO) {
-        lib3ds_io_write_float(io, tcb->ease_to);
+    if (key->flags & LIB3DS_USE_EASE_TO) {
+        lib3ds_io_write_float(io, key->ease_to);
     }
-    if (tcb->flags&LIB3DS_USE_EASE_FROM) {
-        lib3ds_io_write_float(io, tcb->ease_from);
+    if (key->flags & LIB3DS_USE_EASE_FROM) {
+        lib3ds_io_write_float(io, key->ease_from);
     }
 }
 
 
 void
 lib3ds_track_write(Lib3dsTrack *track, Lib3dsIo *io) {
-    unsigned i;
+    int i;
 
     lib3ds_io_write_word(io, (Lib3dsWord)track->flags);
     lib3ds_io_write_dword(io, 0);
@@ -548,41 +518,41 @@ lib3ds_track_write(Lib3dsTrack *track, Lib3dsIo *io) {
         case LIB3DS_TRACK_BOOL:
             for (i = 0; i < track->nkeys; ++i) {
                 lib3ds_io_write_intd(io, track->keys[i].frame);
-                tcb_write(&track->keys[i].tcb, io);
+                tcb_write(&track->keys[i], io);
             }
             break;
 
         case LIB3DS_TRACK_FLOAT:
             for (i = 0; i < track->nkeys; ++i) {
                 lib3ds_io_write_intd(io, track->keys[i].frame);
-                tcb_write(&track->keys[i].tcb, io);
-                lib3ds_io_write_float(io, track->keys[i].data.f.value);
+                tcb_write(&track->keys[i], io);
+                lib3ds_io_write_float(io, track->keys[i].value[0]);
             }
             break;
 
         case LIB3DS_TRACK_VECTOR:
             for (i = 0; i < track->nkeys; ++i) {
                 lib3ds_io_write_intd(io, track->keys[i].frame);
-                tcb_write(&track->keys[i].tcb, io);
-                lib3ds_io_write_vector(io, track->keys[i].data.v.value);
+                tcb_write(&track->keys[i], io);
+                lib3ds_io_write_vector(io, track->keys[i].value);
             }
             break;
 
         case LIB3DS_TRACK_QUAT:
             for (i = 0; i < track->nkeys; ++i) {
                 lib3ds_io_write_intd(io, track->keys[i].frame);
-                tcb_write(&track->keys[i].tcb, io);
-                lib3ds_io_write_float(io, track->keys[i].data.q.angle);
-                lib3ds_io_write_vector(io, track->keys[i].data.q.axis);
+                tcb_write(&track->keys[i], io);
+                lib3ds_io_write_float(io, track->keys[i].value[3]);
+                lib3ds_io_write_vector(io, track->keys[i].value);
             }
             break;
 
-        case LIB3DS_TRACK_MORPH:
+        /*case LIB3DS_TRACK_MORPH:
             for (i = 0; i < track->nkeys; ++i) {
                 lib3ds_io_write_intd(io, track->keys[i].frame);
                 tcb_write(&track->keys[i].tcb, io);
                 lib3ds_io_write_string(io, track->keys[i].data.m.name);
             }
-            break;
+            break;*/
     }
 }

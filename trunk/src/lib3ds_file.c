@@ -183,6 +183,7 @@ lib3ds_file_new() {
     if (!file) {
         return(0);
     }
+    file->user_type = 'FILE';
     file->mesh_version = 3;
     file->master_scale = 1.0f;
     file->keyf_revision = 5;
@@ -1325,7 +1326,7 @@ file_bounding_box_of_nodes_impl(Lib3dsNode *node, Lib3dsFile *file, Lib3dsBool i
                     Lib3dsMesh *mesh;
                     Lib3dsMatrix inv_matrix, M;
                     Lib3dsVector v;
-                    unsigned i;
+                    int i;
 
                     mesh = file->meshes[index];
                     lib3ds_matrix_copy(inv_matrix, mesh->matrix);

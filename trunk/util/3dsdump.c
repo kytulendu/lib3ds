@@ -208,16 +208,16 @@ viewport_dump(Lib3dsViewport *vp) {
 
     printf("  viewport:\n");
     printf("    layout:\n");
-    printf("      style:       %d\n", vp->layout.style);
-    printf("      active:      %d\n", vp->layout.active);
-    printf("      swap:        %d\n", vp->layout.swap);
-    printf("      swap_prior:  %d\n", vp->layout.swap_prior);
-    printf("      position:    %d,%d\n", vp->layout.position[0], vp->layout.position[1]);
-    printf("      size:        %d,%d\n", vp->layout.size[0], vp->layout.size[1]);
-    printf("      views:       %ld\n", vp->layout.nviews);
+    printf("      style:       %d\n", vp->layout_style);
+    printf("      active:      %d\n", vp->layout_active);
+    printf("      swap:        %d\n", vp->layout_swap);
+    printf("      swap_prior:  %d\n", vp->layout_swap_prior);
+    printf("      position:    %d,%d\n", vp->layout_position[0], vp->layout_position[1]);
+    printf("      size:        %d,%d\n", vp->layout_size[0], vp->layout_size[1]);
+    printf("      views:       %ld\n", vp->layout_nviews);
 
-    for (i = 0; i < vp->layout.nviews; ++i) {
-        view = &vp->layout.views[i];
+    for (i = 0; i < vp->layout_nviews; ++i) {
+        view = &vp->layout_views[i];
 
         printf("        view %d:\n", i);
         printf("          type:         %d\n", view->type);
@@ -231,14 +231,14 @@ viewport_dump(Lib3dsViewport *vp) {
         printf("          camera:       %s\n", view->camera);
     }
 
-    printf("    default_view:\n");
-    printf(" type:         %d\n", vp->default_view.type);
-    printf(" position:     (%g,%g,%g)\n", vp->default_view.position[0], vp->default_view.position[1], vp->default_view.position[2]);
-    printf(" width:        %g\n", vp->default_view.width);
-    printf(" horiz_angle:  %g\n", vp->default_view.horiz_angle);
-    printf(" vert_angle:   %g\n", vp->default_view.vert_angle);
-    printf(" roll_angle:   %g\n", vp->default_view.roll_angle);
-    printf(" camera:       %s\n", vp->default_view.camera);
+    printf("    default:\n");
+    printf(" type:         %d\n", vp->default_type);
+    printf(" position:     (%g,%g,%g)\n", vp->default_position[0], vp->default_position[1], vp->default_position[2]);
+    printf(" width:        %g\n", vp->default_width);
+    printf(" horiz_angle:  %g\n", vp->default_horiz_angle);
+    printf(" vert_angle:   %g\n", vp->default_vert_angle);
+    printf(" roll_angle:   %g\n", vp->default_roll_angle);
+    printf(" camera:       %s\n", vp->default_camera);
 }
 
 
@@ -375,7 +375,7 @@ light_dump(Lib3dsLight *light) {
 
 static void
 mesh_dump(Lib3dsMesh *mesh) {
-    unsigned i;
+    int i;
     Lib3dsVector p;
 
     assert(mesh);

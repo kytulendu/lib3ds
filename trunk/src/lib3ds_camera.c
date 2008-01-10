@@ -43,6 +43,7 @@ lib3ds_camera_new(const char *name) {
     if (!camera) {
         return(0);
     }
+    camera->user_type = 'CAM';
     strcpy(camera->name, name);
     camera->fov = 45.0f;
     return(camera);

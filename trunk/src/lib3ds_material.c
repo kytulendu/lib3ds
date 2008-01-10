@@ -48,6 +48,7 @@ lib3ds_material_new() {
         return(0);
     }
 
+    mat->user_type = 'MAT';
     mat->ambient[0] = mat->ambient[1] = mat->ambient[2] = 0.588235f;
     mat->diffuse[0] = mat->diffuse[1] = mat->diffuse[2] = 0.588235f;
     mat->specular[0] = mat->specular[1] = mat->specular[2] = 0.898039f;

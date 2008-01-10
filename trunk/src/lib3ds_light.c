@@ -33,6 +33,7 @@ lib3ds_light_new(const char *name) {
     if (!light) {
         return(0);
     }
+    light->user_type = 'LGHT';
     strcpy(light->name, name);
     return(light);
 }

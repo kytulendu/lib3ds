@@ -190,7 +190,7 @@ static void
 timer_cb(int value) {
     if (!halt) {
         view_rotz += anim_rotz;
-        current_frame+=1.0f;
+        current_frame+= 0.25f;
         if (current_frame > file->frames)
             current_frame = 0;
         lib3ds_file_eval(file, current_frame);
@@ -432,11 +432,11 @@ render_node(Lib3dsNode *node) {
         }
         mesh = file->meshes[index];
 
-        if (!mesh->user.d) {
+        if (!mesh->user_id) {
             assert(mesh);
 
-            mesh->user.d = glGenLists(1);
-            glNewList(mesh->user.d, GL_COMPILE);
+            mesh->user_id = glGenLists(1);
+            glNewList(mesh->user_id, GL_COMPILE);
 
             {
                 unsigned p;
@@ -473,10 +473,10 @@ render_node(Lib3dsNode *node) {
 
                             if (mat->texture1_map.name[0]) {  /* texture map? */
                                 Lib3dsTextureMap *tex = &mat->texture1_map;
-                                if (!tex->user.p) {  /* no player texture yet? */
+                                if (!tex->user_ptr) {  /* no player texture yet? */
                                     char texname[1024];
                                     pt = malloc(sizeof(*pt));
-                                    tex->user.p = pt;
+                                    tex->user_ptr = pt;
                                     //snprintf(texname, sizeof(texname), "%s/%s", datapath, tex->name);
                                     strcpy(texname, datapath);
                                     strcat(texname, "/");
@@ -545,7 +545,7 @@ render_node(Lib3dsNode *node) {
                                         pt->valid = 0;
                                     }
                                 } else {
-                                    pt = (Player_texture *)tex->user.p;
+                                    pt = (Player_texture *)tex->user_ptr;
                                 }
                                 tex_mode = pt->valid;
                             } else {
@@ -581,8 +581,8 @@ render_node(Lib3dsNode *node) {
 
                     else if (mat != NULL && mat->texture1_map.name[0]) {
                         Lib3dsTextureMap *tex = &mat->texture1_map;
-                        if (tex != NULL && tex->user.p != NULL) {
-                            pt = (Player_texture *)tex->user.p;
+                        if (tex != NULL && tex->user_ptr != NULL) {
+                            pt = (Player_texture *)tex->user_ptr;
                             tex_mode = pt->valid;
                         }
                     }
@@ -638,11 +638,11 @@ render_node(Lib3dsNode *node) {
             glEndList();
         }
 
-        if (mesh->user.d) {
+        if (mesh->user_id) {
             glPushMatrix();
             glMultMatrixf(&node->matrix[0][0]);
             glTranslatef(-n->pivot[0], -n->pivot[1], -n->pivot[2]);
-            glCallList(mesh->user.d);
+            glCallList(mesh->user_id);
             /* glutSolidSphere(50.0, 20,20); */
             glPopMatrix();
             if (flush)
@@ -668,7 +668,7 @@ light_update(Lib3dsLight *l) {
 
     if (ln != NULL) {
         Lib3dsLightNode *n = (Lib3dsLightNode*)ln;
-        memcpy(l->color, n->col, sizeof(Lib3dsRgb));
+        memcpy(l->color, n->color, sizeof(Lib3dsRgb));
         memcpy(l->position, n->pos, sizeof(Lib3dsVector));
     }
 
@@ -783,10 +783,10 @@ display(void) {
     Lib3dsVector v;
     Lib3dsNode *p;
 
-    if (file != NULL && file->background.solid.use)
-        glClearColor(file->background.solid.col[0],
-                     file->background.solid.col[1],
-                     file->background.solid.col[2], 1.);
+    if (file != NULL && file->background.use_solid)
+        glClearColor(file->background.solid_color[0],
+                     file->background.solid_color[1],
+                     file->background.solid_color[2], 1.);
 
     /* TODO: fog */
 
@@ -846,7 +846,7 @@ display(void) {
     */
     if (near <= 0.) near = far * .001;
 
-    gluPerspective(fov, 1.0*gl_width / gl_height, 1, 1000);
+    gluPerspective(fov, 1.0*gl_width / gl_height, 1, 10000);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();

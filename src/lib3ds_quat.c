@@ -103,10 +103,13 @@ lib3ds_quat_cnj(Lib3dsQuat c) {
  */
 void
 lib3ds_quat_mul(Lib3dsQuat c, Lib3dsQuat a, Lib3dsQuat b) {
-    c[0] = a[3] * b[0] + a[0] * b[3] + a[1] * b[2] - a[2] * b[1];
-    c[1] = a[3] * b[1] + a[1] * b[3] + a[2] * b[0] - a[0] * b[2];
-    c[2] = a[3] * b[2] + a[2] * b[3] + a[0] * b[1] - a[1] * b[0];
-    c[3] = a[3] * b[3] - a[0] * b[0] - a[1] * b[1] - a[2] * b[2];
+    Lib3dsQuat qa, qb;
+    lib3ds_quat_copy(qa, a);
+    lib3ds_quat_copy(qb, b);
+    c[0] = qa[3] * qb[0] + qa[0] * qb[3] + qa[1] * qb[2] - qa[2] * qb[1];
+    c[1] = qa[3] * qb[1] + qa[1] * qb[3] + qa[2] * qb[0] - qa[0] * qb[2];
+    c[2] = qa[3] * qb[2] + qa[2] * qb[3] + qa[0] * qb[1] - qa[1] * qb[0];
+    c[3] = qa[3] * qb[3] - qa[0] * qb[0] - qa[1] * qb[1] - qa[2] * qb[2];
 }
 
 

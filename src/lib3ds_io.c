@@ -28,42 +28,25 @@ typedef union {
 } Lib3dsDwordFloat;
 
 
-Lib3dsIo*
-lib3ds_io_new(void *self, Lib3dsIoSeekFunc seek_func, Lib3dsIoTellFunc tell_func, 
-              Lib3dsIoReadFunc read_func, Lib3dsIoWriteFunc write_func,
-              Lib3dsIoLogFunc log_func) {
-    Lib3dsIo *io = calloc(sizeof(Lib3dsIo), 1);
-    ASSERT(io);
-    if (!io) {
-        return 0;
-    }
-
-    io->self = self;
-    io->seek_func = seek_func;
-    io->tell_func = tell_func;
-    io->read_func = read_func;
-    io->write_func = write_func;
-    io->log_func = log_func;
-
-    return io;
+void
+lib3ds_io_setup(Lib3dsIo *io) {
+    assert(io);
+    io->impl = calloc(sizeof(Lib3dsIoImpl), 1);
 }
 
 
 void
-lib3ds_io_free(Lib3dsIo *io) {
-    ASSERT(io);
-    if (!io) {
-        return;
+lib3ds_io_cleanup(Lib3dsIo *io) {
+    assert(io);
+    if (io->impl->tmp_mem) {
+        free(io->impl->tmp_mem);
+        io->impl->tmp_mem = NULL;
     }
-
-    if (io->tmp_mem) {
-        free(io->tmp_mem);
+    if (io->impl->tmp_node) {
+        lib3ds_node_free(io->impl->tmp_node);
+        io->impl->tmp_node = NULL;
     }
-    if (io->tmp_node) {
-        lib3ds_node_free(io->tmp_node);
-    }
-
-    free(io);
+    free(io->impl);
 }
 
 
@@ -109,59 +92,49 @@ lib3ds_io_write(Lib3dsIo *io, const void *buffer, size_t size) {
 
 static void 
 lib3ds_io_log_str(Lib3dsIo *io, Lib3dsLogLevel level, const char *str) {
-    char msg[1024];
-    int i;
-    for (i=0; i<2*io->log_indent; ++i) {
-        msg[i] = ' ';
-    }
-    msg[io->log_indent] = 0;
-    strcat(msg, str);
-    (*io->log_func)(io->self, level, msg);
+    if (!io || !io->log_func)
+        return;
+    (*io->log_func)(io->self, level, io->impl->log_indent, str);
 }
 
 
 void 
 lib3ds_io_log(Lib3dsIo *io, Lib3dsLogLevel level, const char *format, ...) {
+    va_list args;
+    /* FIXME */ char str[1024];
+
     ASSERT(io);
-    if (!io || !io->log_func) {
+    if (!io || !io->log_func)
         return;
-    }
-    {
-        va_list args;
-        char str[1024];
-        va_start(args, format);
-        /* FIXME: */ vsprintf(str, format, args); 
-        lib3ds_io_log_str(io, level, str);
+
+    va_start(args, format);
+    /* FIXME: */ vsprintf(str, format, args); 
+    lib3ds_io_log_str(io, level, str);
+
+    if (level == LIB3DS_LOG_ERROR) {
+        longjmp(io->impl->jmpbuf, 1);
     }
 }
 
 
 void 
-lib3ds_io_fatal_error(Lib3dsIo *io, const char *format, ...) {
+lib3ds_io_log_indent(Lib3dsIo *io, int indent) {
     ASSERT(io);
-    if (!io || !io->log_func) {
+    if (!io)
         return;
-    }
-    {
-        va_list args;
-        char str[1024];
-        va_start(args, format);
-        /* FIXME: */ vsprintf(str, format, args); 
-        lib3ds_io_log_str(io, LIB3DS_LOG_ERROR, str);
-    }
-    longjmp(io->jmpbuf, 1);
+    io->impl->log_indent += indent;
 }
 
 
 void 
 lib3ds_io_read_error(Lib3dsIo *io) {
-    lib3ds_io_fatal_error(io, "Reading from input stream failed.");
+    lib3ds_io_log(io, LIB3DS_LOG_ERROR, "Reading from input stream failed.");
 }
 
 
 void 
 lib3ds_io_write_error(Lib3dsIo *io) {
-    lib3ds_io_fatal_error(io, "Writing to output stream failed.");
+    lib3ds_io_log(io, LIB3DS_LOG_ERROR, "Writing to output stream failed.");
 }
 
 
@@ -326,7 +299,7 @@ lib3ds_io_read_string(Lib3dsIo *io, char *s, int buflen) {
         }
         ++k;
         if (k >= buflen) {
-            lib3ds_io_fatal_error(io, "Invalid string in input stream.");
+            lib3ds_io_log(io, LIB3DS_LOG_ERROR, "Invalid string in input stream.");
         }
     }
 }

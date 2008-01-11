@@ -531,7 +531,7 @@ face_array_write(Lib3dsFile *file, Lib3dsMesh *mesh, Lib3dsIo *io) {
         Lib3dsChunk c;
         int i, j;
         Lib3dsWord num;
-        char *matf = io->tmp_mem = calloc(sizeof(char), mesh->nfaces);
+        char *matf = io->impl->tmp_mem = calloc(sizeof(char), mesh->nfaces);
         assert(matf);
 
         for (i = 0; i < mesh->nfaces; ++i) {
@@ -558,7 +558,7 @@ face_array_write(Lib3dsFile *file, Lib3dsMesh *mesh, Lib3dsIo *io) {
                 }
             }
         }
-        io->tmp_mem = NULL;
+        io->impl->tmp_mem = NULL;
         free(matf);
     }
 

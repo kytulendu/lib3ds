@@ -44,7 +44,7 @@ lib3ds_chunk_read(Lib3dsChunk *c, Lib3dsIo *io) {
     c->end = c->cur + c->size;
     c->cur += 6;
     if (c->size < 6) {
-        lib3ds_io_fatal_error(io, "Invalid chunk header.");
+        lib3ds_io_log(io, LIB3DS_LOG_ERROR, "Invalid chunk header.");
     }
 
 }
@@ -56,9 +56,9 @@ lib3ds_chunk_read_start(Lib3dsChunk *c, Lib3dsWord chunk, Lib3dsIo *io) {
     ASSERT(io);
     lib3ds_chunk_read(c, io);
     if ((chunk != 0) && (c->chunk != chunk)) {
-        lib3ds_io_fatal_error(io, "Unexpected chunk found.");
+        lib3ds_io_log(io, LIB3DS_LOG_ERROR, "Unexpected chunk found.");
     }
-    io->log_indent++;
+    io->impl->log_indent++;
 }
 
 
@@ -98,7 +98,7 @@ lib3ds_chunk_read_reset(Lib3dsChunk *c, Lib3dsIo *io) {
 
 void
 lib3ds_chunk_read_end(Lib3dsChunk *c, Lib3dsIo *io) {
-    io->log_indent--;
+    io->impl->log_indent--;
     lib3ds_io_seek(io, c->end, LIB3DS_SEEK_SET);
 }
 

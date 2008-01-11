@@ -176,13 +176,16 @@ fileio_write_func(void *self, const void *buffer, size_t size) {
 
 
 static void 
-fileio_log_func(Lib3dsIo *io, Lib3dsLogLevel level, char *msg)
+fileio_log_func(void *self, Lib3dsLogLevel level, int indent, const char *msg)
 {
     static const char * level_str[] = {
         "ERROR", "WARN", "INFO", "DEBUG"
     };
     if (log_level >=  level) {
-        printf("%5s : %s\n", level_str[level], msg);
+        int i;
+        printf("%5s : ", level_str[level]);
+        for (i = 1; i < indent; ++i) printf("\t");
+        printf("%s\n", msg);
     }
 }
 
@@ -469,7 +472,7 @@ int
 main(int argc, char **argv) {
     FILE *file;
     Lib3dsFile *f = 0;
-    Lib3dsIo *io;
+    Lib3dsIo io;
     Lib3dsBool result;
     int i;
 
@@ -482,22 +485,20 @@ main(int argc, char **argv) {
     }
 
     f = lib3ds_file_new();
-    io = lib3ds_io_new(
-        file,
-        fileio_seek_func,
-        fileio_tell_func,
-        fileio_read_func,
-        fileio_write_func,
-        fileio_log_func
-        );
+ 
+    memset(&io, 0, sizeof(io));
+    io.self = file;
+    io.seek_func = fileio_seek_func;
+    io.tell_func = fileio_tell_func;
+    io.read_func = fileio_read_func;
+    io.write_func = fileio_write_func;
+    io.log_func = fileio_log_func;
 
-    result =  lib3ds_file_read(f, io);
+    result =  lib3ds_file_read(f, &io);
 
-    lib3ds_io_free(io);
     fclose(file);
  
-    if (!result)
-    {
+    if (!result) {
         fprintf(stderr, "***ERROR***\nLoading file failed: %s\n", filename);
         exit(1);
     }

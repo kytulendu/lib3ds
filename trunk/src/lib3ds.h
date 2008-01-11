@@ -73,13 +73,16 @@ typedef enum Lib3dsLogLevel {
     LIB3DS_LOG_DEBUG    = 3
 } Lib3dsLogLevel;
 
-typedef struct Lib3dsIo Lib3dsIo;
-typedef Lib3dsBool (*Lib3dsIoErrorFunc)(void *self);
-typedef long (*Lib3dsIoSeekFunc)(void *self, long offset, Lib3dsIoSeek origin);
-typedef long (*Lib3dsIoTellFunc)(void *self);
-typedef size_t (*Lib3dsIoReadFunc)(void *self, void *buffer, size_t size);
-typedef size_t (*Lib3dsIoWriteFunc)(void *self, const void *buffer, size_t size);
-typedef void (*Lib3dsIoLogFunc)(Lib3dsIo *io, Lib3dsLogLevel level, char *msg);
+typedef struct Lib3dsIoImpl Lib3dsIoImpl;
+typedef struct Lib3dsIo {
+    Lib3dsIoImpl    *impl;
+    void            *self;
+    long            (*seek_func) (void *self, long offset, Lib3dsIoSeek origin);
+    long            (*tell_func) (void *self);
+    size_t          (*read_func) (void *self, void *buffer, size_t size);
+    size_t          (*write_func)(void *self, const void *buffer, size_t size);
+    void            (*log_func)  (void *self, Lib3dsLogLevel level, int indent, const char *msg);
+} Lib3dsIo;
 
 /* Atmosphere settings */
 typedef struct Lib3dsAtmosphere {
@@ -680,11 +683,6 @@ extern LIB3DSAPI void lib3ds_track_eval_bool(Lib3dsTrack *track, Lib3dsBool *b, 
 extern LIB3DSAPI void lib3ds_track_eval_float(Lib3dsTrack *track, float *f, float t);
 extern LIB3DSAPI void lib3ds_track_eval_vector(Lib3dsTrack *track, float v[3], float t);
 extern LIB3DSAPI void lib3ds_track_eval_quat(Lib3dsTrack *track, float q[4], float t);
-
-extern LIB3DSAPI Lib3dsIo* lib3ds_io_new(void *self, Lib3dsIoSeekFunc seek_func, Lib3dsIoTellFunc tell_func,
-                                         Lib3dsIoReadFunc read_func, Lib3dsIoWriteFunc write_func,
-                                         Lib3dsIoLogFunc log_func);
-extern LIB3DSAPI void lib3ds_io_free(Lib3dsIo *io);
 
 /** 
     Calculates the ease in/out function. See Lib3dsKey for details. 

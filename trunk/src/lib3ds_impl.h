@@ -317,25 +317,22 @@ extern void lib3ds_chunk_write_end(Lib3dsChunk *c, Lib3dsIo *io);
 extern const char* lib3ds_chunk_name(Lib3dsWord chunk);
 extern void lib3ds_chunk_unknown(Lib3dsWord chunk, Lib3dsIo *io);
 
-struct Lib3dsIo {
-    void *self;
+struct Lib3dsIoImpl {
     jmp_buf jmpbuf;
-    Lib3dsIoSeekFunc seek_func;
-    Lib3dsIoTellFunc tell_func;
-    Lib3dsIoReadFunc read_func;
-    Lib3dsIoWriteFunc write_func;
-    Lib3dsIoLogFunc log_func;
     Lib3dsIntd log_indent;
     void *tmp_mem;
     Lib3dsNode *tmp_node;
 };
+
+extern LIB3DSAPI void lib3ds_io_setup(Lib3dsIo *io);
+extern LIB3DSAPI void lib3ds_io_cleanup(Lib3dsIo *io);
 
 extern long lib3ds_io_seek(Lib3dsIo *io, long offset, Lib3dsIoSeek origin);
 extern long lib3ds_io_tell(Lib3dsIo *io);
 extern size_t lib3ds_io_read(Lib3dsIo *io, void *buffer, size_t size);
 extern size_t lib3ds_io_write(Lib3dsIo *io, const void *buffer, size_t size);
 extern void lib3ds_io_log(Lib3dsIo *io, Lib3dsLogLevel level, const char *format, ...);
-extern void lib3ds_io_fatal_error(Lib3dsIo *io, const char *format, ...);
+extern void lib3ds_io_log_indent(Lib3dsIo *io, int indent);
 extern void lib3ds_io_read_error(Lib3dsIo *io);
 extern void lib3ds_io_write_error(Lib3dsIo *io);
 

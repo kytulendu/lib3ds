@@ -334,7 +334,9 @@ lib3ds_node_read(Lib3dsNode *node, Lib3dsFile *file, Lib3dsIo *io) {
         switch (chunk) {
             case LIB3DS_NODE_ID: {
                 node->node_id = lib3ds_io_read_word(io);
-                lib3ds_io_log(io, LIB3DS_LOG_INFO, "  ID=%d", (short)node->node_id);
+                lib3ds_io_log_indent(io, 1);
+                lib3ds_io_log(io, LIB3DS_LOG_INFO, "ID=%d", (short)node->node_id);
+                lib3ds_io_log_indent(io, -1);
                 break;
             }
 
@@ -344,8 +346,10 @@ lib3ds_node_read(Lib3dsNode *node, Lib3dsFile *file, Lib3dsIo *io) {
                 node->flags2 = lib3ds_io_read_word(io);
                 node->parent_id = lib3ds_io_read_word(io);
 
-                lib3ds_io_log(io, LIB3DS_LOG_INFO, "  NAME=%s", node->name);
-                lib3ds_io_log(io, LIB3DS_LOG_INFO, "  PARENT=%d", (short)node->parent_id);
+                lib3ds_io_log_indent(io, 1);
+                lib3ds_io_log(io, LIB3DS_LOG_INFO, "NAME=%s", node->name);
+                lib3ds_io_log(io, LIB3DS_LOG_INFO, "PARENT=%d", (short)node->parent_id);
+                lib3ds_io_log_indent(io, -1);
                 break;
             }
 

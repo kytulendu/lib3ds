@@ -87,7 +87,7 @@ Lib3dsFile*
 lib3ds_file_load(const char *filename) {
     FILE *f;
     Lib3dsFile *file;
-    Lib3dsIo *io;
+    Lib3dsIo io;
 
     f = fopen(filename, "rb");
     if (!f) {
@@ -99,28 +99,20 @@ lib3ds_file_load(const char *filename) {
         return NULL;
     }
 
-    io = lib3ds_io_new(
-             f,
-             fileio_seek_func,
-             fileio_tell_func,
-             fileio_read_func,
-             fileio_write_func,
-             NULL
-         );
-    if (!io) {
-        lib3ds_file_free(file);
-        fclose(f);
-        return NULL;
-    }
+    memset(&io, 0, sizeof(io));
+    io.self = f;
+    io.seek_func = fileio_seek_func;
+    io.tell_func = fileio_tell_func;
+    io.read_func = fileio_read_func;
+    io.write_func = fileio_write_func;
+    io.log_func = NULL;
 
-    if (!lib3ds_file_read(file, io)) {
+    if (!lib3ds_file_read(file, &io)) {
+        fclose(f);
         free(file);
-        lib3ds_io_free(io);
-        fclose(f);
         return NULL;
     }
 
-    lib3ds_io_free(io);
     fclose(f);
     return file;
 }
@@ -140,32 +132,25 @@ lib3ds_file_load(const char *filename) {
 Lib3dsBool
 lib3ds_file_save(Lib3dsFile *file, const char *filename) {
     FILE *f;
-    Lib3dsIo *io;
+    Lib3dsIo io;
     Lib3dsBool result;
 
     f = fopen(filename, "wb");
     if (!f) {
-        return(FALSE);
-    }
-    io = lib3ds_io_new(
-             f,
-             fileio_seek_func,
-             fileio_tell_func,
-             fileio_read_func,
-             fileio_write_func,
-             NULL
-         );
-    if (!io) {
-        fclose(f);
         return FALSE;
     }
 
-    result = lib3ds_file_write(file, io);
+    memset(&io, 0, sizeof(io));
+    io.self = f;
+    io.seek_func = fileio_seek_func;
+    io.tell_func = fileio_tell_func;
+    io.read_func = fileio_read_func;
+    io.write_func = fileio_write_func;
+    io.log_func = NULL;
 
+    result = lib3ds_file_write(file, &io);
     fclose(f);
-
-    lib3ds_io_free(io);
-    return(result);
+    return result;
 }
 
 
@@ -500,62 +485,62 @@ kfdata_read(Lib3dsFile *file, Lib3dsIo *io) {
             }
 
             case LIB3DS_AMBIENT_NODE_TAG: {
-                Lib3dsNode *node = io->tmp_node = lib3ds_node_new(LIB3DS_AMBIENT_NODE);
+                Lib3dsNode *node = io->impl->tmp_node = lib3ds_node_new(LIB3DS_AMBIENT_NODE);
                 node->node_id = node_number++;
                 lib3ds_chunk_read_reset(&c, io);
                 lib3ds_node_read(node, file, io);
-                io->tmp_node = NULL;
+                io->impl->tmp_node = NULL;
                 lib3ds_file_insert_node(file, node);
                 break;
             }
 
             case LIB3DS_OBJECT_NODE_TAG: {
-                Lib3dsNode *node = io->tmp_node = lib3ds_node_new(LIB3DS_OBJECT_NODE);
+                Lib3dsNode *node = io->impl->tmp_node = lib3ds_node_new(LIB3DS_OBJECT_NODE);
                 node->node_id = node_number++;
                 lib3ds_chunk_read_reset(&c, io);
                 lib3ds_node_read(node, file, io);
-                io->tmp_node = NULL;
+                io->impl->tmp_node = NULL;
                 lib3ds_file_insert_node(file, node);
                 break;
             }
 
             case LIB3DS_CAMERA_NODE_TAG: {
-                Lib3dsNode *node = io->tmp_node = lib3ds_node_new(LIB3DS_CAMERA_NODE);
+                Lib3dsNode *node = io->impl->tmp_node = lib3ds_node_new(LIB3DS_CAMERA_NODE);
                 node->node_id = node_number++;
                 lib3ds_chunk_read_reset(&c, io);
                 lib3ds_node_read(node, file, io);
-                io->tmp_node = NULL;
+                io->impl->tmp_node = NULL;
                 lib3ds_file_insert_node(file, node);
                 break;
             }
 
             case LIB3DS_TARGET_NODE_TAG: {
-                Lib3dsNode *node = io->tmp_node = lib3ds_node_new(LIB3DS_TARGET_NODE);
+                Lib3dsNode *node = io->impl->tmp_node = lib3ds_node_new(LIB3DS_TARGET_NODE);
                 node->node_id = node_number++;
                 lib3ds_chunk_read_reset(&c, io);
                 lib3ds_node_read(node, file, io);
-                io->tmp_node = NULL;
+                io->impl->tmp_node = NULL;
                 lib3ds_file_insert_node(file, node);
                 break;
             }
 
             case LIB3DS_LIGHT_NODE_TAG:
             case LIB3DS_SPOTLIGHT_NODE_TAG: {
-                Lib3dsNode *node = io->tmp_node = lib3ds_node_new(LIB3DS_LIGHT_NODE);
+                Lib3dsNode *node = io->impl->tmp_node = lib3ds_node_new(LIB3DS_LIGHT_NODE);
                 node->node_id = node_number++;
                 lib3ds_chunk_read_reset(&c, io);
                 lib3ds_node_read(node, file, io);
-                io->tmp_node = NULL;
+                io->impl->tmp_node = NULL;
                 lib3ds_file_insert_node(file, node);
                 break;
             }
 
             case LIB3DS_L_TARGET_NODE_TAG: {
-                Lib3dsNode *node = io->tmp_node = lib3ds_node_new(LIB3DS_SPOT_NODE);
+                Lib3dsNode *node = io->impl->tmp_node = lib3ds_node_new(LIB3DS_SPOT_NODE);
                 node->node_id = node_number++;
                 lib3ds_chunk_read_reset(&c, io);
                 lib3ds_node_read(node, file, io);
-                io->tmp_node = NULL;
+                io->impl->tmp_node = NULL;
                 lib3ds_file_insert_node(file, node);
                 break;
             }
@@ -582,7 +567,9 @@ lib3ds_file_read(Lib3dsFile *file, Lib3dsIo *io) {
     Lib3dsChunk c;
     Lib3dsWord chunk;
 
-    if (setjmp(io->jmpbuf) != 0) {
+    lib3ds_io_setup(io);
+    if (setjmp(io->impl->jmpbuf) != 0) {
+        lib3ds_io_cleanup(io);
         return FALSE;
     }
 
@@ -630,7 +617,8 @@ lib3ds_file_read(Lib3dsFile *file, Lib3dsIo *io) {
 
     lib3ds_chunk_read_end(&c, io);
 
-    memset(io->jmpbuf, 0, sizeof(io->jmpbuf));
+    memset(io->impl->jmpbuf, 0, sizeof(io->impl->jmpbuf));
+    lib3ds_io_cleanup(io);
     return TRUE;
 }
 
@@ -867,7 +855,9 @@ Lib3dsBool
 lib3ds_file_write(Lib3dsFile *file, Lib3dsIo *io) {
     Lib3dsChunk c;
 
-    if (setjmp(io->jmpbuf) != 0) {
+    lib3ds_io_setup(io);
+    if (setjmp(io->impl->jmpbuf) != 0) {
+        lib3ds_io_cleanup(io);
         return FALSE;
     }
 
@@ -888,7 +878,8 @@ lib3ds_file_write(Lib3dsFile *file, Lib3dsIo *io) {
 
     lib3ds_chunk_write_end(&c, io);
 
-    memset(io->jmpbuf, 0, sizeof(io->jmpbuf));
+    memset(io->impl->jmpbuf, 0, sizeof(io->impl->jmpbuf));
+    lib3ds_io_cleanup(io);
     return TRUE;
 }
 

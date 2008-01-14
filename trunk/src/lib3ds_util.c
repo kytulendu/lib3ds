@@ -1,24 +1,20 @@
 /*
- * The 3D Studio File Format Library
- * Copyright (C) 1996-2007 by Jan Eric Kyprianidis <www.kyprianidis.com>
- * All rights reserved.
- *
- * This program is  free  software;  you can redistribute it and/or modify it
- * under the terms of the  GNU Lesser General Public License  as published by
- * the  Free Software Foundation;  either version 2.1 of the License,  or (at
- * your option) any later version.
- *
- * This  program  is  distributed in  the  hope that it will  be useful,  but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or  FITNESS FOR A  PARTICULAR PURPOSE.  See the  GNU Lesser General Public
- * License for more details.
- *
- * You should  have received  a copy of the GNU Lesser General Public License
- * along with  this program;  if not, write to the  Free Software Foundation,
- * Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- * $Id$
- */
+    Copyright (C) 1996-2008 by Jan Eric Kyprianidis <www.kyprianidis.com>
+    All rights reserved.
+    
+    This program is free  software: you can redistribute it and/or modify 
+    it under the terms of the GNU Lesser General Public License as published 
+    by the Free Software Foundation, either version 2.1 of the License, or 
+    (at your option) any later version.
+
+    Thisprogram  is  distributed in the hope that it will be useful, 
+    but WITHOUT ANY WARRANTY; without even the implied warranty of 
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
+    GNU Lesser General Public License for more details.
+    
+    You should  have received a copy of the GNU Lesser General Public License
+    along with  this program; If not, see <http://www.gnu.org/licenses/>. 
+*/
 #include "lib3ds_impl.h"
 
 
@@ -35,8 +31,7 @@ void* lib3ds_util_realloc_array(void *ptr, int old_size, int new_size, int eleme
 }
 
 
-void lib3ds_util_reserve_array(void ***ptr, Lib3dsIntd *n, Lib3dsIntd *size,
-                               Lib3dsIntd new_size, Lib3dsBool force, Lib3dsFreeFunc free_func) {
+void lib3ds_util_reserve_array(void ***ptr, int *n, int *size, int new_size, int force, Lib3dsFreeFunc free_func) {
     assert(ptr && n && size);
     if ((*size < new_size) || force) {
         if (force && free_func) {
@@ -55,8 +50,7 @@ void lib3ds_util_reserve_array(void ***ptr, Lib3dsIntd *n, Lib3dsIntd *size,
 }
 
 
-void lib3ds_util_insert_array(void ***ptr, Lib3dsIntd *n, Lib3dsIntd *size,
-                              void *element, Lib3dsIntd index) {
+void lib3ds_util_insert_array(void ***ptr, int *n, int *size, void *element, int index) {
     int i;
     assert(ptr && n && size && element);
     i = ((index >= 0) && (index < *n)) ? index : *n;
@@ -82,7 +76,7 @@ void lib3ds_util_insert_array(void ***ptr, Lib3dsIntd *n, Lib3dsIntd *size,
 }
 
 
-void lib3ds_util_remove_array(void ***ptr, Lib3dsIntd *n, Lib3dsIntd index, Lib3dsFreeFunc free_func) {
+void lib3ds_util_remove_array(void ***ptr, int *n, int index, Lib3dsFreeFunc free_func) {
     assert(ptr && n);
     if ((index >= 0) && (index < *n)) {
         assert(*ptr);

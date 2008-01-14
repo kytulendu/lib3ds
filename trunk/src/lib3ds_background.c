@@ -1,32 +1,28 @@
 /*
- * The 3D Studio File Format Library
- * Copyright (C) 1996-2007 by Jan Eric Kyprianidis <www.kyprianidis.com>
- * All rights reserved.
- *
- * This program is  free  software;  you can redistribute it and/or modify it
- * under the terms of the  GNU Lesser General Public License  as published by
- * the  Free Software Foundation;  either version 2.1 of the License,  or (at
- * your option) any later version.
- *
- * This  program  is  distributed in  the  hope that it will  be useful,  but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or  FITNESS FOR A  PARTICULAR PURPOSE.  See the  GNU Lesser General Public
- * License for more details.
- *
- * You should  have received  a copy of the GNU Lesser General Public License
- * along with  this program;  if not, write to the  Free Software Foundation,
- * Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- * $Id: background.c,v 1.12 2007/06/20 17:04:08 jeh Exp $
- */
+    Copyright (C) 1996-2008 by Jan Eric Kyprianidis <www.kyprianidis.com>
+    All rights reserved.
+    
+    This program is free  software: you can redistribute it and/or modify 
+    it under the terms of the GNU Lesser General Public License as published 
+    by the Free Software Foundation, either version 2.1 of the License, or 
+    (at your option) any later version.
+
+    Thisprogram  is  distributed in the hope that it will be useful, 
+    but WITHOUT ANY WARRANTY; without even the implied warranty of 
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
+    GNU Lesser General Public License for more details.
+    
+    You should  have received a copy of the GNU Lesser General Public License
+    along with  this program; If not, see <http://www.gnu.org/licenses/>. 
+*/
 #include "lib3ds_impl.h"
 
 
 static void
 solid_bgnd_read(Lib3dsBackground *background, Lib3dsIo *io) {
     Lib3dsChunk c;
-    Lib3dsWord chunk;
-    Lib3dsBool have_lin = FALSE;
+    uint16_t chunk;
+    int have_lin = FALSE;
 
     lib3ds_chunk_read_start(&c, LIB3DS_SOLID_BGND, io);
 
@@ -53,7 +49,7 @@ solid_bgnd_read(Lib3dsBackground *background, Lib3dsIo *io) {
 static void
 v_gradient_read(Lib3dsBackground *background, Lib3dsIo *io) {
     Lib3dsChunk c;
-    Lib3dsWord chunk;
+    uint16_t chunk;
     int index[2];
     float col[2][3][3];
     int have_lin = 0;
@@ -150,7 +146,7 @@ colorf_write(float rgb[3], Lib3dsIo *io) {
 }
 
 
-static Lib3dsBool
+static int
 colorf_defined(float rgb[3]) {
     int i;
     for (i = 0; i < 3; ++i) {
@@ -167,7 +163,7 @@ lib3ds_background_write(Lib3dsBackground *background, Lib3dsIo *io) {
     if (strlen(background->bitmap_name)) { /*---- LIB3DS_BIT_MAP ----*/
         Lib3dsChunk c;
         c.chunk = LIB3DS_BIT_MAP;
-        c.size = 6 + 1 + (Lib3dsDword)strlen(background->bitmap_name);
+        c.size = 6 + 1 + (uint32_t)strlen(background->bitmap_name);
         lib3ds_chunk_write(&c, io);
         lib3ds_io_write_string(io, background->bitmap_name);
     }

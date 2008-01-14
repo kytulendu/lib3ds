@@ -1,29 +1,25 @@
 /*
- * The 3D Studio File Format Library
- * Copyright (C) 1996-2007 by Jan Eric Kyprianidis <www.kyprianidis.com>
- * All rights reserved.
- *
- * This program is  free  software;  you can redistribute it and/or modify it
- * under the terms of the  GNU Lesser General Public License  as published by
- * the  Free Software Foundation;  either version 2.1 of the License,  or (at
- * your option) any later version.
- *
- * This  program  is  distributed in  the  hope that it will  be useful,  but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or  FITNESS FOR A  PARTICULAR PURPOSE.  See the  GNU Lesser General Public
- * License for more details.
- *
- * You should  have received  a copy of the GNU Lesser General Public License
- * along with  this program;  if not, write to the  Free Software Foundation,
- * Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- * $Id: io.c,v 1.9 2007/06/20 17:04:08 jeh Exp $
- */
+    Copyright (C) 1996-2008 by Jan Eric Kyprianidis <www.kyprianidis.com>
+    All rights reserved.
+    
+    This program is free  software: you can redistribute it and/or modify 
+    it under the terms of the GNU Lesser General Public License as published 
+    by the Free Software Foundation, either version 2.1 of the License, or 
+    (at your option) any later version.
+
+    Thisprogram  is  distributed in the hope that it will be useful, 
+    but WITHOUT ANY WARRANTY; without even the implied warranty of 
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
+    GNU Lesser General Public License for more details.
+    
+    You should  have received a copy of the GNU Lesser General Public License
+    along with  this program; If not, see <http://www.gnu.org/licenses/>. 
+*/
 #include "lib3ds_impl.h"
 
 
 typedef union {
-    Lib3dsDword dword_value;
+    uint32_t dword_value;
     float float_value;
 } Lib3dsDwordFloat;
 
@@ -52,7 +48,7 @@ lib3ds_io_cleanup(Lib3dsIo *io) {
 
 long
 lib3ds_io_seek(Lib3dsIo *io, long offset, Lib3dsIoSeek origin) {
-    ASSERT(io);
+    assert(io);
     if (!io || !io->seek_func) {
         return 0;
     }
@@ -62,7 +58,7 @@ lib3ds_io_seek(Lib3dsIo *io, long offset, Lib3dsIoSeek origin) {
 
 long
 lib3ds_io_tell(Lib3dsIo *io) {
-    ASSERT(io);
+    assert(io);
     if (!io || !io->tell_func) {
         return 0;
     }
@@ -72,7 +68,7 @@ lib3ds_io_tell(Lib3dsIo *io) {
 
 size_t
 lib3ds_io_read(Lib3dsIo *io, void *buffer, size_t size) {
-    ASSERT(io);
+    assert(io);
     if (!io || !io->read_func) {
         return 0;
     }
@@ -82,7 +78,7 @@ lib3ds_io_read(Lib3dsIo *io, void *buffer, size_t size) {
 
 size_t
 lib3ds_io_write(Lib3dsIo *io, const void *buffer, size_t size) {
-    ASSERT(io);
+    assert(io);
     if (!io || !io->write_func) {
         return 0;
     }
@@ -103,7 +99,7 @@ lib3ds_io_log(Lib3dsIo *io, Lib3dsLogLevel level, const char *format, ...) {
     va_list args;
     /* FIXME */ char str[1024];
 
-    ASSERT(io);
+    assert(io);
     if (!io || !io->log_func)
         return;
 
@@ -119,7 +115,7 @@ lib3ds_io_log(Lib3dsIo *io, Lib3dsLogLevel level, const char *format, ...) {
 
 void 
 lib3ds_io_log_indent(Lib3dsIo *io, int indent) {
-    ASSERT(io);
+    assert(io);
     if (!io)
         return;
     io->impl->log_indent += indent;
@@ -141,11 +137,11 @@ lib3ds_io_write_error(Lib3dsIo *io) {
 /*!
  * Read a byte from a file stream.
  */
-Lib3dsByte
+uint8_t
 lib3ds_io_read_byte(Lib3dsIo *io) {
-    Lib3dsByte b;
+    uint8_t b;
 
-    ASSERT(io);
+    assert(io);
     lib3ds_io_read(io, &b, 1);
     return(b);
 }
@@ -154,15 +150,15 @@ lib3ds_io_read_byte(Lib3dsIo *io) {
 /**
  * Read a word from a file stream in little endian format.
  */
-Lib3dsWord
+uint16_t
 lib3ds_io_read_word(Lib3dsIo *io) {
-    Lib3dsByte b[2];
-    Lib3dsWord w;
+    uint8_t b[2];
+    uint16_t w;
 
-    ASSERT(io);
+    assert(io);
     lib3ds_io_read(io, b, 2);
-    w = ((Lib3dsWord)b[1] << 8) |
-        ((Lib3dsWord)b[0]);
+    w = ((uint16_t)b[1] << 8) |
+        ((uint16_t)b[0]);
     return(w);
 }
 
@@ -170,17 +166,17 @@ lib3ds_io_read_word(Lib3dsIo *io) {
 /*!
  * Read a dword from file a stream in little endian format.
  */
-Lib3dsDword
+uint32_t
 lib3ds_io_read_dword(Lib3dsIo *io) {
-    Lib3dsByte b[4];
-    Lib3dsDword d;
+    uint8_t b[4];
+    uint32_t d;
 
-    ASSERT(io);
+    assert(io);
     lib3ds_io_read(io, b, 4);
-    d = ((Lib3dsDword)b[3] << 24) |
-        ((Lib3dsDword)b[2] << 16) |
-        ((Lib3dsDword)b[1] << 8) |
-        ((Lib3dsDword)b[0]);
+    d = ((uint32_t)b[3] << 24) |
+        ((uint32_t)b[2] << 16) |
+        ((uint32_t)b[1] << 8) |
+        ((uint32_t)b[0]);
     return(d);
 }
 
@@ -188,11 +184,11 @@ lib3ds_io_read_dword(Lib3dsIo *io) {
 /*!
  * Read a signed byte from a file stream.
  */
-Lib3dsIntb
+int8_t
 lib3ds_io_read_intb(Lib3dsIo *io) {
-    Lib3dsIntb b;
+    int8_t b;
 
-    ASSERT(io);
+    assert(io);
     lib3ds_io_read(io, &b, 1);
     return(b);
 }
@@ -201,34 +197,34 @@ lib3ds_io_read_intb(Lib3dsIo *io) {
 /*!
  * Read a signed word from a file stream in little endian format.
  */
-Lib3dsIntw
+int16_t
 lib3ds_io_read_intw(Lib3dsIo *io) {
-    Lib3dsByte b[2];
-    Lib3dsWord w;
+    uint8_t b[2];
+    uint16_t w;
 
-    ASSERT(io);
+    assert(io);
     lib3ds_io_read(io, b, 2);
-    w = ((Lib3dsWord)b[1] << 8) |
-        ((Lib3dsWord)b[0]);
-    return((Lib3dsIntw)w);
+    w = ((uint16_t)b[1] << 8) |
+        ((uint16_t)b[0]);
+    return((int16_t)w);
 }
 
 
 /*!
  * Read a signed dword a from file stream in little endian format.
  */
-Lib3dsIntd
+int32_t
 lib3ds_io_read_intd(Lib3dsIo *io) {
-    Lib3dsByte b[4];
-    Lib3dsDword d;
+    uint8_t b[4];
+    uint32_t d;
 
-    ASSERT(io);
+    assert(io);
     lib3ds_io_read(io, b, 4);
-    d = ((Lib3dsDword)b[3] << 24) |
-        ((Lib3dsDword)b[2] << 16) |
-        ((Lib3dsDword)b[1] << 8) |
-        ((Lib3dsDword)b[0]);
-    return((Lib3dsIntd)d);
+    d = ((uint32_t)b[3] << 24) |
+        ((uint32_t)b[2] << 16) |
+        ((uint32_t)b[1] << 8) |
+        ((uint32_t)b[0]);
+    return((int32_t)d);
 }
 
 
@@ -237,15 +233,15 @@ lib3ds_io_read_intd(Lib3dsIo *io) {
  */
 float
 lib3ds_io_read_float(Lib3dsIo *io) {
-    Lib3dsByte b[4];
+    uint8_t b[4];
     Lib3dsDwordFloat d;
 
-    ASSERT(io);
+    assert(io);
     lib3ds_io_read(io, b, 4);
-    d.dword_value = ((Lib3dsDword)b[3] << 24) |
-                    ((Lib3dsDword)b[2] << 16) |
-                    ((Lib3dsDword)b[1] << 8) |
-                    ((Lib3dsDword)b[0]);
+    d.dword_value = ((uint32_t)b[3] << 24) |
+                    ((uint32_t)b[2] << 16) |
+                    ((uint32_t)b[1] << 8) |
+                    ((uint32_t)b[0]);
     return d.float_value;
 }
 
@@ -258,7 +254,7 @@ lib3ds_io_read_float(Lib3dsIo *io) {
  */
 void
 lib3ds_io_read_vector(Lib3dsIo *io, float v[3]) {
-    ASSERT(io);
+    assert(io);
     v[0] = lib3ds_io_read_float(io);
     v[1] = lib3ds_io_read_float(io);
     v[2] = lib3ds_io_read_float(io);
@@ -267,7 +263,7 @@ lib3ds_io_read_vector(Lib3dsIo *io, float v[3]) {
 
 void
 lib3ds_io_read_rgb(Lib3dsIo *io, float rgb[3]) {
-    ASSERT(io);
+    assert(io);
     rgb[0] = lib3ds_io_read_float(io);
     rgb[1] = lib3ds_io_read_float(io);
     rgb[2] = lib3ds_io_read_float(io);
@@ -288,7 +284,7 @@ lib3ds_io_read_string(Lib3dsIo *io, char *s, int buflen) {
     char c;
     int k = 0;
 
-    ASSERT(io);
+    assert(io);
     for (;;) {
         if (lib3ds_io_read(io, &c, 1) != 1) {
             lib3ds_io_read_error(io);
@@ -309,8 +305,8 @@ lib3ds_io_read_string(Lib3dsIo *io, char *s, int buflen) {
  * Writes a byte into a file stream.
  */
 void
-lib3ds_io_write_byte(Lib3dsIo *io, Lib3dsByte b) {
-    ASSERT(io);
+lib3ds_io_write_byte(Lib3dsIo *io, uint8_t b) {
+    assert(io);
     if (lib3ds_io_write(io, &b, 1) != 1) {
         lib3ds_io_write_error(io);
     }
@@ -321,12 +317,12 @@ lib3ds_io_write_byte(Lib3dsIo *io, Lib3dsByte b) {
  * Writes a word into a little endian file stream.
  */
 void
-lib3ds_io_write_word(Lib3dsIo *io, Lib3dsWord w) {
-    Lib3dsByte b[2];
+lib3ds_io_write_word(Lib3dsIo *io, uint16_t w) {
+    uint8_t b[2];
 
-    ASSERT(io);
-    b[1] = ((Lib3dsWord)w & 0xFF00) >> 8;
-    b[0] = ((Lib3dsWord)w & 0x00FF);
+    assert(io);
+    b[1] = ((uint16_t)w & 0xFF00) >> 8;
+    b[0] = ((uint16_t)w & 0x00FF);
     if (lib3ds_io_write(io, b, 2) != 2) {
         lib3ds_io_write_error(io);
     }
@@ -337,14 +333,14 @@ lib3ds_io_write_word(Lib3dsIo *io, Lib3dsWord w) {
  * Writes a dword into a little endian file stream.
  */
 void
-lib3ds_io_write_dword(Lib3dsIo *io, Lib3dsDword d) {
-    Lib3dsByte b[4];
+lib3ds_io_write_dword(Lib3dsIo *io, uint32_t d) {
+    uint8_t b[4];
 
-    ASSERT(io);
-    b[3] = (Lib3dsByte)(((Lib3dsDword)d & 0xFF000000) >> 24);
-    b[2] = (Lib3dsByte)(((Lib3dsDword)d & 0x00FF0000) >> 16);
-    b[1] = (Lib3dsByte)(((Lib3dsDword)d & 0x0000FF00) >> 8);
-    b[0] = (Lib3dsByte)(((Lib3dsDword)d & 0x000000FF));
+    assert(io);
+    b[3] = (uint8_t)(((uint32_t)d & 0xFF000000) >> 24);
+    b[2] = (uint8_t)(((uint32_t)d & 0x00FF0000) >> 16);
+    b[1] = (uint8_t)(((uint32_t)d & 0x0000FF00) >> 8);
+    b[0] = (uint8_t)(((uint32_t)d & 0x000000FF));
     if (lib3ds_io_write(io, b, 4) != 4) {
         lib3ds_io_write_error(io);
     }
@@ -355,8 +351,8 @@ lib3ds_io_write_dword(Lib3dsIo *io, Lib3dsDword d) {
  * Writes a signed byte in a file stream.
  */
 void
-lib3ds_io_write_intb(Lib3dsIo *io, Lib3dsIntb b) {
-    ASSERT(io);
+lib3ds_io_write_intb(Lib3dsIo *io, int8_t b) {
+    assert(io);
     if (lib3ds_io_write(io, &b, 1) != 1) {
         lib3ds_io_write_error(io);
     }
@@ -367,12 +363,12 @@ lib3ds_io_write_intb(Lib3dsIo *io, Lib3dsIntb b) {
  * Writes a signed word into a little endian file stream.
  */
 void
-lib3ds_io_write_intw(Lib3dsIo *io, Lib3dsIntw w) {
-    Lib3dsByte b[2];
+lib3ds_io_write_intw(Lib3dsIo *io, int16_t w) {
+    uint8_t b[2];
 
-    ASSERT(io);
-    b[1] = ((Lib3dsWord)w & 0xFF00) >> 8;
-    b[0] = ((Lib3dsWord)w & 0x00FF);
+    assert(io);
+    b[1] = ((uint16_t)w & 0xFF00) >> 8;
+    b[0] = ((uint16_t)w & 0x00FF);
     if (lib3ds_io_write(io, b, 2) != 2) {
         lib3ds_io_write_error(io);
     }
@@ -383,14 +379,14 @@ lib3ds_io_write_intw(Lib3dsIo *io, Lib3dsIntw w) {
  * Writes a signed dword into a little endian file stream.
  */
 void
-lib3ds_io_write_intd(Lib3dsIo *io, Lib3dsIntd d) {
-    Lib3dsByte b[4];
+lib3ds_io_write_intd(Lib3dsIo *io, int32_t d) {
+    uint8_t b[4];
 
-    ASSERT(io);
-    b[3] = (Lib3dsByte)(((Lib3dsDword)d & 0xFF000000) >> 24);
-    b[2] = (Lib3dsByte)(((Lib3dsDword)d & 0x00FF0000) >> 16);
-    b[1] = (Lib3dsByte)(((Lib3dsDword)d & 0x0000FF00) >> 8);
-    b[0] = (Lib3dsByte)(((Lib3dsDword)d & 0x000000FF));
+    assert(io);
+    b[3] = (uint8_t)(((uint32_t)d & 0xFF000000) >> 24);
+    b[2] = (uint8_t)(((uint32_t)d & 0x00FF0000) >> 16);
+    b[1] = (uint8_t)(((uint32_t)d & 0x0000FF00) >> 8);
+    b[0] = (uint8_t)(((uint32_t)d & 0x000000FF));
     if (lib3ds_io_write(io, b, 4) != 4) {
         lib3ds_io_write_error(io);
     }
@@ -402,15 +398,15 @@ lib3ds_io_write_intd(Lib3dsIo *io, Lib3dsIntd d) {
  */
 void
 lib3ds_io_write_float(Lib3dsIo *io, float l) {
-    Lib3dsByte b[4];
+    uint8_t b[4];
     Lib3dsDwordFloat d;
 
-    ASSERT(io);
+    assert(io);
     d.float_value = l;
-    b[3] = (Lib3dsByte)(((Lib3dsDword)d.dword_value & 0xFF000000) >> 24);
-    b[2] = (Lib3dsByte)(((Lib3dsDword)d.dword_value & 0x00FF0000) >> 16);
-    b[1] = (Lib3dsByte)(((Lib3dsDword)d.dword_value & 0x0000FF00) >> 8);
-    b[0] = (Lib3dsByte)(((Lib3dsDword)d.dword_value & 0x000000FF));
+    b[3] = (uint8_t)(((uint32_t)d.dword_value & 0xFF000000) >> 24);
+    b[2] = (uint8_t)(((uint32_t)d.dword_value & 0x00FF0000) >> 16);
+    b[1] = (uint8_t)(((uint32_t)d.dword_value & 0x0000FF00) >> 8);
+    b[0] = (uint8_t)(((uint32_t)d.dword_value & 0x000000FF));
     if (lib3ds_io_write(io, b, 4) != 4) {
         lib3ds_io_write_error(io);
     }

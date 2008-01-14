@@ -1,24 +1,20 @@
 /*
- * The 3D Studio File Format Library
- * Copyright (C) 1996-2007 by Jan Eric Kyprianidis <www.kyprianidis.com>
- * All rights reserved.
- *
- * This program is  free  software;  you can redistribute it and/or modify it
- * under the terms of the  GNU Lesser General Public License  as published by
- * the  Free Software Foundation;  either version 2.1 of the License,  or (at
- * your option) any later version.
- *
- * This  program  is  distributed in  the  hope that it will  be useful,  but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or  FITNESS FOR A  PARTICULAR PURPOSE.  See the  GNU Lesser General Public
- * License for more details.
- *
- * You should  have received  a copy of the GNU Lesser General Public License
- * along with  this program;  if not, write to the  Free Software Foundation,
- * Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- * $Id: 3dsdump.c,v 1.4 2007/06/14 11:29:39 jeh Exp $
- */
+    Copyright (C) 1996-2008 by Jan Eric Kyprianidis <www.kyprianidis.com>
+    All rights reserved.
+    
+    This program is free  software: you can redistribute it and/or modify 
+    it under the terms of the GNU Lesser General Public License as published 
+    by the Free Software Foundation, either version 2.1 of the License, or 
+    (at your option) any later version.
+
+    Thisprogram  is  distributed in the hope that it will be useful, 
+    but WITHOUT ANY WARRANTY; without even the implied warranty of 
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
+    GNU Lesser General Public License for more details.
+    
+    You should  have received a copy of the GNU Lesser General Public License
+    along with  this program; If not, see <http://www.gnu.org/licenses/>. 
+*/
 #include <lib3ds.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -206,7 +202,7 @@ matrix_dump(float matrix[4][4]) {
 static void
 viewport_dump(Lib3dsViewport *vp) {
     Lib3dsView *view;
-    unsigned i;
+    int i;
     assert(vp);
 
     printf("  viewport:\n");
@@ -287,7 +283,7 @@ lib3ds_material_dump(Lib3dsMaterial *material) {
     printf("  use_blur:      %s\n", material->use_blur ? "yes" : "no");
     printf("  blur:          %f\n", material->blur);
     printf("  falloff:       %f\n", material->falloff);
-    printf("  additive:      %s\n", material->additive ? "yes" : "no");
+    printf("  is_additive:    %s\n", material->is_additive ? "yes" : "no");
     printf("  use_falloff:   %s\n", material->use_falloff ? "yes" : "no");
     printf("  self_illum:    %s\n", material->self_illum ? "yes" : "no");
     printf("  self_ilpct:    %f\n", material->self_ilpct);
@@ -438,7 +434,7 @@ static const char* node_names_table[] = {
 
 
 static void
-node_dump(Lib3dsNode *node, Lib3dsIntd level) {
+node_dump(Lib3dsNode *node, int level) {
     Lib3dsNode *p;
     char l[128];
 
@@ -473,7 +469,7 @@ main(int argc, char **argv) {
     FILE *file;
     Lib3dsFile *f = 0;
     Lib3dsIo io;
-    Lib3dsBool result;
+    int result;
     int i;
 
     parse_args(argc, argv);

@@ -1,24 +1,20 @@
 /*
- * The 3D Studio File Format Library
- * Copyright (C) 1996-2007 by Jan Eric Kyprianidis <www.kyprianidis.com>
- * All rights reserved.
- *
- * This program is  free  software;  you can redistribute it and/or modify it
- * under the terms of the  GNU Lesser General Public License  as published by
- * the  Free Software Foundation;  either version 2.1 of the License,  or (at
- * your option) any later version.
- *
- * This  program  is  distributed in  the  hope that it will  be useful,  but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or  FITNESS FOR A  PARTICULAR PURPOSE.  See the  GNU Lesser General Public
- * License for more details.
- *
- * You should  have received  a copy of the GNU Lesser General Public License
- * along with  this program;  if not, write to the  Free Software Foundation,
- * Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- * $Id: mesh.c,v 1.29 2007/06/20 17:04:08 jeh Exp $
- */
+    Copyright (C) 1996-2008 by Jan Eric Kyprianidis <www.kyprianidis.com>
+    All rights reserved.
+    
+    This program is free  software: you can redistribute it and/or modify 
+    it under the terms of the GNU Lesser General Public License as published 
+    by the Free Software Foundation, either version 2.1 of the License, or 
+    (at your option) any later version.
+
+    Thisprogram  is  distributed in the hope that it will be useful, 
+    but WITHOUT ANY WARRANTY; without even the implied warranty of 
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
+    GNU Lesser General Public License for more details.
+    
+    You should  have received a copy of the GNU Lesser General Public License
+    along with  this program; If not, see <http://www.gnu.org/licenses/>. 
+*/
 #include "lib3ds_impl.h"
 
 
@@ -38,8 +34,8 @@ Lib3dsMesh*
 lib3ds_mesh_new(const char *name) {
     Lib3dsMesh *mesh;
 
-    ASSERT(name);
-    ASSERT(strlen(name) < 64);
+    assert(name);
+    assert(strlen(name) < 64);
 
     mesh = (Lib3dsMesh*) calloc(sizeof(Lib3dsMesh), 1);
     if (!mesh) {
@@ -48,7 +44,7 @@ lib3ds_mesh_new(const char *name) {
     mesh->user_type = 'MESH';
     strcpy(mesh->name, name);
     lib3ds_matrix_identity(mesh->matrix);
-    mesh->map_projection = LIB3DS_MAP_NONE;
+    mesh->map_type = LIB3DS_MAP_NONE;
     return (mesh);
 }
 
@@ -127,7 +123,7 @@ lib3ds_mesh_calculate_face_normals(Lib3dsMesh *mesh, float (*face_normals)[3]) {
 
 typedef struct Lib3dsFaces {
     struct Lib3dsFaces *next;
-    Lib3dsIntd index;
+    int index;
 } Lib3dsFaces;
 
 
@@ -246,9 +242,9 @@ lib3ds_mesh_calculate_normals(Lib3dsMesh *mesh, float (*normals)[3]) {
 static void
 face_array_read(Lib3dsFile *file, Lib3dsMesh *mesh, Lib3dsIo *io) {
     Lib3dsChunk c;
-    Lib3dsWord chunk;
+    uint16_t chunk;
     int i;
-    Lib3dsWord nfaces;
+    uint16_t nfaces;
 
     lib3ds_chunk_read_start(&c, LIB3DS_FACE_ARRAY, io);
 
@@ -319,7 +315,7 @@ face_array_read(Lib3dsFile *file, Lib3dsMesh *mesh, Lib3dsIo *io) {
 void
 lib3ds_mesh_read(Lib3dsFile *file, Lib3dsMesh *mesh, Lib3dsIo *io) {
     Lib3dsChunk c;
-    Lib3dsWord chunk;
+    uint16_t chunk;
 
     lib3ds_chunk_read_start(&c, LIB3DS_N_TRI_OBJECT, io);
 
@@ -344,7 +340,7 @@ lib3ds_mesh_read(Lib3dsFile *file, Lib3dsMesh *mesh, Lib3dsIo *io) {
 
             case LIB3DS_POINT_ARRAY: {
                 int i;
-                Lib3dsWord nvertices = lib3ds_io_read_word(io);
+                uint16_t nvertices = lib3ds_io_read_word(io);
                 lib3ds_mesh_resize_vertices(mesh, nvertices);
                 for (i = 0; i < mesh->nvertices; ++i) {
                     lib3ds_io_read_vector(io, mesh->vertices[i].pos);
@@ -354,7 +350,7 @@ lib3ds_mesh_read(Lib3dsFile *file, Lib3dsMesh *mesh, Lib3dsIo *io) {
 
             case LIB3DS_POINT_FLAG_ARRAY: {
                 int i;
-                Lib3dsWord nflags = lib3ds_io_read_word(io);
+                uint16_t nflags = lib3ds_io_read_word(io);
                 if (mesh->nvertices && (nflags > mesh->nvertices)) {
                    // TODO: warning
                    nflags = mesh->nvertices;
@@ -376,6 +372,8 @@ lib3ds_mesh_read(Lib3dsFile *file, Lib3dsMesh *mesh, Lib3dsIo *io) {
 
             case LIB3DS_MESH_TEXTURE_INFO: {
                 int i, j;
+
+                //FIXME: mesh->map_type = lib3ds_io_read_word(io);
 
                 for (i = 0; i < 2; ++i) {
                     mesh->map_tile[i] = lib3ds_io_read_float(io);
@@ -459,7 +457,7 @@ point_array_write(Lib3dsMesh *mesh, Lib3dsIo *io) {
     c.size = 8 + 12 * mesh->nvertices;
     lib3ds_chunk_write(&c, io);
 
-    lib3ds_io_write_word(io, (Lib3dsWord) mesh->nvertices);
+    lib3ds_io_write_word(io, (uint16_t) mesh->nvertices);
 
     if (lib3ds_matrix_det(mesh->matrix) >= 0.0f) {
         for (i = 0; i < mesh->nvertices; ++i) {
@@ -497,7 +495,7 @@ flag_array_write(Lib3dsMesh *mesh, Lib3dsIo *io) {
     c.size = 8 + 2 * mesh->nvertices;
     lib3ds_chunk_write(&c, io);
 
-    lib3ds_io_write_word(io, (Lib3dsWord) mesh->nvertices);
+    lib3ds_io_write_word(io, (uint16_t) mesh->nvertices);
     for (i = 0; i < mesh->nvertices; ++i) {
         lib3ds_io_write_word(io, mesh->vertices[i].flags);
     }
@@ -517,7 +515,7 @@ face_array_write(Lib3dsFile *file, Lib3dsMesh *mesh, Lib3dsIo *io) {
     {
         int i;
 
-        lib3ds_io_write_word(io, (Lib3dsWord) mesh->nfaces);
+        lib3ds_io_write_word(io, (uint16_t) mesh->nfaces);
         for (i = 0; i < mesh->nfaces; ++i) {
             lib3ds_io_write_word(io, mesh->faces[i].index[0]);
             lib3ds_io_write_word(io, mesh->faces[i].index[1]);
@@ -530,7 +528,7 @@ face_array_write(Lib3dsFile *file, Lib3dsMesh *mesh, Lib3dsIo *io) {
         /*---- MSH_MAT_GROUP ----*/
         Lib3dsChunk c;
         int i, j;
-        Lib3dsWord num;
+        uint16_t num;
         char *matf = io->impl->tmp_mem = calloc(sizeof(char), mesh->nfaces);
         assert(matf);
 
@@ -544,15 +542,15 @@ face_array_write(Lib3dsFile *file, Lib3dsMesh *mesh, Lib3dsIo *io) {
                 }
 
                 c.chunk = LIB3DS_MSH_MAT_GROUP;
-                c.size = 6 + (Lib3dsDword)strlen(file->materials[mesh->faces[i].material]->name) + 1 + 2 + 2 * num;
+                c.size = 6 + (uint32_t)strlen(file->materials[mesh->faces[i].material]->name) + 1 + 2 + 2 * num;
                 lib3ds_chunk_write(&c, io);
                 lib3ds_io_write_string(io, file->materials[mesh->faces[i].material]->name);
                 lib3ds_io_write_word(io, num);
-                lib3ds_io_write_word(io, (Lib3dsWord) i);
+                lib3ds_io_write_word(io, (uint16_t) i);
 
                 for (j = i + 1; j < mesh->nfaces; ++j) {
                     if (mesh->faces[i].material == mesh->faces[j].material) {
-                        lib3ds_io_write_word(io, (Lib3dsWord) j);
+                        lib3ds_io_write_word(io, (uint16_t) j);
                         matf[j] = 1;
                     }
                 }
@@ -636,7 +634,7 @@ lib3ds_mesh_write(Lib3dsFile *file, Lib3dsMesh *mesh, Lib3dsIo *io) {
     point_array_write(mesh, io);
     texco_array_write(mesh, io);
 
-    if (mesh->map_projection != LIB3DS_MAP_NONE) {   /*---- LIB3DS_MESH_TEXTURE_INFO ----*/
+    if (mesh->map_type != LIB3DS_MAP_NONE) {   /*---- LIB3DS_MESH_TEXTURE_INFO ----*/
         Lib3dsChunk c;
         int i, j;
 
@@ -644,7 +642,7 @@ lib3ds_mesh_write(Lib3dsFile *file, Lib3dsMesh *mesh, Lib3dsIo *io) {
         c.size = 92;
         lib3ds_chunk_write(&c, io);
 
-        lib3ds_io_write_word(io, mesh->map_projection);
+        lib3ds_io_write_word(io, mesh->map_type);
 
         for (i = 0; i < 2; ++i) {
             lib3ds_io_write_float(io, mesh->map_tile[i]);

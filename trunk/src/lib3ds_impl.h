@@ -2,26 +2,22 @@
 #ifndef INCLUDED_LIB3DS_IMPL_H
 #define INCLUDED_LIB3DS_IMPL_H
 /*
- * The 3D Studio File Format Library
- * Copyright (C) 1996-2007 by Jan Eric Kyprianidis <www.kyprianidis.com>
- * All rights reserved.
- *
- * This program is  free  software;  you can redistribute it and/or modify it
- * under the terms of the  GNU Lesser General Public License  as published by 
- * the  Free Software Foundation;  either version 2.1 of the License,  or (at 
- * your option) any later version.
- *
- * This  program  is  distributed in  the  hope that it will  be useful,  but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or  FITNESS FOR A  PARTICULAR PURPOSE.  See the  GNU Lesser General Public  
- * License for more details.
- *
- * You should  have received  a copy of the GNU Lesser General Public License
- * along with  this program;  if not, write to the  Free Software Foundation,
- * Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- * $Id: chunk.h,v 1.16 2007/06/20 17:04:08 jeh Exp $
- */
+    Copyright (C) 1996-2008 by Jan Eric Kyprianidis <www.kyprianidis.com>
+    All rights reserved.
+    
+    This program is free  software: you can redistribute it and/or modify 
+    it under the terms of the GNU Lesser General Public License as published 
+    by the Free Software Foundation, either version 2.1 of the License, or 
+    (at your option) any later version.
+
+    Thisprogram  is  distributed in the hope that it will be useful, 
+    but WITHOUT ANY WARRANTY; without even the implied warranty of 
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
+    GNU Lesser General Public License for more details.
+    
+    You should  have received a copy of the GNU Lesser General Public License
+    along with  this program; If not, see <http://www.gnu.org/licenses/>. 
+*/
 
 #include "lib3ds.h"
 #include <stdio.h>
@@ -38,21 +34,15 @@
 #pragma warning ( disable : 4996 )
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#ifdef _DEBUG
-#ifndef ASSERT
-#define ASSERT(__expr) assert(__expr)
-#endif
-#define LIB3DS_ERROR_LOG \
-    {printf("\t***LIB3DS_ERROR_LOG*** %s : %d\n", __FILE__, __LINE__);}
-#else 
-#ifndef ASSERT
-#define ASSERT(__expr)
-#endif
-#define LIB3DS_ERROR_LOG
+#ifndef _MSC_VER
+#include <stdint.h>
+#else
+typedef unsigned __int8 uint8_t;
+typedef unsigned __int16 uint16_t;
+typedef unsigned __int32 uint32_t;
+typedef signed __int8 int8_t;
+typedef signed __int16 int16_t;
+typedef signed __int32 int32_t;
 #endif
 
 #ifndef TRUE
@@ -68,6 +58,10 @@ extern "C" {
 #define LIB3DS_HALFPI (LIB3DS_PI/2.0)
 #define LIB3DS_RAD_TO_DEG(x) ((180.0/LIB3DS_PI)*(x))
 #define LIB3DS_DEG_TO_RAD(x) ((LIB3DS_PI/180.0)*(x))
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef enum Lib3dsChunks {
   LIB3DS_NULL_CHUNK             =0x0000,
@@ -299,33 +293,33 @@ typedef enum Lib3dsChunks {
 } Lib3dsChunks;
 
 typedef struct Lib3dsChunk {
-    Lib3dsWord chunk;
-    Lib3dsDword size;
-    Lib3dsDword end;
-    Lib3dsDword cur;
+    uint16_t chunk;
+    uint32_t size;
+    uint32_t end;
+    uint32_t cur;
 } Lib3dsChunk; 
 
 extern void lib3ds_chunk_read(Lib3dsChunk *c, Lib3dsIo *io);
-extern void lib3ds_chunk_read_start(Lib3dsChunk *c, Lib3dsWord chunk, Lib3dsIo *io);
+extern void lib3ds_chunk_read_start(Lib3dsChunk *c, uint16_t chunk, Lib3dsIo *io);
 extern void lib3ds_chunk_read_tell(Lib3dsChunk *c, Lib3dsIo *io);
-extern Lib3dsWord lib3ds_chunk_read_next(Lib3dsChunk *c, Lib3dsIo *io);
+extern uint16_t lib3ds_chunk_read_next(Lib3dsChunk *c, Lib3dsIo *io);
 extern void lib3ds_chunk_read_reset(Lib3dsChunk *c, Lib3dsIo *io);
 extern void lib3ds_chunk_read_end(Lib3dsChunk *c, Lib3dsIo *io);
 extern void lib3ds_chunk_write(Lib3dsChunk *c, Lib3dsIo *io);
 extern void lib3ds_chunk_write_start(Lib3dsChunk *c, Lib3dsIo *io);
 extern void lib3ds_chunk_write_end(Lib3dsChunk *c, Lib3dsIo *io);
-extern const char* lib3ds_chunk_name(Lib3dsWord chunk);
-extern void lib3ds_chunk_unknown(Lib3dsWord chunk, Lib3dsIo *io);
+extern const char* lib3ds_chunk_name(uint16_t chunk);
+extern void lib3ds_chunk_unknown(uint16_t chunk, Lib3dsIo *io);
 
 struct Lib3dsIoImpl {
     jmp_buf jmpbuf;
-    Lib3dsIntd log_indent;
+    int log_indent;
     void *tmp_mem;
     Lib3dsNode *tmp_node;
 };
 
-extern LIB3DSAPI void lib3ds_io_setup(Lib3dsIo *io);
-extern LIB3DSAPI void lib3ds_io_cleanup(Lib3dsIo *io);
+extern void lib3ds_io_setup(Lib3dsIo *io);
+extern void lib3ds_io_cleanup(Lib3dsIo *io);
 
 extern long lib3ds_io_seek(Lib3dsIo *io, long offset, Lib3dsIoSeek origin);
 extern long lib3ds_io_tell(Lib3dsIo *io);
@@ -336,23 +330,23 @@ extern void lib3ds_io_log_indent(Lib3dsIo *io, int indent);
 extern void lib3ds_io_read_error(Lib3dsIo *io);
 extern void lib3ds_io_write_error(Lib3dsIo *io);
 
-extern Lib3dsByte lib3ds_io_read_byte(Lib3dsIo *io);
-extern Lib3dsWord lib3ds_io_read_word(Lib3dsIo *io);
-extern Lib3dsDword lib3ds_io_read_dword(Lib3dsIo *io);
-extern Lib3dsIntb lib3ds_io_read_intb(Lib3dsIo *io);
-extern Lib3dsIntw lib3ds_io_read_intw(Lib3dsIo *io);
-extern Lib3dsIntd lib3ds_io_read_intd(Lib3dsIo *io);
+extern uint8_t lib3ds_io_read_byte(Lib3dsIo *io);
+extern uint16_t lib3ds_io_read_word(Lib3dsIo *io);
+extern uint32_t lib3ds_io_read_dword(Lib3dsIo *io);
+extern int8_t lib3ds_io_read_intb(Lib3dsIo *io);
+extern int16_t lib3ds_io_read_intw(Lib3dsIo *io);
+extern int32_t lib3ds_io_read_intd(Lib3dsIo *io);
 extern float lib3ds_io_read_float(Lib3dsIo *io);
 extern void lib3ds_io_read_vector(Lib3dsIo *io, float v[3]);
 extern void lib3ds_io_read_rgb(Lib3dsIo *io, float rgb[3]);
 extern void lib3ds_io_read_string(Lib3dsIo *io, char *s, int buflen);
 
-extern void lib3ds_io_write_byte(Lib3dsIo *io, Lib3dsByte b);
-extern void lib3ds_io_write_word(Lib3dsIo *io, Lib3dsWord w);
-extern void lib3ds_io_write_dword(Lib3dsIo *io, Lib3dsDword d);
-extern void lib3ds_io_write_intb(Lib3dsIo *io, Lib3dsIntb b);
-extern void lib3ds_io_write_intw(Lib3dsIo *io, Lib3dsIntw w);
-extern void lib3ds_io_write_intd(Lib3dsIo *io, Lib3dsIntd d);
+extern void lib3ds_io_write_byte(Lib3dsIo *io, uint8_t b);
+extern void lib3ds_io_write_word(Lib3dsIo *io, uint16_t w);
+extern void lib3ds_io_write_dword(Lib3dsIo *io, uint32_t d);
+extern void lib3ds_io_write_intb(Lib3dsIo *io, int8_t b);
+extern void lib3ds_io_write_intw(Lib3dsIo *io, int16_t w);
+extern void lib3ds_io_write_intd(Lib3dsIo *io, int32_t d);
 extern void lib3ds_io_write_float(Lib3dsIo *io, float l);
 extern void lib3ds_io_write_vector(Lib3dsIo *io, float v[3]);
 extern void lib3ds_io_write_rgb(Lib3dsIo *io, float rgb[3]);
@@ -382,9 +376,9 @@ extern void lib3ds_node_write(Lib3dsNode *node, Lib3dsFile *file, Lib3dsIo *io);
 typedef void (*Lib3dsFreeFunc)(void *ptr);
 
 extern void* lib3ds_util_realloc_array(void *ptr, int old_size, int new_size, int element_size);
-extern void lib3ds_util_reserve_array(void ***ptr, Lib3dsIntd *n, Lib3dsIntd *size, Lib3dsIntd new_size, Lib3dsBool force, Lib3dsFreeFunc free_func);
-extern void lib3ds_util_insert_array(void ***ptr, Lib3dsIntd *n, Lib3dsIntd *size, void *element, Lib3dsIntd index);
-extern void lib3ds_util_remove_array(void ***ptr, Lib3dsIntd *n, Lib3dsIntd index, Lib3dsFreeFunc free_func);
+extern void lib3ds_util_reserve_array(void ***ptr, int *n, int *size, int new_size, int force, Lib3dsFreeFunc free_func);
+extern void lib3ds_util_insert_array(void ***ptr, int *n, int *size, void *element, int index);
+extern void lib3ds_util_remove_array(void ***ptr, int *n, int index, Lib3dsFreeFunc free_func);
 
 #ifdef __cplusplus
 }

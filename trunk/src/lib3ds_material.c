@@ -1,24 +1,20 @@
 /*
- * The 3D Studio File Format Library
- * Copyright (C) 1996-2007 by Jan Eric Kyprianidis <www.kyprianidis.com>
- * All rights reserved.
- *
- * This program is  free  software;  you can redistribute it and/or modify it
- * under the terms of the  GNU Lesser General Public License  as published by
- * the  Free Software Foundation;  either version 2.1 of the License,  or (at
- * your option) any later version.
- *
- * This  program  is  distributed in  the  hope that it will  be useful,  but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or  FITNESS FOR A  PARTICULAR PURPOSE.  See the  GNU Lesser General Public
- * License for more details.
- *
- * You should  have received  a copy of the GNU Lesser General Public License
- * along with  this program;  if not, write to the  Free Software Foundation,
- * Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- * $Id: material.c,v 1.24 2007/06/20 17:04:08 jeh Exp $
- */
+    Copyright (C) 1996-2008 by Jan Eric Kyprianidis <www.kyprianidis.com>
+    All rights reserved.
+    
+    This program is free  software: you can redistribute it and/or modify 
+    it under the terms of the GNU Lesser General Public License as published 
+    by the Free Software Foundation, either version 2.1 of the License, or 
+    (at your option) any later version.
+
+    Thisprogram  is  distributed in the hope that it will be useful, 
+    but WITHOUT ANY WARRANTY; without even the implied warranty of 
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
+    GNU Lesser General Public License for more details.
+    
+    You should  have received a copy of the GNU Lesser General Public License
+    along with  this program; If not, see <http://www.gnu.org/licenses/>. 
+*/
 #include "lib3ds_impl.h"
 
 
@@ -87,8 +83,8 @@ lib3ds_material_free(Lib3dsMaterial *material) {
 static void
 color_read(float rgb[3], Lib3dsIo *io) {
     Lib3dsChunk c;
-    Lib3dsWord chunk;
-    Lib3dsBool have_lin = FALSE;
+    uint16_t chunk;
+    int have_lin = FALSE;
 
     lib3ds_chunk_read_start(&c, 0, io);
 
@@ -146,14 +142,14 @@ color_read(float rgb[3], Lib3dsIo *io) {
 static void
 int_percentage_read(float *p, Lib3dsIo *io) {
     Lib3dsChunk c;
-    Lib3dsWord chunk;
+    uint16_t chunk;
 
     lib3ds_chunk_read_start(&c, 0, io);
 
     while ((chunk = lib3ds_chunk_read_next(&c, io)) != 0) {
         switch (chunk) {
             case LIB3DS_INT_PERCENTAGE: {
-                Lib3dsIntw i = lib3ds_io_read_intw(io);
+                int16_t i = lib3ds_io_read_intw(io);
                 *p = (float)(1.0 * i / 100.0);
                 break;
             }
@@ -170,7 +166,7 @@ int_percentage_read(float *p, Lib3dsIo *io) {
 static void
 texture_map_read(Lib3dsTextureMap *map, Lib3dsIo *io) {
     Lib3dsChunk c;
-    Lib3dsWord chunk;
+    uint16_t chunk;
 
     lib3ds_chunk_read_start(&c, 0, io);
 
@@ -266,9 +262,9 @@ texture_map_read(Lib3dsTextureMap *map, Lib3dsIo *io) {
 void
 lib3ds_material_read(Lib3dsMaterial *material, Lib3dsIo *io) {
     Lib3dsChunk c;
-    Lib3dsWord chunk;
+    uint16_t chunk;
 
-    ASSERT(material);
+    assert(material);
     lib3ds_chunk_read_start(&c, LIB3DS_MAT_ENTRY, io);
 
     while ((chunk = lib3ds_chunk_read_next(&c, io)) != 0) {
@@ -364,7 +360,7 @@ lib3ds_material_read(Lib3dsMaterial *material, Lib3dsIo *io) {
             }
 
             case LIB3DS_MAT_ADDITIVE: {
-                material->additive = TRUE;
+                material->is_additive = TRUE;
                 break;
             }
 
@@ -511,16 +507,16 @@ color_write(float rgb[3], Lib3dsIo *io) {
     c.chunk = LIB3DS_COLOR_24;
     c.size = 9;
     lib3ds_chunk_write(&c, io);
-    lib3ds_io_write_byte(io, (Lib3dsByte)floor(255.0*rgb[0] + 0.5));
-    lib3ds_io_write_byte(io, (Lib3dsByte)floor(255.0*rgb[1] + 0.5));
-    lib3ds_io_write_byte(io, (Lib3dsByte)floor(255.0*rgb[2] + 0.5));
+    lib3ds_io_write_byte(io, (uint8_t)floor(255.0*rgb[0] + 0.5));
+    lib3ds_io_write_byte(io, (uint8_t)floor(255.0*rgb[1] + 0.5));
+    lib3ds_io_write_byte(io, (uint8_t)floor(255.0*rgb[2] + 0.5));
 
     c.chunk = LIB3DS_LIN_COLOR_24;
     c.size = 9;
     lib3ds_chunk_write(&c, io);
-    lib3ds_io_write_byte(io, (Lib3dsByte)floor(255.0*rgb[0] + 0.5));
-    lib3ds_io_write_byte(io, (Lib3dsByte)floor(255.0*rgb[1] + 0.5));
-    lib3ds_io_write_byte(io, (Lib3dsByte)floor(255.0*rgb[2] + 0.5));
+    lib3ds_io_write_byte(io, (uint8_t)floor(255.0*rgb[0] + 0.5));
+    lib3ds_io_write_byte(io, (uint8_t)floor(255.0*rgb[1] + 0.5));
+    lib3ds_io_write_byte(io, (uint8_t)floor(255.0*rgb[2] + 0.5));
 }
 
 
@@ -531,12 +527,12 @@ int_percentage_write(float p, Lib3dsIo *io) {
     c.chunk = LIB3DS_INT_PERCENTAGE;
     c.size = 8;
     lib3ds_chunk_write(&c, io);
-    lib3ds_io_write_intw(io, (Lib3dsByte)floor(100.0*p + 0.5));
+    lib3ds_io_write_intw(io, (uint8_t)floor(100.0*p + 0.5));
 }
 
 
 static void
-texture_map_write(Lib3dsWord chunk, Lib3dsTextureMap *map, Lib3dsIo *io) {
+texture_map_write(uint16_t chunk, Lib3dsTextureMap *map, Lib3dsIo *io) {
     Lib3dsChunk c;
 
     if (strlen(map->name) == 0) {
@@ -550,7 +546,7 @@ texture_map_write(Lib3dsWord chunk, Lib3dsTextureMap *map, Lib3dsIo *io) {
     { /*---- LIB3DS_MAT_MAPNAME ----*/
         Lib3dsChunk c;
         c.chunk = LIB3DS_MAT_MAPNAME;
-        c.size = 6 + (Lib3dsDword)strlen(map->name) + 1;
+        c.size = 6 + (uint32_t)strlen(map->name) + 1;
         lib3ds_chunk_write(&c, io);
         lib3ds_io_write_string(io, map->name);
     }
@@ -560,7 +556,7 @@ texture_map_write(Lib3dsWord chunk, Lib3dsTextureMap *map, Lib3dsIo *io) {
         c.chunk = LIB3DS_MAT_MAP_TILING;
         c.size = 8;
         lib3ds_chunk_write(&c, io);
-        lib3ds_io_write_word(io, (Lib3dsWord)map->flags);
+        lib3ds_io_write_word(io, (uint16_t)map->flags);
     }
 
     { /*---- LIB3DS_MAT_MAP_TEXBLUR ----*/
@@ -616,9 +612,9 @@ texture_map_write(Lib3dsWord chunk, Lib3dsTextureMap *map, Lib3dsIo *io) {
         c.chunk = LIB3DS_MAT_MAP_COL1;
         c.size = 9;
         lib3ds_chunk_write(&c, io);
-        lib3ds_io_write_byte(io, (Lib3dsByte)floor(255.0*map->tint_1[0] + 0.5));
-        lib3ds_io_write_byte(io, (Lib3dsByte)floor(255.0*map->tint_1[1] + 0.5));
-        lib3ds_io_write_byte(io, (Lib3dsByte)floor(255.0*map->tint_1[2] + 0.5));
+        lib3ds_io_write_byte(io, (uint8_t)floor(255.0*map->tint_1[0] + 0.5));
+        lib3ds_io_write_byte(io, (uint8_t)floor(255.0*map->tint_1[1] + 0.5));
+        lib3ds_io_write_byte(io, (uint8_t)floor(255.0*map->tint_1[2] + 0.5));
     }
 
     { /*---- LIB3DS_MAT_MAP_COL2 ----*/
@@ -626,9 +622,9 @@ texture_map_write(Lib3dsWord chunk, Lib3dsTextureMap *map, Lib3dsIo *io) {
         c.chunk = LIB3DS_MAT_MAP_COL2;
         c.size = 9;
         lib3ds_chunk_write(&c, io);
-        lib3ds_io_write_byte(io, (Lib3dsByte)floor(255.0*map->tint_2[0] + 0.5));
-        lib3ds_io_write_byte(io, (Lib3dsByte)floor(255.0*map->tint_2[1] + 0.5));
-        lib3ds_io_write_byte(io, (Lib3dsByte)floor(255.0*map->tint_2[2] + 0.5));
+        lib3ds_io_write_byte(io, (uint8_t)floor(255.0*map->tint_2[0] + 0.5));
+        lib3ds_io_write_byte(io, (uint8_t)floor(255.0*map->tint_2[1] + 0.5));
+        lib3ds_io_write_byte(io, (uint8_t)floor(255.0*map->tint_2[2] + 0.5));
     }
 
     { /*---- LIB3DS_MAT_MAP_RCOL ----*/
@@ -636,9 +632,9 @@ texture_map_write(Lib3dsWord chunk, Lib3dsTextureMap *map, Lib3dsIo *io) {
         c.chunk = LIB3DS_MAT_MAP_RCOL;
         c.size = 9;
         lib3ds_chunk_write(&c, io);
-        lib3ds_io_write_byte(io, (Lib3dsByte)floor(255.0*map->tint_r[0] + 0.5));
-        lib3ds_io_write_byte(io, (Lib3dsByte)floor(255.0*map->tint_r[1] + 0.5));
-        lib3ds_io_write_byte(io, (Lib3dsByte)floor(255.0*map->tint_r[2] + 0.5));
+        lib3ds_io_write_byte(io, (uint8_t)floor(255.0*map->tint_r[0] + 0.5));
+        lib3ds_io_write_byte(io, (uint8_t)floor(255.0*map->tint_r[1] + 0.5));
+        lib3ds_io_write_byte(io, (uint8_t)floor(255.0*map->tint_r[2] + 0.5));
     }
 
     { /*---- LIB3DS_MAT_MAP_GCOL ----*/
@@ -646,9 +642,9 @@ texture_map_write(Lib3dsWord chunk, Lib3dsTextureMap *map, Lib3dsIo *io) {
         c.chunk = LIB3DS_MAT_MAP_GCOL;
         c.size = 9;
         lib3ds_chunk_write(&c, io);
-        lib3ds_io_write_byte(io, (Lib3dsByte)floor(255.0*map->tint_g[0] + 0.5));
-        lib3ds_io_write_byte(io, (Lib3dsByte)floor(255.0*map->tint_g[1] + 0.5));
-        lib3ds_io_write_byte(io, (Lib3dsByte)floor(255.0*map->tint_g[2] + 0.5));
+        lib3ds_io_write_byte(io, (uint8_t)floor(255.0*map->tint_g[0] + 0.5));
+        lib3ds_io_write_byte(io, (uint8_t)floor(255.0*map->tint_g[1] + 0.5));
+        lib3ds_io_write_byte(io, (uint8_t)floor(255.0*map->tint_g[2] + 0.5));
     }
 
     { /*---- LIB3DS_MAT_MAP_BCOL ----*/
@@ -656,9 +652,9 @@ texture_map_write(Lib3dsWord chunk, Lib3dsTextureMap *map, Lib3dsIo *io) {
         c.chunk = LIB3DS_MAT_MAP_BCOL;
         c.size = 9;
         lib3ds_chunk_write(&c, io);
-        lib3ds_io_write_byte(io, (Lib3dsByte)floor(255.0*map->tint_b[0] + 0.5));
-        lib3ds_io_write_byte(io, (Lib3dsByte)floor(255.0*map->tint_b[1] + 0.5));
-        lib3ds_io_write_byte(io, (Lib3dsByte)floor(255.0*map->tint_b[2] + 0.5));
+        lib3ds_io_write_byte(io, (uint8_t)floor(255.0*map->tint_b[0] + 0.5));
+        lib3ds_io_write_byte(io, (uint8_t)floor(255.0*map->tint_b[1] + 0.5));
+        lib3ds_io_write_byte(io, (uint8_t)floor(255.0*map->tint_b[2] + 0.5));
     }
 
     lib3ds_chunk_write_end(&c, io);
@@ -675,7 +671,7 @@ lib3ds_material_write(Lib3dsMaterial *material, Lib3dsIo *io) {
     { /*---- LIB3DS_MAT_NAME ----*/
         Lib3dsChunk c;
         c.chunk = LIB3DS_MAT_NAME;
-        c.size = 6 + (Lib3dsDword)strlen(material->name) + 1;
+        c.size = 6 + (uint32_t)strlen(material->name) + 1;
         lib3ds_chunk_write(&c, io);
         lib3ds_io_write_string(io, material->name);
     }
@@ -787,7 +783,7 @@ lib3ds_material_write(Lib3dsMaterial *material, Lib3dsIo *io) {
         lib3ds_chunk_write(&c, io);
     }
 
-    if (material->additive) { /*---- LIB3DS_MAT_ADDITIVE ----*/
+    if (material->is_additive) { /*---- LIB3DS_MAT_ADDITIVE ----*/
         Lib3dsChunk c;
         c.chunk = LIB3DS_MAT_ADDITIVE;
         c.size = 6;

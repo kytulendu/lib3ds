@@ -1,24 +1,20 @@
 /*
- * The 3D Studio File Format Library
- * Copyright (C) 1996-2007 by Jan Eric Kyprianidis <www.kyprianidis.com>
- * All rights reserved.
- *
- * This program is  free  software;  you can redistribute it and/or modify it
- * under the terms of the  GNU Lesser General Public License  as published by
- * the  Free Software Foundation;  either version 2.1 of the License,  or (at
- * your option) any later version.
- *
- * This  program  is  distributed in  the  hope that it will  be useful,  but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or  FITNESS FOR A  PARTICULAR PURPOSE.  See the  GNU Lesser General Public
- * License for more details.
- *
- * You should  have received  a copy of the GNU Lesser General Public License
- * along with  this program;  if not, write to the  Free Software Foundation,
- * Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- * $Id: node.c,v 1.20 2007/06/20 17:04:08 jeh Exp $
- */
+    Copyright (C) 1996-2008 by Jan Eric Kyprianidis <www.kyprianidis.com>
+    All rights reserved.
+    
+    This program is free  software: you can redistribute it and/or modify 
+    it under the terms of the GNU Lesser General Public License as published 
+    by the Free Software Foundation, either version 2.1 of the License, or 
+    (at your option) any later version.
+
+    Thisprogram  is  distributed in the hope that it will be useful, 
+    but WITHOUT ANY WARRANTY; without even the implied warranty of 
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
+    GNU Lesser General Public License for more details.
+    
+    You should  have received a copy of the GNU Lesser General Public License
+    along with  this program; If not, see <http://www.gnu.org/licenses/>. 
+*/
 #include "lib3ds_impl.h"
 
 
@@ -51,7 +47,7 @@ lib3ds_node_new(Lib3dsNodeType type) {
 
 static void
 free_node_and_childs(Lib3dsNode *node) {
-    ASSERT(node);
+    assert(node);
     switch (node->type) {
         case LIB3DS_AMBIENT_NODE: {
             Lib3dsAmbientNode *n = (Lib3dsAmbientNode*)node;
@@ -133,7 +129,7 @@ free_node_and_childs(Lib3dsNode *node) {
  */
 void
 lib3ds_node_free(Lib3dsNode *node) {
-    ASSERT(node);
+    assert(node);
     free_node_and_childs(node);
 }
 
@@ -149,7 +145,7 @@ lib3ds_node_free(Lib3dsNode *node) {
  */
 void
 lib3ds_node_eval(Lib3dsNode *node, float t) {
-    ASSERT(node);
+    assert(node);
     switch (node->type) {
         case LIB3DS_AMBIENT_NODE: {
             Lib3dsAmbientNode *n = (Lib3dsAmbientNode*)node;
@@ -292,7 +288,7 @@ lib3ds_node_by_name(Lib3dsNode *node, const char* name, Lib3dsNodeType type) {
  * \return A pointer to the first matching node, or NULL if not found.
  */
 Lib3dsNode*
-lib3ds_node_by_id(Lib3dsNode *node, Lib3dsWord node_id) {
+lib3ds_node_by_id(Lib3dsNode *node, uint16_t node_id) {
     Lib3dsNode *p, *q;
 
     for (p = node->childs; p != 0; p = p->next) {
@@ -311,9 +307,9 @@ lib3ds_node_by_id(Lib3dsNode *node, Lib3dsWord node_id) {
 void
 lib3ds_node_read(Lib3dsNode *node, Lib3dsFile *file, Lib3dsIo *io) {
     Lib3dsChunk c;
-    Lib3dsWord chunk;
+    uint16_t chunk;
 
-    ASSERT(node);
+    assert(node);
     lib3ds_chunk_read_start(&c, 0, io);
 
     switch (c.chunk) {
@@ -614,7 +610,7 @@ lib3ds_node_write(Lib3dsNode *node, Lib3dsFile *file, Lib3dsIo *io) {
     { /*---- LIB3DS_NODE_HDR ----*/
         Lib3dsChunk c;
         c.chunk = LIB3DS_NODE_HDR;
-        c.size = 6 + 1 + (Lib3dsDword)strlen(node->name) + 2 + 2 + 2;
+        c.size = 6 + 1 + (uint32_t)strlen(node->name) + 2 + 2 + 2;
         lib3ds_chunk_write(&c, io);
         lib3ds_io_write_string(io, node->name);
         lib3ds_io_write_word(io, node->flags1);
@@ -648,7 +644,7 @@ lib3ds_node_write(Lib3dsNode *node, Lib3dsFile *file, Lib3dsIo *io) {
                     name = n->instance;
 
                     c.chunk = LIB3DS_INSTANCE_NAME;
-                    c.size = 6 + 1 + (Lib3dsDword)strlen(name);
+                    c.size = 6 + 1 + (uint32_t)strlen(name);
                     lib3ds_chunk_write(&c, io);
                     lib3ds_io_write_string(io, name);
                 }

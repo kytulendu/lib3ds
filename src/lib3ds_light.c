@@ -1,24 +1,20 @@
 /*
- * The 3D Studio File Format Library
- * Copyright (C) 1996-2007 by Jan Eric Kyprianidis <www.kyprianidis.com>
- * All rights reserved.
- *
- * This program is  free  software;  you can redistribute it and/or modify it
- * under the terms of the  GNU Lesser General Public License  as published by
- * the  Free Software Foundation;  either version 2.1 of the License,  or (at
- * your option) any later version.
- *
- * This  program  is  distributed in  the  hope that it will  be useful,  but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or  FITNESS FOR A  PARTICULAR PURPOSE.  See the  GNU Lesser General Public
- * License for more details.
- *
- * You should  have received  a copy of the GNU Lesser General Public License
- * along with  this program;  if not, write to the  Free Software Foundation,
- * Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- * $Id: light.c,v 1.15 2007/06/20 17:04:08 jeh Exp $
- */
+    Copyright (C) 1996-2008 by Jan Eric Kyprianidis <www.kyprianidis.com>
+    All rights reserved.
+    
+    This program is free  software: you can redistribute it and/or modify 
+    it under the terms of the GNU Lesser General Public License as published 
+    by the Free Software Foundation, either version 2.1 of the License, or 
+    (at your option) any later version.
+
+    Thisprogram  is  distributed in the hope that it will be useful, 
+    but WITHOUT ANY WARRANTY; without even the implied warranty of 
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
+    GNU Lesser General Public License for more details.
+    
+    You should  have received a copy of the GNU Lesser General Public License
+    along with  this program; If not, see <http://www.gnu.org/licenses/>. 
+*/
 #include "lib3ds_impl.h"
 
 
@@ -26,8 +22,8 @@ Lib3dsLight*
 lib3ds_light_new(const char *name) {
     Lib3dsLight *light;
 
-    ASSERT(name);
-    ASSERT(strlen(name) < 64);
+    assert(name);
+    assert(strlen(name) < 64);
 
     light = (Lib3dsLight*)calloc(sizeof(Lib3dsLight), 1);
     if (!light) {
@@ -49,7 +45,7 @@ lib3ds_light_free(Lib3dsLight *light) {
 static void
 spotlight_read(Lib3dsLight *light, Lib3dsIo *io) {
     Lib3dsChunk c;
-    Lib3dsWord chunk;
+    uint16_t chunk;
     int i;
 
     lib3ds_chunk_read_start(&c, LIB3DS_DL_SPOTLIGHT, io);
@@ -128,7 +124,7 @@ spotlight_read(Lib3dsLight *light, Lib3dsIo *io) {
 void
 lib3ds_light_read(Lib3dsLight *light, Lib3dsIo *io) {
     Lib3dsChunk c;
-    Lib3dsWord chunk;
+    uint16_t chunk;
 
     lib3ds_chunk_read_start(&c, LIB3DS_N_DIRECT_LIGHT, io);
 

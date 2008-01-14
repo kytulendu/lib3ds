@@ -1,31 +1,28 @@
 /*
-* The 3D Studio File Format Library
-* Copyright (C) 1996-2007 by Jan Eric Kyprianidis <www.lib3ds.org>
-* All rights reserved.
-*
-* This program is  free  software;  you can redistribute it and/or modify it
-* under the terms of the  GNU Lesser General Public License  as published by
-* the  Free Software Foundation;  either version 2.1 of the License,  or (at
-* your option) any later version.
-*
-* This  program  is  distributed in  the  hope that it will  be useful,  but
-* WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-* or  FITNESS FOR A  PARTICULAR PURPOSE.  See the  GNU Lesser General Public
-* License for more details.
-*
-* You should  have received  a copy of the GNU Lesser General Public License
-* along with  this program;  if not, write to the  Free Software Foundation,
-* Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*
-* $Id: 3dsplay.c,v 1.14 2007/06/18 06:51:53 jeh Exp $
-*/
+    Copyright (C) 1996-2008 by Jan Eric Kyprianidis <www.kyprianidis.com>
+    All rights reserved.
+    
+    This program is free  software: you can redistribute it and/or modify 
+    it under the terms of the GNU Lesser General Public License as published 
+    by the Free Software Foundation, either version 2.1 of the License, or 
+    (at your option) any later version.
 
+    Thisprogram  is  distributed in the hope that it will be useful, 
+    but WITHOUT ANY WARRANTY; without even the implied warranty of 
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
+    GNU Lesser General Public License for more details.
+    
+    You should  have received a copy of the GNU Lesser General Public License
+    along with  this program; If not, see <http://www.gnu.org/licenses/>. 
+*/
 #include <lib3ds.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <assert.h>
+
+#define FRAMES_PER_SECOND 10
 
 // OS X has a different path than everyone else
 #ifdef __APPLE__
@@ -182,6 +179,8 @@ build_menu() {
     glutAddMenuEntry("Show bounds", callback(toggle_bool, &show_bounds));
 }
 
+#define LIB3DS_PI 3.14159265358979323846
+
 
 /*!
 * Time function, called every frame
@@ -189,12 +188,30 @@ build_menu() {
 static void
 timer_cb(int value) {
     if (!halt) {
+
+        {
+            Lib3dsObjectNode* n = (Lib3dsObjectNode*)file->nodes;
+            float q[4];
+            float vl;
+            
+            assert(n);
+            lib3ds_file_eval(file, current_frame);
+            lib3ds_quat_copy(q, n->rot);
+            vl = sqrt(q[0]*q[0] + q[1]*q[1] + q[2]*q[2]);
+            printf("%8f - %8f %8f %8f - %8f\n",
+                current_frame,
+                q[0]/vl, q[1]/vl, q[2]/vl,  
+                2.0 * acos(q[3]) * 180.0 / LIB3DS_PI
+            );
+        }
+
         view_rotz += anim_rotz;
-        current_frame+= 0.25f;
+        current_frame+= 1;
         if (current_frame > file->frames)
             current_frame = 0;
         lib3ds_file_eval(file, current_frame);
-        glutTimerFunc(10, timer_cb, 0);
+
+        glutTimerFunc(1000 / FRAMES_PER_SECOND, timer_cb, 0);
     }
     glutPostRedisplay();
 }
@@ -416,7 +433,7 @@ render_node(Lib3dsNode *node) {
         }
     }
     if (node->type == LIB3DS_OBJECT_NODE) {
-        Lib3dsIntd index;
+        int index;
         Lib3dsMesh *mesh;
         Lib3dsObjectNode *n = (Lib3dsObjectNode*)node;
 
@@ -778,7 +795,7 @@ display(void) {
     float *campos;
     float *tgt;
     float M[4][4];
-    Lib3dsIntd camidx;
+    int camidx;
     Lib3dsCamera *cam;
     float v[3];
     Lib3dsNode *p;
@@ -1153,7 +1170,7 @@ main(int argc, char** argv) {
     glutKeyboardFunc(keyboard);
     glutMouseFunc(mouse_cb);
     glutMotionFunc(drag_cb);
-    glutTimerFunc(10, timer_cb, 0);
+    glutTimerFunc(1000 / FRAMES_PER_SECOND, timer_cb, 0);
     glutMainLoop();
     return(0);
 }

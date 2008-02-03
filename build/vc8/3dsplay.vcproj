@@ -20,8 +20,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)build_$(ConfigurationName)_$(PlatformName)"
-			IntermediateDirectory="$(OutDir)/.tmp/$(ProjectName)"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)/.tmp/$(ProjectName)"
 			ConfigurationType="1"
 			>
 			<Tool
@@ -42,7 +42,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../../src"
+				AdditionalIncludeDirectories="../.."
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -175,8 +175,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)build_$(ConfigurationName)_$(PlatformName)"
-			IntermediateDirectory="$(OutDir)/.tmp/$(ProjectName)"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)/.tmp/$(ProjectName)"
 			ConfigurationType="1"
 			>
 			<Tool
@@ -196,7 +196,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="../../src"
+				AdditionalIncludeDirectories="../.."
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;"
 				RuntimeLibrary="2"
 				DisableLanguageExtensions="true"
@@ -331,7 +331,7 @@
 	</References>
 	<Files>
 		<File
-			RelativePath="..\..\util\3dsplay.c"
+			RelativePath="..\..\examples\3dsplay.c"
 			>
 		</File>
 	</Files>

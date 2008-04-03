@@ -369,10 +369,10 @@ typedef struct Lib3dsVertex {
 } Lib3dsVertex; 
 
 typedef struct Lib3dsFace {
-    int         index[3];
-    unsigned    flags;
-    int         material;
-    unsigned    smoothing_group;
+    unsigned short  index[3];
+    unsigned        flags;
+    int             material;
+    unsigned        smoothing_group;
 } Lib3dsFace; 
 
 /* Triangular mesh object */
@@ -384,9 +384,9 @@ typedef struct Lib3dsMesh {
     unsigned        object_flags;        /* @see Lib3dsObjectFlags */ 
     int             color;               /* Index to editor palette [0..255] */
     float           matrix[4][4];        /* Transformation matrix for mesh data */
-    int             nvertices;		     /* Number of vertices in vertex array (max. 65535) */
+    unsigned short  nvertices;		     /* Number of vertices in vertex array (max. 65535) */
     Lib3dsVertex*   vertices;	         /* Point list */
-    int             nfaces;	             /* Number of faces in face array (max. 65535) */
+    unsigned short  nfaces;	             /* Number of faces in face array (max. 65535) */
 	Lib3dsFace*     faces;               /* Array */
 	char            box_front[64];
 	char            box_back[64];
@@ -681,9 +681,9 @@ extern LIB3DSAPI float lib3ds_math_ease(
 
 /**  
     Computes a point on a n-dimensional cubic hermite spline. 
-    \param v,   
+    \param v   
         [out] Result 
-    \param a,   
+    \param a
         [in] First point of the spline.
     \param p   
         [in] Tangent at the first point of the spline.
@@ -727,7 +727,7 @@ extern LIB3DSAPI void lib3ds_vector_zero(
         [in] The source vector.
 */
 extern LIB3DSAPI void lib3ds_vector_copy( 
-    float dest[3],  
+    float dst[3],  
     float src[3]);
 
 /** 

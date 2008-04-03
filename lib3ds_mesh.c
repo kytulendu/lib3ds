@@ -488,7 +488,7 @@ flag_array_write(Lib3dsMesh *mesh, Lib3dsIo *io) {
     Lib3dsChunk c;
     int i;
 
-    if ((mesh->nvertices < 0) || (mesh->nvertices > 65535)) {
+    if (mesh->nvertices == 0) {
         return;
     }
     c.chunk = LIB3DS_POINT_FLAG_ARRAY;
@@ -506,7 +506,7 @@ static void
 face_array_write(Lib3dsFile *file, Lib3dsMesh *mesh, Lib3dsIo *io) {
     Lib3dsChunk c;
 
-    if ((mesh->nfaces < 0) || (mesh->nfaces > 65535)) {
+    if (mesh->nfaces == 0) {
         return;
     }
     c.chunk = LIB3DS_FACE_ARRAY;
@@ -608,7 +608,7 @@ texco_array_write(Lib3dsMesh *mesh, Lib3dsIo *io) {
     Lib3dsChunk c;
     int i;
 
-    if ((mesh->nvertices < 0) || (mesh->nvertices > 65535)) {
+    if (mesh->nvertices == 0) {
         return;
     }
      

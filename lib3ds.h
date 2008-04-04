@@ -184,7 +184,7 @@ typedef enum Lib3dsTextureMapFlags {
 
 /* Material texture map */
 typedef struct Lib3dsTextureMap {
-    int         user_id;
+    unsigned    user_id;
     void*       user_ptr;
     char        name[64];
     unsigned    flags;
@@ -235,7 +235,7 @@ typedef enum Lib3dsShading {
 /** Material */
 typedef struct Lib3dsMaterial {
     unsigned            user_type;          /* == 'MAT' */
-    int                 user_id;
+    unsigned            user_id;
     void*               user_ptr;
     char                name[64];			/* Material name */
     float               ambient[3];			/* Material ambient reflectivity */
@@ -292,7 +292,7 @@ typedef enum Lib3dsObjectFlags {
 /** Camera object */
 typedef struct Lib3dsCamera {
     unsigned    user_type;          /* == 'CAM' */
-    int         user_id;
+    unsigned    user_id;
     void*       user_ptr;
     char        name[64];
     unsigned    object_flags; /*< @see Lib3dsObjectFlags */ 
@@ -308,7 +308,7 @@ typedef struct Lib3dsCamera {
 /** Light object */
 typedef struct Lib3dsLight {
     unsigned    user_type;          /* == 'LGHT' */
-    int         user_id;
+    unsigned    user_id;
     void*       user_ptr;
     char        name[64];
     unsigned    object_flags; /*< @see Lib3dsObjectFlags */ 
@@ -378,7 +378,7 @@ typedef struct Lib3dsFace {
 /* Triangular mesh object */
 typedef struct Lib3dsMesh {
     unsigned        user_type;          /* == 'MESH' */
-    int             user_id;
+    unsigned        user_id;
     void*           user_ptr;
     char            name[64];		     /* Mesh name. Don't use more than 8 characters  */
     unsigned        object_flags;        /* @see Lib3dsObjectFlags */ 
@@ -436,7 +436,7 @@ typedef enum {
  */
 typedef struct Lib3dsNode {
     unsigned            user_type;          /* == 'MAT' */
-    int                 user_id;
+    unsigned            user_id;
     void*               user_ptr;
     struct Lib3dsNode*  next;
     struct Lib3dsNode*  childs;
@@ -489,7 +489,7 @@ typedef enum {
 
 typedef struct Lib3dsTrack {
     unsigned        user_type;          /* == 'TRCK' */
-    int             user_id;
+    unsigned        user_id;
     void*           user_ptr;
     Lib3dsNode*     node;
     unsigned        flags;
@@ -564,7 +564,7 @@ typedef struct Lib3dsSpotNode {
  */
 typedef struct Lib3dsFile {
     unsigned            user_type;          /* == 'FILE' */
-    int                 user_id;
+    unsigned            user_id;
     void*               user_ptr;
     unsigned            mesh_version;
     unsigned            keyf_revision;

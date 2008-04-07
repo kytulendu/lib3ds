@@ -619,23 +619,27 @@ lib3ds_node_write(Lib3dsNode *node, Lib3dsFile *file, Lib3dsIo *io) {
     }
 
     switch (c.chunk) {
-        case LIB3DS_AMBIENT_NODE_TAG: { /*---- LIB3DS_COL_TRACK_TAG ----*/
-            Lib3dsChunk c;
+        case LIB3DS_AMBIENT_NODE_TAG: {
             Lib3dsAmbientNode *n = (Lib3dsAmbientNode*)node;
-            c.chunk = LIB3DS_COL_TRACK_TAG;
-            lib3ds_chunk_write_start(&c, io);
-            lib3ds_track_write(n->color_track, io);
-            lib3ds_chunk_write_end(&c, io);
+            if (n->color_track) { /*---- LIB3DS_COL_TRACK_TAG ----*/
+                Lib3dsChunk c;
+                c.chunk = LIB3DS_COL_TRACK_TAG;
+                lib3ds_chunk_write_start(&c, io);
+                lib3ds_track_write(n->color_track, io);
+                lib3ds_chunk_write_end(&c, io);
+            }
             break;
         }
 
-        case LIB3DS_OBJECT_NODE_TAG: { /*---- LIB3DS_PIVOT ----*/
-            Lib3dsChunk c;
+        case LIB3DS_OBJECT_NODE_TAG: {
             Lib3dsObjectNode *n = (Lib3dsObjectNode*)node;
-            c.chunk = LIB3DS_PIVOT;
-            c.size = 18;
-            lib3ds_chunk_write(&c, io);
-            lib3ds_io_write_vector(io, n->pivot);
+            { /*---- LIB3DS_PIVOT ----*/
+                Lib3dsChunk c;
+                c.chunk = LIB3DS_PIVOT;
+                c.size = 18;
+                lib3ds_chunk_write(&c, io);
+                lib3ds_io_write_vector(io, n->pivot);
+            }
 
             { /*---- LIB3DS_INSTANCE_NAME ----*/
                 Lib3dsChunk c;
@@ -667,21 +671,22 @@ lib3ds_node_write(Lib3dsNode *node, Lib3dsFile *file, Lib3dsIo *io) {
                     lib3ds_io_write_vector(io, n->bbox_max);
                 }
             }
-            { /*---- LIB3DS_POS_TRACK_TAG ----*/
+
+            if (n->pos_track) { /*---- LIB3DS_POS_TRACK_TAG ----*/
                 Lib3dsChunk c;
                 c.chunk = LIB3DS_POS_TRACK_TAG;
                 lib3ds_chunk_write_start(&c, io);
                 lib3ds_track_write(n->pos_track, io);
                 lib3ds_chunk_write_end(&c, io);
             }
-            { /*---- LIB3DS_ROT_TRACK_TAG ----*/
+            if (n->rot_track) { /*---- LIB3DS_ROT_TRACK_TAG ----*/
                 Lib3dsChunk c;
                 c.chunk = LIB3DS_ROT_TRACK_TAG;
                 lib3ds_chunk_write_start(&c, io);
                 lib3ds_track_write(n->rot_track, io);
                 lib3ds_chunk_write_end(&c, io);
             }
-            { /*---- LIB3DS_SCL_TRACK_TAG ----*/
+            if (n->scl_track) { /*---- LIB3DS_SCL_TRACK_TAG ----*/
                 Lib3dsChunk c;
                 c.chunk = LIB3DS_SCL_TRACK_TAG;
                 lib3ds_chunk_write_start(&c, io);
@@ -705,22 +710,23 @@ lib3ds_node_write(Lib3dsNode *node, Lib3dsFile *file, Lib3dsIo *io) {
             break;
         }
 
-        case LIB3DS_CAMERA_NODE_TAG: { /*---- LIB3DS_POS_TRACK_TAG ----*/
-            Lib3dsChunk c;
+        case LIB3DS_CAMERA_NODE_TAG: {
             Lib3dsCameraNode *n = (Lib3dsCameraNode*)node;
-            c.chunk = LIB3DS_POS_TRACK_TAG;
-            lib3ds_chunk_write_start(&c, io);
-            lib3ds_track_write(n->pos_track, io);
-            lib3ds_chunk_write_end(&c, io);
-            
-            { /*---- LIB3DS_FOV_TRACK_TAG ----*/
+            if (n->pos_track) { /*---- LIB3DS_POS_TRACK_TAG ----*/
+                Lib3dsChunk c;
+                c.chunk = LIB3DS_POS_TRACK_TAG;
+                lib3ds_chunk_write_start(&c, io);
+                lib3ds_track_write(n->pos_track, io);
+                lib3ds_chunk_write_end(&c, io);
+            }
+            if (n->fov_track) { /*---- LIB3DS_FOV_TRACK_TAG ----*/
                 Lib3dsChunk c;
                 c.chunk = LIB3DS_FOV_TRACK_TAG;
                 lib3ds_chunk_write_start(&c, io);
                 lib3ds_track_write(n->fov_track, io);
                 lib3ds_chunk_write_end(&c, io);
             }
-            { /*---- LIB3DS_ROLL_TRACK_TAG ----*/
+            if (n->roll_track) { /*---- LIB3DS_ROLL_TRACK_TAG ----*/
                 Lib3dsChunk c;
                 c.chunk = LIB3DS_ROLL_TRACK_TAG;
                 lib3ds_chunk_write_start(&c, io);
@@ -730,25 +736,28 @@ lib3ds_node_write(Lib3dsNode *node, Lib3dsFile *file, Lib3dsIo *io) {
             break;
         }
 
-        case LIB3DS_TARGET_NODE_TAG: { /*---- LIB3DS_POS_TRACK_TAG ----*/
-            Lib3dsChunk c;
+        case LIB3DS_TARGET_NODE_TAG: {
             Lib3dsTargetNode *n = (Lib3dsTargetNode*)node;
-            c.chunk = LIB3DS_POS_TRACK_TAG;
-            lib3ds_chunk_write_start(&c, io);
-            lib3ds_track_write(n->pos_track, io);
-            lib3ds_chunk_write_end(&c, io);
+            if (n->pos_track) { /*---- LIB3DS_POS_TRACK_TAG ----*/
+                Lib3dsChunk c;
+                c.chunk = LIB3DS_POS_TRACK_TAG;
+                lib3ds_chunk_write_start(&c, io);
+                lib3ds_track_write(n->pos_track, io);
+                lib3ds_chunk_write_end(&c, io);
+            }
             break;
         }
 
-        case LIB3DS_LIGHT_NODE_TAG: { /*---- LIB3DS_POS_TRACK_TAG ----*/
-            Lib3dsChunk c;
+        case LIB3DS_LIGHT_NODE_TAG: {
             Lib3dsLightNode *n = (Lib3dsLightNode*)node;
-            c.chunk = LIB3DS_POS_TRACK_TAG;
-            lib3ds_chunk_write_start(&c, io);
-            lib3ds_track_write(n->pos_track, io);
-            lib3ds_chunk_write_end(&c, io);
-            
-            { /*---- LIB3DS_COL_TRACK_TAG ----*/
+            if (n->pos_track) { /*---- LIB3DS_POS_TRACK_TAG ----*/
+                Lib3dsChunk c;
+                c.chunk = LIB3DS_POS_TRACK_TAG;
+                lib3ds_chunk_write_start(&c, io);
+                lib3ds_track_write(n->pos_track, io);
+                lib3ds_chunk_write_end(&c, io);
+            }
+            if (n->color_track) { /*---- LIB3DS_COL_TRACK_TAG ----*/
                 Lib3dsChunk c;
                 c.chunk = LIB3DS_COL_TRACK_TAG;
                 lib3ds_chunk_write_start(&c, io);
@@ -758,36 +767,37 @@ lib3ds_node_write(Lib3dsNode *node, Lib3dsFile *file, Lib3dsIo *io) {
             break;
         }
 
-        case LIB3DS_SPOTLIGHT_NODE_TAG: { /*---- LIB3DS_POS_TRACK_TAG ----*/
-            Lib3dsChunk c;
+        case LIB3DS_SPOTLIGHT_NODE_TAG: {
             Lib3dsLightNode *n = (Lib3dsLightNode*)node;
-            c.chunk = LIB3DS_POS_TRACK_TAG;
-            lib3ds_chunk_write_start(&c, io);
-            lib3ds_track_write(n->pos_track, io);
-            lib3ds_chunk_write_end(&c, io);
-
-            { /*---- LIB3DS_COL_TRACK_TAG ----*/
+            if (n->pos_track) { /*---- LIB3DS_POS_TRACK_TAG ----*/
+                Lib3dsChunk c;
+                c.chunk = LIB3DS_POS_TRACK_TAG;
+                lib3ds_chunk_write_start(&c, io);
+                lib3ds_track_write(n->pos_track, io);
+                lib3ds_chunk_write_end(&c, io);
+            }
+            if (n->color_track) { /*---- LIB3DS_COL_TRACK_TAG ----*/
                 Lib3dsChunk c;
                 c.chunk = LIB3DS_COL_TRACK_TAG;
                 lib3ds_chunk_write_start(&c, io);
                 lib3ds_track_write(n->color_track, io);
                 lib3ds_chunk_write_end(&c, io);
             }
-            { /*---- LIB3DS_HOT_TRACK_TAG ----*/
+            if (n->hotspot_track) { /*---- LIB3DS_HOT_TRACK_TAG ----*/
                 Lib3dsChunk c;
                 c.chunk = LIB3DS_HOT_TRACK_TAG;
                 lib3ds_chunk_write_start(&c, io);
                 lib3ds_track_write(n->hotspot_track, io);
                 lib3ds_chunk_write_end(&c, io);
             }
-            { /*---- LIB3DS_FALL_TRACK_TAG ----*/
+            if (n->falloff_track) { /*---- LIB3DS_FALL_TRACK_TAG ----*/
                 Lib3dsChunk c;
                 c.chunk = LIB3DS_FALL_TRACK_TAG;
                 lib3ds_chunk_write_start(&c, io);
                 lib3ds_track_write(n->falloff_track, io);
                 lib3ds_chunk_write_end(&c, io);
             }
-            { /*---- LIB3DS_ROLL_TRACK_TAG ----*/
+            if (n->roll_track) { /*---- LIB3DS_ROLL_TRACK_TAG ----*/
                 Lib3dsChunk c;
                 c.chunk = LIB3DS_ROLL_TRACK_TAG;
                 lib3ds_chunk_write_start(&c, io);
@@ -797,13 +807,15 @@ lib3ds_node_write(Lib3dsNode *node, Lib3dsFile *file, Lib3dsIo *io) {
             break; 
         }
 
-        case LIB3DS_L_TARGET_NODE_TAG: { /*---- LIB3DS_POS_TRACK_TAG ----*/
-            Lib3dsChunk c;
+        case LIB3DS_L_TARGET_NODE_TAG: {
             Lib3dsSpotNode *n = (Lib3dsSpotNode*)node;
-            c.chunk = LIB3DS_POS_TRACK_TAG;
-            lib3ds_chunk_write_start(&c, io);
-            lib3ds_track_write(n->pos_track, io);
-            lib3ds_chunk_write_end(&c, io);
+            if (n->pos_track) { /*---- LIB3DS_POS_TRACK_TAG ----*/
+                Lib3dsChunk c;
+                c.chunk = LIB3DS_POS_TRACK_TAG;
+                lib3ds_chunk_write_start(&c, io);
+                lib3ds_track_write(n->pos_track, io);
+                lib3ds_chunk_write_end(&c, io);
+            }
             break;
         }
 

@@ -80,7 +80,7 @@ fileio_write_func(void *self, const void *buffer, size_t size) {
  * \see lib3ds_file_free
  */
 Lib3dsFile*
-lib3ds_file_load(const char *filename) {
+lib3ds_file_open(const char *filename) {
     FILE *f;
     Lib3dsFile *file;
     Lib3dsIo io;
@@ -123,7 +123,7 @@ lib3ds_file_load(const char *filename) {
  *
  * \return          TRUE on success, FALSE otherwise.
  *
- * \see lib3ds_file_load
+ * \see lib3ds_file_open
  */
 int
 lib3ds_file_save(Lib3dsFile *file, const char *filename) {
@@ -187,10 +187,10 @@ lib3ds_file_new() {
 void
 lib3ds_file_free(Lib3dsFile* file) {
     assert(file);
-    lib3ds_file_material_reserve(file, 0, TRUE);
-    lib3ds_file_camera_reserve(file, 0, TRUE);
-    lib3ds_file_light_reserve(file, 0, TRUE);
-    lib3ds_file_mesh_reserve(file, 0, TRUE);
+    lib3ds_file_reserve_materials(file, 0, TRUE);
+    lib3ds_file_reserve_cameras(file, 0, TRUE);
+    lib3ds_file_reserve_lights(file, 0, TRUE);
+    lib3ds_file_reserve_meshes(file, 0, TRUE);
     {
         Lib3dsNode *p, *q;
 
@@ -242,7 +242,7 @@ named_object_read(Lib3dsFile *file, Lib3dsIo *io) {
         switch (chunk) {
             case LIB3DS_N_TRI_OBJECT: {
                 mesh = lib3ds_mesh_new(name);
-                lib3ds_file_mesh_insert(file, mesh, -1);
+                lib3ds_file_insert_mesh(file, mesh, -1);
                 lib3ds_chunk_read_reset(&c, io);
                 lib3ds_mesh_read(file, mesh, io);
                 break;
@@ -250,7 +250,7 @@ named_object_read(Lib3dsFile *file, Lib3dsIo *io) {
 
             case LIB3DS_N_CAMERA: {
                 camera = lib3ds_camera_new(name);
-                lib3ds_file_camera_insert(file, camera, -1);
+                lib3ds_file_insert_camera(file, camera, -1);
                 lib3ds_chunk_read_reset(&c, io);
                 lib3ds_camera_read(camera, io);
                 break;
@@ -258,7 +258,7 @@ named_object_read(Lib3dsFile *file, Lib3dsIo *io) {
 
             case LIB3DS_N_DIRECT_LIGHT: {
                 light = lib3ds_light_new(name);
-                lib3ds_file_light_insert(file, light, -1);
+                lib3ds_file_insert_light(file, light, -1);
                 lib3ds_chunk_read_reset(&c, io);
                 lib3ds_light_read(light, io);
                 break;
@@ -424,7 +424,7 @@ mdata_read(Lib3dsFile *file, Lib3dsIo *io) {
 
             case LIB3DS_MAT_ENTRY: {
                 Lib3dsMaterial *material = lib3ds_material_new();
-                lib3ds_file_material_insert(file, material, -1);
+                lib3ds_file_insert_material(file, material, -1);
                 lib3ds_chunk_read_reset(&c, io);
                 lib3ds_material_read(material, io);
                 break;
@@ -880,21 +880,21 @@ lib3ds_file_write(Lib3dsFile *file, Lib3dsIo *io) {
 }
 
 
-void lib3ds_file_material_reserve(Lib3dsFile *file, int size, int force) {
+void lib3ds_file_reserve_materials(Lib3dsFile *file, int size, int force) {
     assert(file);
     lib3ds_util_reserve_array(&file->materials, &file->nmaterials, &file->materials_size, size, force, (Lib3dsFreeFunc)lib3ds_material_free);
 }
 
 
 void
-lib3ds_file_material_insert(Lib3dsFile *file, Lib3dsMaterial *material, int index) {
+lib3ds_file_insert_material(Lib3dsFile *file, Lib3dsMaterial *material, int index) {
     assert(file);
     lib3ds_util_insert_array(&file->materials, &file->nmaterials, &file->materials_size, material, index);
 }
 
 
 void
-lib3ds_file_material_remove(Lib3dsFile *file, int index) {
+lib3ds_file_remove_material(Lib3dsFile *file, int index) {
     assert(file);
     lib3ds_util_remove_array(&file->materials, &file->nmaterials, index, (Lib3dsFreeFunc)lib3ds_material_free);
 }
@@ -914,21 +914,21 @@ lib3ds_file_material_by_name(Lib3dsFile *file, const char *name) {
 }
 
 
-void lib3ds_file_camera_reserve(Lib3dsFile *file, int size, int force) {
+void lib3ds_file_reserve_cameras(Lib3dsFile *file, int size, int force) {
     assert(file);
     lib3ds_util_reserve_array(&file->cameras, &file->ncameras, &file->cameras_size, size, force, (Lib3dsFreeFunc)lib3ds_camera_free);
 }
 
 
 void
-lib3ds_file_camera_insert(Lib3dsFile *file, Lib3dsCamera *camera, int index) {
+lib3ds_file_insert_camera(Lib3dsFile *file, Lib3dsCamera *camera, int index) {
     assert(file);
     lib3ds_util_insert_array(&file->cameras, &file->ncameras, &file->cameras_size, camera, index);
 }
 
 
 void
-lib3ds_file_camera_remove(Lib3dsFile *file, int index) {
+lib3ds_file_remove_camera(Lib3dsFile *file, int index) {
     assert(file);
     lib3ds_util_remove_array(&file->cameras, &file->ncameras, index, (Lib3dsFreeFunc)lib3ds_camera_free);
 }
@@ -948,21 +948,21 @@ lib3ds_file_camera_by_name(Lib3dsFile *file, const char *name) {
 }
 
 
-void lib3ds_file_light_reserve(Lib3dsFile *file, int size, int force) {
+void lib3ds_file_reserve_lights(Lib3dsFile *file, int size, int force) {
     assert(file);
     lib3ds_util_reserve_array(&file->lights, &file->nlights, &file->lights_size, size, force, (Lib3dsFreeFunc)lib3ds_light_free);
 }
 
 
 void
-lib3ds_file_light_insert(Lib3dsFile *file, Lib3dsLight *light, int index) {
+lib3ds_file_insert_light(Lib3dsFile *file, Lib3dsLight *light, int index) {
     assert(file);
     lib3ds_util_insert_array(&file->lights, &file->nlights, &file->lights_size, light, index);
 }
 
 
 void
-lib3ds_file_light_remove(Lib3dsFile *file, int index) {
+lib3ds_file_remove_light(Lib3dsFile *file, int index) {
     assert(file);
     lib3ds_util_remove_array(&file->lights, &file->nlights, index, (Lib3dsFreeFunc)lib3ds_light_free);
 }
@@ -982,14 +982,14 @@ lib3ds_file_light_by_name(Lib3dsFile *file, const char *name) {
 }
 
 
-void lib3ds_file_mesh_reserve(Lib3dsFile *file, int size, int force) {
+void lib3ds_file_reserve_meshes(Lib3dsFile *file, int size, int force) {
     assert(file);
     lib3ds_util_reserve_array(&file->meshes, &file->nmeshes, &file->meshes_size, size, force, (Lib3dsFreeFunc)lib3ds_mesh_free);
 }
 
 
 void
-lib3ds_file_mesh_insert(Lib3dsFile *file, Lib3dsMesh *mesh, int index) {
+lib3ds_file_insert_mesh(Lib3dsFile *file, Lib3dsMesh *mesh, int index) {
     assert(file);
     lib3ds_util_insert_array(&file->meshes, &file->nmeshes, &file->meshes_size, mesh, index);
 }

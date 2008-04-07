@@ -596,30 +596,35 @@ typedef struct Lib3dsFile {
     Lib3dsNode*         nodes;
 } Lib3dsFile; 
 
-extern LIB3DSAPI Lib3dsFile* lib3ds_file_load(const char *filename);
+extern LIB3DSAPI Lib3dsFile* lib3ds_file_open(const char *filename);
 extern LIB3DSAPI int lib3ds_file_save(Lib3dsFile *file, const char *filename);
 extern LIB3DSAPI Lib3dsFile* lib3ds_file_new();
 extern LIB3DSAPI void lib3ds_file_free(Lib3dsFile *file);
 extern LIB3DSAPI void lib3ds_file_eval(Lib3dsFile *file, float t);
 extern LIB3DSAPI int lib3ds_file_read(Lib3dsFile *file, Lib3dsIo *io);
 extern LIB3DSAPI int lib3ds_file_write(Lib3dsFile *file, Lib3dsIo *io);
-extern LIB3DSAPI void lib3ds_file_material_reserve(Lib3dsFile *file, int size, int force);
-extern LIB3DSAPI void lib3ds_file_material_insert(Lib3dsFile *file, Lib3dsMaterial *material, int index);
-extern LIB3DSAPI void lib3ds_file_material_remove(Lib3dsFile *file, int index);
+
+extern LIB3DSAPI void lib3ds_file_reserve_materials(Lib3dsFile *file, int size, int force);
+extern LIB3DSAPI void lib3ds_file_insert_material(Lib3dsFile *file, Lib3dsMaterial *material, int index);
+extern LIB3DSAPI void lib3ds_file_remove_material(Lib3dsFile *file, int index);
 extern LIB3DSAPI int lib3ds_file_material_by_name(Lib3dsFile *file, const char *name);
-extern LIB3DSAPI void lib3ds_file_camera_reserve(Lib3dsFile *file, int size, int force);
-extern LIB3DSAPI void lib3ds_file_camera_insert(Lib3dsFile *file, Lib3dsCamera *camera, int index);
-extern LIB3DSAPI void lib3ds_file_camera_remove(Lib3dsFile *file, int index);
+
+extern LIB3DSAPI void lib3ds_file_reserve_cameras(Lib3dsFile *file, int size, int force);
+extern LIB3DSAPI void lib3ds_file_insert_camera(Lib3dsFile *file, Lib3dsCamera *camera, int index);
+extern LIB3DSAPI void lib3ds_file_remove_camera(Lib3dsFile *file, int index);
 extern LIB3DSAPI int lib3ds_file_camera_by_name(Lib3dsFile *file, const char *name);
-extern LIB3DSAPI void lib3ds_file_light_reserve(Lib3dsFile *file, int size, int force);
-extern LIB3DSAPI void lib3ds_file_light_insert(Lib3dsFile *file, Lib3dsLight *light, int index);
-extern LIB3DSAPI void lib3ds_file_light_remove(Lib3dsFile *file, int index);
+
+extern LIB3DSAPI void lib3ds_file_reserve_lights(Lib3dsFile *file, int size, int force);
+extern LIB3DSAPI void lib3ds_file_insert_light(Lib3dsFile *file, Lib3dsLight *light, int index);
+extern LIB3DSAPI void lib3ds_file_remove_light(Lib3dsFile *file, int index);
 extern LIB3DSAPI int lib3ds_file_light_by_name(Lib3dsFile *file, const char *name);
-extern LIB3DSAPI void lib3ds_file_mesh_reserve(Lib3dsFile *file, int size, int force);
-extern LIB3DSAPI void lib3ds_file_mesh_insert(Lib3dsFile *file, Lib3dsMesh *mesh, int index);
-extern LIB3DSAPI void lib3ds_file_mesh_remove(Lib3dsFile *file, int index);
+
+extern LIB3DSAPI void lib3ds_file_reserve_meshes(Lib3dsFile *file, int size, int force);
+extern LIB3DSAPI void lib3ds_file_insert_mesh(Lib3dsFile *file, Lib3dsMesh *mesh, int index);
+extern LIB3DSAPI void lib3ds_file_remove_mesh(Lib3dsFile *file, int index);
 extern LIB3DSAPI int lib3ds_file_mesh_by_name(Lib3dsFile *file, const char *name);
 extern LIB3DSAPI Lib3dsMesh* lib3ds_file_mesh_for_node(Lib3dsFile *file, Lib3dsNode *node);
+
 extern LIB3DSAPI Lib3dsNode* lib3ds_file_node_by_name(Lib3dsFile *file, const char* name, Lib3dsNodeType type);
 extern LIB3DSAPI Lib3dsNode* lib3ds_file_node_by_id(Lib3dsFile *file, unsigned short node_id);
 extern LIB3DSAPI void lib3ds_file_insert_node(Lib3dsFile *file, Lib3dsNode *node);

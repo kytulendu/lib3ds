@@ -250,7 +250,7 @@ init(void) {
 */
 static void
 load_model(void) {
-    file = lib3ds_file_load(filepath);
+    file = lib3ds_file_open(filepath);
     if (!file) {
         puts("3dsplayer: Error: Loading 3DS file failed.\n");
         exit(1);
@@ -295,7 +295,7 @@ load_model(void) {
         camera->position[0] = bmax[0] + 1.5 * MAX(sy, sz);
         camera->near_range = (camera->position[0] - bmax[0]) * .5;
         camera->far_range = (camera->position[0] - bmin[0]) * 2;
-        lib3ds_file_camera_insert(file, camera, -1);
+        lib3ds_file_insert_camera(file, camera, -1);
 
         /* Since lib3ds considers +Y to be into the screen, we'll put
         * this camera on the -Y axis, looking in the +Y direction.
@@ -308,7 +308,7 @@ load_model(void) {
         camera->position[1] = bmin[1] - 1.5 * MAX(sx, sz);
         camera->near_range = (bmin[1] - camera->position[1]) * .5;
         camera->far_range = (bmax[1] - camera->position[1]) * 2;
-        lib3ds_file_camera_insert(file, camera, -1);
+        lib3ds_file_insert_camera(file, camera, -1);
 
         camera = lib3ds_camera_new("Camera_Z");
         camera->target[0] = cx;
@@ -318,7 +318,7 @@ load_model(void) {
         camera->position[2] = bmax[2] + 1.5 * MAX(sx, sy);
         camera->near_range = (camera->position[2] - bmax[2]) * .5;
         camera->far_range = (camera->position[2] - bmin[2]) * 2;
-        lib3ds_file_camera_insert(file, camera, -1);
+        lib3ds_file_insert_camera(file, camera, -1);
 
         camera = lib3ds_camera_new("Camera_ISO");
         camera->target[0] = cx;
@@ -330,7 +330,7 @@ load_model(void) {
         camera->position[2] = bmax[2] + .75 * size;
         camera->near_range = (camera->position[0] - bmax[0]) * .5;
         camera->far_range = (camera->position[0] - bmin[0]) * 3;
-        lib3ds_file_camera_insert(file, camera, -1);
+        lib3ds_file_insert_camera(file, camera, -1);
     }
 
     /* No lights in the file?  Add some. */
@@ -349,7 +349,7 @@ load_model(void) {
         light->outer_range = 100;
         light->inner_range = 10;
         light->multiplier = 1;
-        lib3ds_file_light_insert(file, light, -1);
+        lib3ds_file_insert_light(file, light, -1);
 
         light = lib3ds_light_new("light1");
         light->spot_light = 0;
@@ -362,7 +362,7 @@ load_model(void) {
         light->outer_range = 100;
         light->inner_range = 10;
         light->multiplier = 1;
-        lib3ds_file_light_insert(file, light, -1);
+        lib3ds_file_insert_light(file, light, -1);
 
         light = lib3ds_light_new("light2");
         light->spot_light = 0;
@@ -375,7 +375,7 @@ load_model(void) {
         light->outer_range = 100;
         light->inner_range = 10;
         light->multiplier = 1;
-        lib3ds_file_light_insert(file, light, -1);
+        lib3ds_file_insert_light(file, light, -1);
     }
 
     camera = file->cameras[0]->name;

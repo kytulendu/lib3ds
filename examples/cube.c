@@ -18,17 +18,36 @@
 #include <lib3ds.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
+
+
+#ifndef MPI
+#define M_PI 3.14159265358979323846
+#endif
 
 
 static float g_vertices[8][3] = {
-    { -10.0, -10.0,  10.0 },
-    {  10.0, -10.0,  10.0 },
-    {  10.0,  10.0,  10.0 },
-    { -10.0,  10.0,  10.0 },
-    { -10.0, -10.0, -10.0 },
-    {  10.0, -10.0, -10.0 },
-    {  10.0,  10.0, -10.0 },
-    { -10.0,  10.0, -10.0 }
+    { -10.0, -10.0,  15.0 },
+    {  10.0, -10.0,  15.0 },
+    {  10.0,  10.0,  15.0 },
+    { -10.0,  10.0,  15.0 },
+    { -10.0, -10.0, -15.0 },
+    {  10.0, -10.0, -15.0 },
+    {  10.0,  10.0, -15.0 },
+    { -10.0,  10.0, -15.0 }
+};
+
+
+// Texture coodinate origin (0,0) is in bottom-left corner!
+static float g_texcoords[8][3] = {
+    {  0.00, 1.0 },
+    {  0.25, 1.0 },
+    {  0.50, 1.0 },
+    {  0.75, 1.0 },
+    {  0.00, 0.0 },
+    {  0.25, 0.0 },
+    {  0.50, 0.0 },
+    {  0.75, 0.0 }
 };
 
 
@@ -51,6 +70,27 @@ static unsigned short g_indices[12][3] = {
 
 int main(int argc, char **argv) {
     Lib3dsFile *file = lib3ds_file_new();
+    file->frames = 360;
+    
+    {
+        Lib3dsMaterial *mat = lib3ds_material_new("c_tex");
+        lib3ds_file_insert_material(file, mat, -1);
+        strcpy(mat->texture1_map.name, "cube.tga");
+        mat->texture1_map.percent = 1.0;
+
+        mat = lib3ds_material_new("c_red");
+        lib3ds_file_insert_material(file, mat, -1);
+        mat->diffuse[0] = 1.0;
+        mat->diffuse[1] = 0.0;
+        mat->diffuse[2] = 0.0;
+
+        mat = lib3ds_material_new("c_blue");
+        lib3ds_file_insert_material(file, mat, -1);
+        mat->diffuse[0] = 0.0;
+        mat->diffuse[1] = 0.0;
+        mat->diffuse[2] = 1.0;
+    }
+
     {
         int i, j;
         Lib3dsMesh *mesh = lib3ds_mesh_new("cube");
@@ -59,6 +99,8 @@ int main(int argc, char **argv) {
         lib3ds_mesh_resize_vertices(mesh, 8);
         for (i = 0; i < 8; ++i) {
             lib3ds_vector_copy(mesh->vertices[i].pos, g_vertices[i]);
+            mesh->vertices[i].tex[0] = g_texcoords[i][0];
+            mesh->vertices[i].tex[1] = g_texcoords[i][1];
         }
 
         lib3ds_mesh_resize_faces(mesh, 12);
@@ -67,34 +109,38 @@ int main(int argc, char **argv) {
                 mesh->faces[i].index[j] = g_indices[i][j];
             }
         }
+
+        for (i = 0; i < 8; ++i) {
+            mesh->faces[i].material = 0;
+        }
+        for (i = 0; i < 2; ++i) {
+            mesh->faces[8+i].material = 1;
+        }
+        for (i = 0; i < 2; ++i) {
+            mesh->faces[10+i].material = 2;
+        }
+
+        lib3ds_file_new_mesh_node(file, mesh, NULL, NULL, NULL, NULL);
     }
 
     {
-        Lib3dsNode *node;
-        Lib3dsObjectNode *onode;
-            
-        node = lib3ds_node_new(LIB3DS_OBJECT_NODE);
-        lib3ds_file_insert_node(file, node);
+        Lib3dsCamera *camera;
+        Lib3dsCameraNode *n;
+        int i;
 
-        onode = (Lib3dsObjectNode*)node;
-        strcpy(onode->base.name, "cube");
-        strcpy(onode->instance, "01");
+        camera = lib3ds_camera_new("camera01");
+        lib3ds_file_insert_camera(file, camera, -1);
+        lib3ds_vector_make(camera->position, 0.0, -100, 0.0);
+        lib3ds_vector_make(camera->target, 0.0, 0.0, 0.0);
 
-        onode->pos_track =  lib3ds_track_new(node, LIB3DS_TRACK_VECTOR, 2);
-        onode->pos_track->keys[0].value[0] = 0.0;
-        onode->pos_track->keys[0].value[1] = 0.0;
-        onode->pos_track->keys[0].value[2] = 0.0;
+        n = lib3ds_file_new_camera_node(file, camera, NULL);
+        lib3ds_file_new_target_node(file, camera, NULL);
 
-        onode->scl_track =  lib3ds_track_new(node, LIB3DS_TRACK_VECTOR, 1);
-        onode->scl_track->keys[0].value[0] = 1.0;
-        onode->scl_track->keys[0].value[1] = 1.0;
-        onode->scl_track->keys[0].value[2] = 1.0;
-
-        onode->rot_track = lib3ds_track_new(node, LIB3DS_TRACK_QUAT, 1);
-        onode->rot_track->keys[0].value[0] = 0.0;
-        onode->rot_track->keys[0].value[1] = 0.0;
-        onode->rot_track->keys[0].value[2] = 0.0;
-        onode->rot_track->keys[0].value[3] = 0.0;
+        lib3ds_track_resize(&n->pos_track, 37);
+        for (i = 0; i <= 36; i++) {
+            n->pos_track.keys[i].frame = 10 * i;
+            lib3ds_vector_make(n->pos_track.keys[i].value, (float)100.0 * cos(M_PI * i / 36.0), (float)100.0 * sin(M_PI * i / 36.0), 50.0);
+        }
     }
 
     if (!lib3ds_file_save(file, "cube.3ds")) {

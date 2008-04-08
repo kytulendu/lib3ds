@@ -36,7 +36,7 @@ initialize_texture_map(Lib3dsTextureMap *map) {
  *  If the structure cannot be allocated, NULL is returned.
  */
 Lib3dsMaterial*
-lib3ds_material_new() {
+lib3ds_material_new(const char* name) {
     Lib3dsMaterial *mat;
 
     mat = (Lib3dsMaterial*)calloc(sizeof(Lib3dsMaterial), 1);
@@ -44,7 +44,9 @@ lib3ds_material_new() {
         return(0);
     }
 
-    mat->user_type = 'MAT';
+    if (name) {
+        strcpy(mat->name, name);
+    }
     mat->ambient[0] = mat->ambient[1] = mat->ambient[2] = 0.588235f;
     mat->diffuse[0] = mat->diffuse[1] = mat->diffuse[2] = 0.588235f;
     mat->specular[0] = mat->specular[1] = mat->specular[2] = 0.898039f;

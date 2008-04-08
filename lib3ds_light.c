@@ -29,7 +29,6 @@ lib3ds_light_new(const char *name) {
     if (!light) {
         return(0);
     }
-    light->user_type = 'LGHT';
     strcpy(light->name, name);
     return(light);
 }
@@ -54,8 +53,8 @@ spotlight_read(Lib3dsLight *light, Lib3dsIo *io) {
     for (i = 0; i < 3; ++i) {
         light->spot[i] = lib3ds_io_read_float(io);
     }
-    light->hot_spot = lib3ds_io_read_float(io);
-    light->fall_off = lib3ds_io_read_float(io);
+    light->hotspot = lib3ds_io_read_float(io);
+    light->falloff = lib3ds_io_read_float(io);
     lib3ds_chunk_read_tell(&c, io);
 
     while ((chunk = lib3ds_chunk_read_next(&c, io)) != 0) {
@@ -243,8 +242,8 @@ lib3ds_light_write(Lib3dsLight *light, Lib3dsIo *io) {
         lib3ds_chunk_write_start(&c, io);
 
         lib3ds_io_write_vector(io, light->spot);
-        lib3ds_io_write_float(io, light->hot_spot);
-        lib3ds_io_write_float(io, light->fall_off);
+        lib3ds_io_write_float(io, light->hotspot);
+        lib3ds_io_write_float(io, light->falloff);
 
         { /*---- LIB3DS_DL_SPOT_ROLL ----*/
             Lib3dsChunk c;

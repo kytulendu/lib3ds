@@ -41,7 +41,6 @@ lib3ds_mesh_new(const char *name) {
     if (!mesh) {
         return (0);
     }
-    mesh->user_type = 'MESH';
     strcpy(mesh->name, name);
     lib3ds_matrix_identity(mesh->matrix);
     mesh->map_type = LIB3DS_MAP_NONE;

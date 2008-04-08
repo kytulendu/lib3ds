@@ -45,20 +45,6 @@ lib3ds_vector_copy(float dst[3], float src[3]) {
 
 
 /*!
- * Negate a vector.
- *
- * \param c Vector to negate.
- */
-void
-lib3ds_vector_neg(float c[3]) {
-    int i;
-    for (i = 0; i < 3; ++i) {
-        c[i] = -c[i];
-    }
-}
-
-
-/*!
  * Add two vectors.
  *
  * \param c Result.
@@ -97,7 +83,7 @@ lib3ds_vector_sub(float c[3], float a[3], float b[3]) {
  * \param k Scalar.
  */
 void
-lib3ds_vector_scalar(float c[3], float k) {
+lib3ds_vector_scalar_mul(float c[3], float k) {
     int i;
     for (i = 0; i < 3; ++i) {
         c[i] *= k;

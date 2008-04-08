@@ -366,8 +366,8 @@ light_dump(Lib3dsLight *light) {
     printf("  spot_overshoot:   %d\n", (int)light->spot_overshoot);
     printf("  ray_shadows:      %s\n", light->ray_shadows ? "yes" : "no");
     printf("  ray_bias:         %f\n", light->ray_bias);
-    printf("  hot_spot:         %f\n", light->hot_spot);
-    printf("  fall_off:         %f\n", light->fall_off);
+    printf("  hotspot:         %f\n", light->hotspot);
+    printf("  falloff:         %f\n", light->falloff);
     printf("\n");
 }
 
@@ -385,10 +385,14 @@ mesh_dump(Lib3dsMesh *mesh) {
         );
     printf("  matrix:\n");
     matrix_dump(mesh->matrix);
-    printf("  point list:\n");
+    printf("  vertices (x, y, z, u, v):\n");
     for (i = 0; i < mesh->nvertices; ++i) {
         lib3ds_vector_copy(p, mesh->vertices[i].pos);
-        printf("    %8f %8f %8f\n", p[0], p[1], p[2]);
+        printf("    %10.5f %10.5f %10.5f %10.5f %10.5f\n", 
+            p[0], p[1], p[2],
+            mesh->vertices[i].tex[0],
+            mesh->vertices[i].tex[1]
+        );
     }
     printf("  facelist:\n");
     for (i = 0; i < mesh->nfaces; ++i) {

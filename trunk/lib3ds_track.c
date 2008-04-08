@@ -19,10 +19,8 @@
 
 
 Lib3dsTrack* 
-lib3ds_track_new(Lib3dsNode *node, Lib3dsTrackType type, int nkeys) {
+lib3ds_track_new(Lib3dsTrackType type, int nkeys) {
     Lib3dsTrack *track = (Lib3dsTrack*)calloc(sizeof(Lib3dsTrack), 1);
-    track->user_type = 'TRCK';
-    track->node = node;
     track->type = type;
     lib3ds_track_resize(track, nkeys);
     return track;
@@ -281,7 +279,11 @@ lib3ds_track_eval_bool(Lib3dsTrack *track, int *b, float t) {
     if (track) {
         int index;
         float u;
+
         assert(track->type == LIB3DS_TRACK_BOOL);
+        if (!track->nkeys) {
+            return;
+        }
 
         index = find_index(track, t, &u);
         if (index < 0) {
@@ -305,6 +307,12 @@ track_eval_linear(Lib3dsTrack *track, float *value, float t) {
     float dsp[3], ddp[3], dsn[3], ddn[3];
 
     assert(track);
+    if (!track->nkeys) {
+        int i;
+        for (i = 0; i < track->type; ++i) value[i] = 0.0f;
+        return;
+    }
+
     index = find_index(track, t, &u);
 
     if (index < 0) {
@@ -365,6 +373,9 @@ lib3ds_track_eval_quat(Lib3dsTrack *track, float q[4], float t) {
         float ap[4], bp[4], an[4], bn[4];
 
         assert(track->type == LIB3DS_TRACK_QUAT);
+        if (!track->nkeys) {
+            return;
+        }
 
         index = find_index(track, t, &u);
         if (index < 0) {

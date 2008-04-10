@@ -23,7 +23,7 @@ fog_read(Lib3dsAtmosphere *at, Lib3dsIo *io) {
     Lib3dsChunk c;
     uint16_t chunk;
 
-    lib3ds_chunk_read_start(&c, LIB3DS_FOG, io);
+    lib3ds_chunk_read_start(&c, CHK_FOG, io);
 
     at->fog_near_plane = lib3ds_io_read_float(io);
     at->fog_near_density = lib3ds_io_read_float(io);
@@ -33,7 +33,7 @@ fog_read(Lib3dsAtmosphere *at, Lib3dsIo *io) {
 
     while ((chunk = lib3ds_chunk_read_next(&c, io)) != 0) {
         switch (chunk) {
-            case LIB3DS_LIN_COLOR_F: {
+            case CHK_LIN_COLOR_F: {
                 int i;
                 for (i = 0; i < 3; ++i) {
                     at->fog_color[i] = lib3ds_io_read_float(io);
@@ -41,10 +41,10 @@ fog_read(Lib3dsAtmosphere *at, Lib3dsIo *io) {
             }
             break;
 
-            case LIB3DS_COLOR_F:
+            case CHK_COLOR_F:
                 break;
 
-            case LIB3DS_FOG_BGND: {
+            case CHK_FOG_BGND: {
                 at->fog_background = TRUE;
             }
             break;
@@ -64,7 +64,7 @@ layer_fog_read(Lib3dsAtmosphere *at, Lib3dsIo *io) {
     uint16_t chunk;
     int have_lin = FALSE;
 
-    lib3ds_chunk_read_start(&c, LIB3DS_LAYER_FOG, io);
+    lib3ds_chunk_read_start(&c, CHK_LAYER_FOG, io);
 
     at->layer_fog_near_y = lib3ds_io_read_float(io);
     at->layer_fog_far_y = lib3ds_io_read_float(io);
@@ -74,12 +74,12 @@ layer_fog_read(Lib3dsAtmosphere *at, Lib3dsIo *io) {
 
     while ((chunk = lib3ds_chunk_read_next(&c, io)) != 0) {
         switch (chunk) {
-            case LIB3DS_LIN_COLOR_F:
+            case CHK_LIN_COLOR_F:
                 lib3ds_io_read_rgb(io, at->layer_fog_color);
                 have_lin = TRUE;
                 break;
 
-            case LIB3DS_COLOR_F:
+            case CHK_COLOR_F:
                 lib3ds_io_read_rgb(io, at->layer_fog_color);
                 break;
 
@@ -97,7 +97,7 @@ distance_cue_read(Lib3dsAtmosphere *at, Lib3dsIo *io) {
     Lib3dsChunk c;
     uint16_t chunk;
 
-    lib3ds_chunk_read_start(&c, LIB3DS_DISTANCE_CUE, io);
+    lib3ds_chunk_read_start(&c, CHK_DISTANCE_CUE, io);
 
     at->dist_cue_near_plane = lib3ds_io_read_float(io);
     at->dist_cue_near_dimming = lib3ds_io_read_float(io);
@@ -107,7 +107,7 @@ distance_cue_read(Lib3dsAtmosphere *at, Lib3dsIo *io) {
 
     while ((chunk = lib3ds_chunk_read_next(&c, io)) != 0) {
         switch (chunk) {
-            case LIB3DS_DCUE_BGND: {
+            case CHK_DCUE_BGND: {
                 at->dist_cue_background = TRUE;
             }
             break;
@@ -127,35 +127,35 @@ lib3ds_atmosphere_read(Lib3dsAtmosphere *atmosphere, Lib3dsIo *io) {
 
     lib3ds_chunk_read(&c, io);
     switch (c.chunk) {
-        case LIB3DS_FOG: {
+        case CHK_FOG: {
             lib3ds_chunk_read_reset(&c, io);
             fog_read(atmosphere, io);
             break;
         }
 
-        case LIB3DS_LAYER_FOG: {
+        case CHK_LAYER_FOG: {
             lib3ds_chunk_read_reset(&c, io);
             layer_fog_read(atmosphere, io);
             break;
         }
 
-        case LIB3DS_DISTANCE_CUE: {
+        case CHK_DISTANCE_CUE: {
             lib3ds_chunk_read_reset(&c, io);
             distance_cue_read(atmosphere, io);
             break;
         }
 
-        case LIB3DS_USE_FOG: {
+        case CHK_USE_FOG: {
             atmosphere->use_fog = TRUE;
             break;
         }
 
-        case LIB3DS_USE_LAYER_FOG: {
+        case CHK_USE_LAYER_FOG: {
             atmosphere->use_layer_fog = TRUE;
             break;
         }
 
-        case LIB3DS_USE_DISTANCE_CUE: {
+        case CHK_USE_DISTANCE_CUE: {
             atmosphere->use_dist_cue = TRUE;
             break;
         }
@@ -167,7 +167,7 @@ void
 lib3ds_atmosphere_write(Lib3dsAtmosphere *atmosphere, Lib3dsIo *io) {
     if (atmosphere->use_fog) { /*---- LIB3DS_FOG ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_FOG;
+        c.chunk = CHK_FOG;
         lib3ds_chunk_write_start(&c, io);
 
         lib3ds_io_write_float(io, atmosphere->fog_near_plane);
@@ -176,14 +176,14 @@ lib3ds_atmosphere_write(Lib3dsAtmosphere *atmosphere, Lib3dsIo *io) {
         lib3ds_io_write_float(io, atmosphere->fog_far_density);
         {
             Lib3dsChunk c;
-            c.chunk = LIB3DS_COLOR_F;
+            c.chunk = CHK_COLOR_F;
             c.size = 18;
             lib3ds_chunk_write(&c, io);
             lib3ds_io_write_rgb(io, atmosphere->fog_color);
         }
         if (atmosphere->fog_background) {
             Lib3dsChunk c;
-            c.chunk = LIB3DS_FOG_BGND;
+            c.chunk = CHK_FOG_BGND;
             c.size = 6;
             lib3ds_chunk_write(&c, io);
         }
@@ -193,7 +193,7 @@ lib3ds_atmosphere_write(Lib3dsAtmosphere *atmosphere, Lib3dsIo *io) {
 
     if (atmosphere->use_layer_fog) { /*---- LIB3DS_LAYER_FOG ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_LAYER_FOG;
+        c.chunk = CHK_LAYER_FOG;
         c.size = 40;
         lib3ds_chunk_write(&c, io);
         lib3ds_io_write_float(io, atmosphere->layer_fog_near_y);
@@ -202,7 +202,7 @@ lib3ds_atmosphere_write(Lib3dsAtmosphere *atmosphere, Lib3dsIo *io) {
         lib3ds_io_write_dword(io, atmosphere->layer_fog_flags);
         {
             Lib3dsChunk c;
-            c.chunk = LIB3DS_COLOR_F;
+            c.chunk = CHK_COLOR_F;
             c.size = 18;
             lib3ds_chunk_write(&c, io);
             lib3ds_io_write_rgb(io, atmosphere->fog_color);
@@ -211,7 +211,7 @@ lib3ds_atmosphere_write(Lib3dsAtmosphere *atmosphere, Lib3dsIo *io) {
 
     if (atmosphere->use_dist_cue) { /*---- LIB3DS_DISTANCE_CUE ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_DISTANCE_CUE;
+        c.chunk = CHK_DISTANCE_CUE;
         lib3ds_chunk_write_start(&c, io);
 
         lib3ds_io_write_float(io, atmosphere->dist_cue_near_plane);
@@ -220,7 +220,7 @@ lib3ds_atmosphere_write(Lib3dsAtmosphere *atmosphere, Lib3dsIo *io) {
         lib3ds_io_write_float(io, atmosphere->dist_cue_far_dimming);
         if (atmosphere->dist_cue_background) {
             Lib3dsChunk c;
-            c.chunk = LIB3DS_DCUE_BGND;
+            c.chunk = CHK_DCUE_BGND;
             c.size = 6;
             lib3ds_chunk_write(&c, io);
         }
@@ -230,21 +230,21 @@ lib3ds_atmosphere_write(Lib3dsAtmosphere *atmosphere, Lib3dsIo *io) {
 
     if (atmosphere->use_fog) { /*---- LIB3DS_USE_FOG ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_USE_FOG;
+        c.chunk = CHK_USE_FOG;
         c.size = 6;
         lib3ds_chunk_write(&c, io);
     }
 
     if (atmosphere->use_layer_fog) { /*---- LIB3DS_USE_LAYER_FOG ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_USE_LAYER_FOG;
+        c.chunk = CHK_USE_LAYER_FOG;
         c.size = 6;
         lib3ds_chunk_write(&c, io);
     }
 
     if (atmosphere->use_dist_cue) { /*---- LIB3DS_USE_DISTANCE_CUE ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_USE_V_GRADIENT;
+        c.chunk = CHK_USE_V_GRADIENT;
         c.size = 6;
         lib3ds_chunk_write(&c, io);
     }

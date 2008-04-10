@@ -48,15 +48,14 @@ typedef enum Lib3dsLogLevel {
     LIB3DS_LOG_DEBUG    = 3
 } Lib3dsLogLevel;
 
-typedef struct Lib3dsIoImpl Lib3dsIoImpl;
 typedef struct Lib3dsIo {
-    Lib3dsIoImpl    *impl;
-    void            *self;
-    long            (*seek_func) (void *self, long offset, Lib3dsIoSeek origin);
-    long            (*tell_func) (void *self);
-    size_t          (*read_func) (void *self, void *buffer, size_t size);
-    size_t          (*write_func)(void *self, const void *buffer, size_t size);
-    void            (*log_func)  (void *self, Lib3dsLogLevel level, int indent, const char *msg);
+    void*   impl;
+    void*   self;
+    long    (*seek_func) (void *self, long offset, Lib3dsIoSeek origin);
+    long    (*tell_func) (void *self);
+    size_t  (*read_func) (void *self, void *buffer, size_t size);
+    size_t  (*write_func)(void *self, const void *buffer, size_t size);
+    void    (*log_func)  (void *self, Lib3dsLogLevel level, int indent, const char *msg);
 } Lib3dsIo;
 
 /* Atmosphere settings */
@@ -106,16 +105,16 @@ typedef struct Lib3dsShadow {
 
 /* Layout view types */
 typedef enum Lib3dsViewType {
-    LIB3DS_VIEW_TYPE_NOT_USED   = 0,
-    LIB3DS_VIEW_TYPE_TOP        = 1,
-    LIB3DS_VIEW_TYPE_BOTTOM     = 2,
-    LIB3DS_VIEW_TYPE_LEFT       = 3,
-    LIB3DS_VIEW_TYPE_RIGHT      = 4,
-    LIB3DS_VIEW_TYPE_FRONT      = 5,
-    LIB3DS_VIEW_TYPE_BACK       = 6,
-    LIB3DS_VIEW_TYPE_USER       = 7,
-    LIB3DS_VIEW_TYPE_SPOTLIGHT  = 18,
-    LIB3DS_VIEW_TYPE_CAMERA     = 65535
+    LIB3DS_VIEW_NOT_USED   = 0,
+    LIB3DS_VIEW_TOP        = 1,
+    LIB3DS_VIEW_BOTTOM     = 2,
+    LIB3DS_VIEW_LEFT       = 3,
+    LIB3DS_VIEW_RIGHT      = 4,
+    LIB3DS_VIEW_FRONT      = 5,
+    LIB3DS_VIEW_BACK       = 6,
+    LIB3DS_VIEW_USER       = 7,
+    LIB3DS_VIEW_SPOTLIGHT  = 18,
+    LIB3DS_VIEW_CAMERA     = 65535
 } Lib3dsViewType;
 
 /* Layout styles */
@@ -171,15 +170,15 @@ typedef struct Lib3dsViewport {
 
 /* Material texture map flags */
 typedef enum Lib3dsTextureMapFlags {
-    LIB3DS_DECALE       = 0x0001,
-    LIB3DS_MIRROR       = 0x0002,
-    LIB3DS_NEGATE       = 0x0008,
-    LIB3DS_NO_TILE      = 0x0010,
-    LIB3DS_SUMMED_AREA  = 0x0020,
-    LIB3DS_ALPHA_SOURCE = 0x0040,
-    LIB3DS_TINT         = 0x0080,
-    LIB3DS_IGNORE_ALPHA = 0x0100,
-    LIB3DS_RGB_TINT     = 0x0200
+    LIB3DS_TEXTURE_DECALE       = 0x0001,
+    LIB3DS_TEXTURE_MIRROR       = 0x0002,
+    LIB3DS_TEXTURE_NEGATE       = 0x0008,
+    LIB3DS_TEXTURE_NO_TILE      = 0x0010,
+    LIB3DS_TEXTURE_SUMMED_AREA  = 0x0020,
+    LIB3DS_TEXTURE_ALPHA_SOURCE = 0x0040,
+    LIB3DS_TEXTURE_TINT         = 0x0080,
+    LIB3DS_TEXTURE_IGNORE_ALPHA = 0x0100,
+    LIB3DS_TEXTURE_RGB_TINT     = 0x0200
 } Lib3dsTextureMapFlags;
 
 /* Material texture map */
@@ -202,34 +201,18 @@ typedef struct Lib3dsTextureMap {
 
 /* Auto reflection texture map flags */
 typedef enum Lib3dsAutoReflMapFlags {
-    LIB3DS_USE_REFL_MAP             = 0x0001,
-    LIB3DS_READ_FIRST_FRAME_ONLY    = 0x0004,
-    LIB3DS_FLAT_MIRROR              = 0x0008 
+    LIB3DS_AUTOREFL_USE                     = 0x0001,
+    LIB3DS_AUTOREFL_READ_FIRST_FRAME_ONLY   = 0x0004,
+    LIB3DS_AUTOREFL_FLAT_MIRROR             = 0x0008 
 } Lib3dsAutoReflMapFlags;
-
-/* Auto reflection texture map anti-aliasing level */
-typedef enum Lib3dsAutoReflMapAntiAlias {
-    LIB3DS_ANTI_ALIAS_NONE      = 0,
-    LIB3DS_ANTI_ALIAS_LOW       = 1,
-    LIB3DS_ANTI_ALIAS_MEDIUM    = 2,
-    LIB3DS_ANTI_ALIAS_HIGH      = 3
-} Lib3dsAutoReflMapAntiAlias;
-
-/* Auto reflection map settings */
-typedef struct Lib3dsAutoReflMap {
-    unsigned    flags;
-    int         anti_alias;
-    int         size;
-    int         frame_step;
-} Lib3dsAutoReflMap;
 
 /* Material shading type */
 typedef enum Lib3dsShading {
-	LIB3DS_WIRE_FRAME = 0,
-	LIB3DS_FLAT       = 1, 
-	LIB3DS_GOURAUD    = 2, 
-	LIB3DS_PHONG      = 3, 
-	LIB3DS_METAL      = 4
+	LIB3DS_SHADING_WIRE_FRAME = 0,
+	LIB3DS_SHADING_FLAT       = 1, 
+	LIB3DS_SHADING_GOURAUD    = 2, 
+	LIB3DS_SHADING_PHONG      = 3, 
+	LIB3DS_SHADING_METAL      = 4
 } Lib3dsShading; 
 
 /** Material */
@@ -274,7 +257,10 @@ typedef struct Lib3dsMaterial {
     Lib3dsTextureMap    self_illum_mask;
     Lib3dsTextureMap    reflection_map;
     Lib3dsTextureMap    reflection_mask;
-    Lib3dsAutoReflMap   autorefl_map;
+    unsigned            autorefl_map_flags;
+    int                 autorefl_map_anti_alias;  /* 0=None, 1=Low, 2=Medium, 3=High */
+    int                 autorefl_map_size;
+    int                 autorefl_map_frame_step;
 } Lib3dsMaterial;
 
 /** Object flags for cameras, lights and meshes */
@@ -367,7 +353,7 @@ typedef struct Lib3dsVertex {
 
 typedef struct Lib3dsFace {
     unsigned short  index[3];
-    unsigned        flags;
+    unsigned short  flags;
     int             material;
     unsigned        smoothing_group;
 } Lib3dsFace; 
@@ -400,32 +386,25 @@ typedef struct Lib3dsMesh {
 } Lib3dsMesh; 
 
 typedef enum Lib3dsNodeType {
-    LIB3DS_AMBIENT_NODE = 0,
-    LIB3DS_OBJECT_NODE  = 1,
-    LIB3DS_CAMERA_NODE  = 2,
-    LIB3DS_TARGET_NODE  = 3,
-    LIB3DS_LIGHT_NODE   = 4,
-    LIB3DS_SPOT_NODE    = 5
+    LIB3DS_NODE_AMBIENT         = 0,
+    LIB3DS_NODE_MESH            = 1,
+    LIB3DS_NODE_CAMERA          = 2,
+    LIB3DS_NODE_CAMERA_TARGET   = 3,
+    LIB3DS_NODE_OMNILIGHT       = 4,
+    LIB3DS_NODE_SPOTLIGHT       = 5,
+    LIB3DS_NODE_SPOTLIGHT_TARGET= 6
 } Lib3dsNodeType;
 
-#define LIB3DS_NO_PARENT 65535
-
 /*!
- * Node flags #1
+ * Node flags
  */
-typedef enum {
-    LIB3DS_HIDDEN   = 0x800
-} Lib3dsNodeFlags1;
-
-/*!
- * Node flags #2
- */
-typedef enum {
-    LIB3DS_SHOW_PATH        = 0x1,
-    LIB3DS_SMOOTHING        = 0x2,
-    LIB3DS_MOTION_BLUR      = 0x10,
-    LIB3DS_MORPH_MATERIALS  = 0x40
-} Lib3dsNodeFlags2;
+typedef enum Lib3dsNodeFlags{
+    LIB3DS_NODE_HIDDEN           = 0x000800,
+    LIB3DS_NODE_SHOW_PATH        = 0x010000,
+    LIB3DS_NODE_SMOOTHING        = 0x020000,
+    LIB3DS_NODE_MOTION_BLUR      = 0x100000,
+    LIB3DS_NODE_MORPH_MATERIALS  = 0x400000
+} Lib3dsNodeFlags;
 
 /*!
  * Scene graph node
@@ -439,18 +418,16 @@ typedef struct Lib3dsNode {
     Lib3dsNodeType      type;
     unsigned short      node_id;            /* 0..65535 */
     char                name[64];
-    unsigned            flags1;
-    unsigned            flags2;
-    unsigned short      parent_id;          /* 0..65535 */
+    unsigned            flags;
     float               matrix[4][4];
 } Lib3dsNode;
 
 typedef enum Lib3dsKeyFlags {
-    LIB3DS_USE_TENSION      = 0x01,
-    LIB3DS_USE_CONTINUITY   = 0x02,
-    LIB3DS_USE_BIAS         = 0x04,
-    LIB3DS_USE_EASE_TO      = 0x08,
-    LIB3DS_USE_EASE_FROM    = 0x10
+    LIB3DS_KEY_USE_TENS         = 0x01,
+    LIB3DS_KEY_USE_CONT         = 0x02,
+    LIB3DS_KEY_USE_BIAS         = 0x04,
+    LIB3DS_KEY_USE_EASE_TO      = 0x08,
+    LIB3DS_KEY_USE_EASE_FROM    = 0x10
 } Lib3dsKeyFlags;
 
 typedef struct Lib3dsKey {
@@ -472,14 +449,14 @@ typedef enum Lib3dsTrackType {
 } Lib3dsTrackType;
 
 typedef enum {
-    LIB3DS_REPEAT   = 0x0001,
-    LIB3DS_SMOOTH   = 0x0002,
-    LIB3DS_LOCK_X   = 0x0008,
-    LIB3DS_LOCK_Y   = 0x0010,
-    LIB3DS_LOCK_Z   = 0x0020,
-    LIB3DS_UNLINK_X = 0x0100,
-    LIB3DS_UNLINK_Y = 0x0200,
-    LIB3DS_UNLINK_Z = 0x0400
+    LIB3DS_TRACK_REPEAT   = 0x0001,
+    LIB3DS_TRACK_SMOOTH   = 0x0002,
+    LIB3DS_TRACK_LOCK_X   = 0x0008,
+    LIB3DS_TRACK_LOCK_Y   = 0x0010,
+    LIB3DS_TRACK_LOCK_Z   = 0x0020,
+    LIB3DS_TRACK_UNLINK_X = 0x0100,
+    LIB3DS_TRACK_UNLINK_Y = 0x0200,
+    LIB3DS_TRACK_UNLINK_Z = 0x0400
 } Lib3dsTrackFlags;
 
 typedef struct Lib3dsTrack {
@@ -495,7 +472,7 @@ typedef struct Lib3dsAmbientNode {
     Lib3dsTrack     color_track;
 } Lib3dsAmbientNode;
 
-typedef struct Lib3dsObjectNode {
+typedef struct Lib3dsMeshNode {
     Lib3dsNode      base;
     float           pivot[3];
     char            instance[64];
@@ -511,7 +488,7 @@ typedef struct Lib3dsObjectNode {
     Lib3dsTrack     rot_track;
     Lib3dsTrack     scl_track;
     Lib3dsTrack     hide_track;
-} Lib3dsObjectNode;
+} Lib3dsMeshNode;
 
 typedef struct Lib3dsCameraNode {
     Lib3dsNode      base;
@@ -529,7 +506,15 @@ typedef struct Lib3dsTargetNode {
     Lib3dsTrack     pos_track;
 } Lib3dsTargetNode;
 
-typedef struct Lib3dsLightNode {
+typedef struct Lib3dsOmnilightNode {
+    Lib3dsNode      base;
+    float           pos[3];
+    float           color[3];
+    Lib3dsTrack     pos_track;
+    Lib3dsTrack     color_track;
+} Lib3dsOmnilightNode;
+
+typedef struct Lib3dsSpotlightNode {
     Lib3dsNode      base;
     float           pos[3];
     float           color[3];
@@ -541,13 +526,7 @@ typedef struct Lib3dsLightNode {
     Lib3dsTrack     hotspot_track;
     Lib3dsTrack     falloff_track;
     Lib3dsTrack     roll_track;
-} Lib3dsLightNode;
-
-typedef struct Lib3dsSpotNode {
-    Lib3dsNode      base;
-    float           pos[3];
-    Lib3dsTrack     pos_track;
-} Lib3dsSpotNode;
+} Lib3dsSpotlightNode;
 
 /*!
     3DS file structure 
@@ -602,26 +581,21 @@ extern LIB3DSAPI void lib3ds_file_reserve_cameras(Lib3dsFile *file, int size, in
 extern LIB3DSAPI void lib3ds_file_insert_camera(Lib3dsFile *file, Lib3dsCamera *camera, int index);
 extern LIB3DSAPI void lib3ds_file_remove_camera(Lib3dsFile *file, int index);
 extern LIB3DSAPI int lib3ds_file_camera_by_name(Lib3dsFile *file, const char *name);
-extern LIB3DSAPI Lib3dsCameraNode* lib3ds_file_new_camera_node(Lib3dsFile *file, Lib3dsCamera *camera, Lib3dsNode *parent);
-extern LIB3DSAPI Lib3dsTargetNode* lib3ds_file_new_target_node(Lib3dsFile *file, Lib3dsCamera *camera, Lib3dsNode *parent);
 
 extern LIB3DSAPI void lib3ds_file_reserve_lights(Lib3dsFile *file, int size, int force);
 extern LIB3DSAPI void lib3ds_file_insert_light(Lib3dsFile *file, Lib3dsLight *light, int index);
 extern LIB3DSAPI void lib3ds_file_remove_light(Lib3dsFile *file, int index);
 extern LIB3DSAPI int lib3ds_file_light_by_name(Lib3dsFile *file, const char *name);
-extern LIB3DSAPI Lib3dsLightNode* lib3ds_file_new_light_node(Lib3dsFile* file, Lib3dsLight *light, Lib3dsNode *parent);
-extern LIB3DSAPI Lib3dsSpotNode* lib3ds_file_new_spot_node(Lib3dsFile* file, Lib3dsLight *light, Lib3dsNode *parent);
 
 extern LIB3DSAPI void lib3ds_file_reserve_meshes(Lib3dsFile *file, int size, int force);
 extern LIB3DSAPI void lib3ds_file_insert_mesh(Lib3dsFile *file, Lib3dsMesh *mesh, int index);
 extern LIB3DSAPI void lib3ds_file_remove_mesh(Lib3dsFile *file, int index);
 extern LIB3DSAPI int lib3ds_file_mesh_by_name(Lib3dsFile *file, const char *name);
-extern LIB3DSAPI Lib3dsMesh* lib3ds_file_mesh_for_node(Lib3dsFile *file, Lib3dsNode *node);
-extern LIB3DSAPI Lib3dsObjectNode* lib3ds_file_new_mesh_node(Lib3dsFile *file, Lib3dsMesh *mesh, Lib3dsNode *parent, float pos0[3], float scl0[3], float rot0[4]);
 
 extern LIB3DSAPI Lib3dsNode* lib3ds_file_node_by_name(Lib3dsFile *file, const char* name, Lib3dsNodeType type);
 extern LIB3DSAPI Lib3dsNode* lib3ds_file_node_by_id(Lib3dsFile *file, unsigned short node_id);
-extern LIB3DSAPI void lib3ds_file_insert_node(Lib3dsFile *file, Lib3dsNode *node);
+extern LIB3DSAPI void lib3ds_file_append_node(Lib3dsFile *file, Lib3dsNode *node, Lib3dsNode *parent);
+extern LIB3DSAPI void lib3ds_file_insert_node(Lib3dsFile *file, Lib3dsNode *node, Lib3dsNode *at);
 extern LIB3DSAPI void lib3ds_file_remove_node(Lib3dsFile *file, Lib3dsNode *node);
 extern LIB3DSAPI void lib3ds_file_minmax_node_id(Lib3dsFile *file, unsigned short *min_id, unsigned short *max_id);
 extern LIB3DSAPI void lib3ds_file_bounding_box_of_objects(Lib3dsFile *file, int include_meshes, int include_cameras, int include_lights, float bmin[3], float bmax[3]);

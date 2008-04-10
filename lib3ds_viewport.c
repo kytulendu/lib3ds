@@ -26,7 +26,7 @@ lib3ds_viewport_read(Lib3dsViewport *viewport, Lib3dsIo *io) {
     memset(viewport, 0, sizeof(*viewport));
     lib3ds_chunk_read_start(&c, 0, io);
     switch (c.chunk) {
-        case LIB3DS_VIEWPORT_LAYOUT: {
+        case CHK_VIEWPORT_LAYOUT: {
             int cur = 0;
             viewport->layout_style = lib3ds_io_read_word(io);
             viewport->layout_active = lib3ds_io_read_intw(io);
@@ -38,7 +38,7 @@ lib3ds_viewport_read(Lib3dsViewport *viewport, Lib3dsIo *io) {
             lib3ds_chunk_read_tell(&c, io);
             while ((chunk = lib3ds_chunk_read_next(&c, io)) != 0) {
                 switch (chunk) {
-                    case LIB3DS_VIEWPORT_SIZE: {
+                    case CHK_VIEWPORT_SIZE: {
                         viewport->layout_position[0] = lib3ds_io_read_word(io);
                         viewport->layout_position[1] = lib3ds_io_read_word(io);
                         viewport->layout_size[0] = lib3ds_io_read_word(io);
@@ -46,7 +46,7 @@ lib3ds_viewport_read(Lib3dsViewport *viewport, Lib3dsIo *io) {
                         break;
                     }
 
-                    case LIB3DS_VIEWPORT_DATA_3: {
+                    case CHK_VIEWPORT_DATA_3: {
                         if (cur < LIB3DS_LAYOUT_MAX_VIEWS) {
                             lib3ds_io_read_intw(io);
                             viewport->layout_views[cur].axis_lock = lib3ds_io_read_word(io);
@@ -65,7 +65,7 @@ lib3ds_viewport_read(Lib3dsViewport *viewport, Lib3dsIo *io) {
                         break;
                     }
 
-                    case LIB3DS_VIEWPORT_DATA:
+                    case CHK_VIEWPORT_DATA:
                         /* 3DS R2 & R3 chunk unsupported */
                         break;
 
@@ -76,53 +76,53 @@ lib3ds_viewport_read(Lib3dsViewport *viewport, Lib3dsIo *io) {
             break;
         }
 
-        case LIB3DS_DEFAULT_VIEW: {
+        case CHK_DEFAULT_VIEW: {
             while ((chunk = lib3ds_chunk_read_next(&c, io)) != 0) {
                 switch (chunk) {
-                    case LIB3DS_VIEW_TOP: {
-                        viewport->default_type = LIB3DS_VIEW_TYPE_TOP;
+                    case CHK_VIEW_TOP: {
+                        viewport->default_type = LIB3DS_VIEW_TOP;
                         lib3ds_io_read_vector(io, viewport->default_position);
                         viewport->default_width = lib3ds_io_read_float(io);
                         break;
                     }
 
-                    case LIB3DS_VIEW_BOTTOM: {
-                        viewport->default_type = LIB3DS_VIEW_TYPE_BOTTOM;
+                    case CHK_VIEW_BOTTOM: {
+                        viewport->default_type = LIB3DS_VIEW_BOTTOM;
                         lib3ds_io_read_vector(io, viewport->default_position);
                         viewport->default_width = lib3ds_io_read_float(io);
                         break;
                     }
 
-                    case LIB3DS_VIEW_LEFT: {
-                        viewport->default_type = LIB3DS_VIEW_TYPE_LEFT;
+                    case CHK_VIEW_LEFT: {
+                        viewport->default_type = LIB3DS_VIEW_LEFT;
                         lib3ds_io_read_vector(io, viewport->default_position);
                         viewport->default_width = lib3ds_io_read_float(io);
                         break;
                     }
 
-                    case LIB3DS_VIEW_RIGHT: {
-                        viewport->default_type = LIB3DS_VIEW_TYPE_RIGHT;
+                    case CHK_VIEW_RIGHT: {
+                        viewport->default_type = LIB3DS_VIEW_RIGHT;
                         lib3ds_io_read_vector(io, viewport->default_position);
                         viewport->default_width = lib3ds_io_read_float(io);
                         break;
                     }
 
-                    case LIB3DS_VIEW_FRONT: {
-                        viewport->default_type = LIB3DS_VIEW_TYPE_FRONT;
+                    case CHK_VIEW_FRONT: {
+                        viewport->default_type = LIB3DS_VIEW_FRONT;
                         lib3ds_io_read_vector(io, viewport->default_position);
                         viewport->default_width = lib3ds_io_read_float(io);
                         break;
                     }
 
-                    case LIB3DS_VIEW_BACK: {
-                        viewport->default_type = LIB3DS_VIEW_TYPE_BACK;
+                    case CHK_VIEW_BACK: {
+                        viewport->default_type = LIB3DS_VIEW_BACK;
                         lib3ds_io_read_vector(io, viewport->default_position);
                         viewport->default_width = lib3ds_io_read_float(io);
                         break;
                     }
 
-                    case LIB3DS_VIEW_USER: {
-                        viewport->default_type = LIB3DS_VIEW_TYPE_USER;
+                    case CHK_VIEW_USER: {
+                        viewport->default_type = LIB3DS_VIEW_USER;
                         lib3ds_io_read_vector(io, viewport->default_position);
                         viewport->default_width = lib3ds_io_read_float(io);
                         viewport->default_horiz_angle = lib3ds_io_read_float(io);
@@ -131,8 +131,8 @@ lib3ds_viewport_read(Lib3dsViewport *viewport, Lib3dsIo *io) {
                         break;
                     }
 
-                    case LIB3DS_VIEW_CAMERA: {
-                        viewport->default_type = LIB3DS_VIEW_TYPE_CAMERA;
+                    case CHK_VIEW_CAMERA: {
+                        viewport->default_type = LIB3DS_VIEW_CAMERA;
                         lib3ds_io_read(io, viewport->default_camera, 11);
                         break;
                     }
@@ -155,7 +155,7 @@ lib3ds_viewport_write(Lib3dsViewport *viewport, Lib3dsIo *io) {
         Lib3dsChunk c;
         int i;
 
-        c.chunk = LIB3DS_VIEWPORT_LAYOUT;
+        c.chunk = CHK_VIEWPORT_LAYOUT;
         lib3ds_chunk_write_start(&c, io);
 
         lib3ds_io_write_word(io, viewport->layout_style);
@@ -168,7 +168,7 @@ lib3ds_viewport_write(Lib3dsViewport *viewport, Lib3dsIo *io) {
 
         {
             Lib3dsChunk c;
-            c.chunk = LIB3DS_VIEWPORT_SIZE;
+            c.chunk = CHK_VIEWPORT_SIZE;
             c.size = 14;
             lib3ds_chunk_write(&c, io);
             lib3ds_io_write_intw(io, viewport->layout_position[0]);
@@ -179,7 +179,7 @@ lib3ds_viewport_write(Lib3dsViewport *viewport, Lib3dsIo *io) {
 
         for (i = 0; i < viewport->layout_nviews; ++i) {
             Lib3dsChunk c;
-            c.chunk = LIB3DS_VIEWPORT_DATA_3;
+            c.chunk = CHK_VIEWPORT_DATA_3;
             c.size = 55;
             lib3ds_chunk_write(&c, io);
 
@@ -203,13 +203,13 @@ lib3ds_viewport_write(Lib3dsViewport *viewport, Lib3dsIo *io) {
     if (viewport->default_type) {
         Lib3dsChunk c;
 
-        c.chunk = LIB3DS_DEFAULT_VIEW;
+        c.chunk = CHK_DEFAULT_VIEW;
         lib3ds_chunk_write_start(&c, io);
 
         switch (viewport->default_type) {
-            case LIB3DS_VIEW_TYPE_TOP: {
+            case LIB3DS_VIEW_TOP: {
                 Lib3dsChunk c;
-                c.chunk = LIB3DS_VIEW_TOP;
+                c.chunk = CHK_VIEW_TOP;
                 c.size = 22;
                 lib3ds_chunk_write(&c, io);
                 lib3ds_io_write_vector(io, viewport->default_position);
@@ -217,9 +217,9 @@ lib3ds_viewport_write(Lib3dsViewport *viewport, Lib3dsIo *io) {
                 break;
             }
 
-            case LIB3DS_VIEW_TYPE_BOTTOM: {
+            case LIB3DS_VIEW_BOTTOM: {
                 Lib3dsChunk c;
-                c.chunk = LIB3DS_VIEW_BOTTOM;
+                c.chunk = CHK_VIEW_BOTTOM;
                 c.size = 22;
                 lib3ds_chunk_write(&c, io);
                 lib3ds_io_write_vector(io, viewport->default_position);
@@ -227,9 +227,9 @@ lib3ds_viewport_write(Lib3dsViewport *viewport, Lib3dsIo *io) {
                 break;
             }
 
-            case LIB3DS_VIEW_TYPE_LEFT: {
+            case LIB3DS_VIEW_LEFT: {
                 Lib3dsChunk c;
-                c.chunk = LIB3DS_VIEW_LEFT;
+                c.chunk = CHK_VIEW_LEFT;
                 c.size = 22;
                 lib3ds_chunk_write(&c, io);
                 lib3ds_io_write_vector(io, viewport->default_position);
@@ -237,9 +237,9 @@ lib3ds_viewport_write(Lib3dsViewport *viewport, Lib3dsIo *io) {
                 break;
             }
 
-            case LIB3DS_VIEW_TYPE_RIGHT: {
+            case LIB3DS_VIEW_RIGHT: {
                 Lib3dsChunk c;
-                c.chunk = LIB3DS_VIEW_RIGHT;
+                c.chunk = CHK_VIEW_RIGHT;
                 c.size = 22;
                 lib3ds_chunk_write(&c, io);
                 lib3ds_io_write_vector(io, viewport->default_position);
@@ -247,9 +247,9 @@ lib3ds_viewport_write(Lib3dsViewport *viewport, Lib3dsIo *io) {
                 break;
             }
 
-            case LIB3DS_VIEW_TYPE_FRONT: {
+            case LIB3DS_VIEW_FRONT: {
                 Lib3dsChunk c;
-                c.chunk = LIB3DS_VIEW_FRONT;
+                c.chunk = CHK_VIEW_FRONT;
                 c.size = 22;
                 lib3ds_chunk_write(&c, io);
                 lib3ds_io_write_vector(io, viewport->default_position);
@@ -257,9 +257,9 @@ lib3ds_viewport_write(Lib3dsViewport *viewport, Lib3dsIo *io) {
                 break;
             }
 
-            case LIB3DS_VIEW_TYPE_BACK: {
+            case LIB3DS_VIEW_BACK: {
                 Lib3dsChunk c;
-                c.chunk = LIB3DS_VIEW_BACK;
+                c.chunk = CHK_VIEW_BACK;
                 c.size = 22;
                 lib3ds_chunk_write(&c, io);
                 lib3ds_io_write_vector(io, viewport->default_position);
@@ -267,9 +267,9 @@ lib3ds_viewport_write(Lib3dsViewport *viewport, Lib3dsIo *io) {
                 break;
             }
 
-            case LIB3DS_VIEW_TYPE_USER: {
+            case LIB3DS_VIEW_USER: {
                 Lib3dsChunk c;
-                c.chunk = LIB3DS_VIEW_USER;
+                c.chunk = CHK_VIEW_USER;
                 c.size = 34;
                 lib3ds_chunk_write(&c, io);
                 lib3ds_io_write_vector(io, viewport->default_position);
@@ -280,9 +280,9 @@ lib3ds_viewport_write(Lib3dsViewport *viewport, Lib3dsIo *io) {
                 break;
             }
 
-            case LIB3DS_VIEW_TYPE_CAMERA: {
+            case LIB3DS_VIEW_CAMERA: {
                 Lib3dsChunk c;
-                c.chunk = LIB3DS_VIEW_CAMERA;
+                c.chunk = CHK_VIEW_CAMERA;
                 c.size = 17;
                 lib3ds_chunk_write(&c, io);
                 lib3ds_io_write(io, viewport->default_camera, 11);

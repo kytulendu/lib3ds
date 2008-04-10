@@ -235,35 +235,27 @@ lib3ds_quat_slerp(float c[4], float a[4], float b[4], float t) {
     double l;
     double om, sinom;
     double sp, sq;
-    float q[4];
+    float flip = 1.0f;
+    int i;
 
     l = a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3];
-    if ((1.0 + l) > LIB3DS_EPSILON) {
-        if (fabs(l) > 1.0f) l /= fabs(l);
-        om = acos(l);
-        sinom = sin(om);
-        if (fabs(sinom) > LIB3DS_EPSILON) {
-            sp = sin((1.0f - t) * om) / sinom;
-            sq = sin(t * om) / sinom;
-        } else {
-            sp = 1.0f - t;
-            sq = t;
-        }
-        c[0] = (float)(sp * a[0] + sq * b[0]);
-        c[1] = (float)(sp * a[1] + sq * b[1]);
-        c[2] = (float)(sp * a[2] + sq * b[2]);
-        c[3] = (float)(sp * a[3] + sq * b[3]);
+    if (l < 0) { 
+        flip = -1.0f;
+        l = -l; 
+    }    
+    
+    om = acos(l);
+    sinom = sin(om);
+    if (fabs(sinom) > LIB3DS_EPSILON) {
+        sp = sin((1.0f - t) * om) / sinom;
+        sq = sin(t * om) / sinom;
     } else {
-        q[0] = -a[1];
-        q[1] = a[0];
-        q[2] = -a[3];
-        q[3] = a[2];
-        sp = sin((1.0 - t) * LIB3DS_HALFPI);
-        sq = sin(t * LIB3DS_HALFPI);
-        c[0] = (float)(sp * a[0] + sq * q[0]);
-        c[1] = (float)(sp * a[1] + sq * q[1]);
-        c[2] = (float)(sp * a[2] + sq * q[2]);
-        c[3] = (float)(sp * a[3] + sq * q[3]);
+        sp = 1.0f - t;
+        sq = t;
+    }
+    sq *= flip;
+    for (i = 0; i < 4; ++i) {
+        c[i] = (float)(sp * a[i] + sq * b[i]);
     }
 }
 

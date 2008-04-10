@@ -54,7 +54,7 @@ lib3ds_chunk_read_start(Lib3dsChunk *c, uint16_t chunk, Lib3dsIo *io) {
     if ((chunk != 0) && (c->chunk != chunk)) {
         lib3ds_io_log(io, LIB3DS_LOG_ERROR, "Unexpected chunk found.");
     }
-    io->impl->log_indent++;
+    ((Lib3dsIoImpl*)io->impl)->log_indent++;
 }
 
 
@@ -94,7 +94,7 @@ lib3ds_chunk_read_reset(Lib3dsChunk *c, Lib3dsIo *io) {
 
 void
 lib3ds_chunk_read_end(Lib3dsChunk *c, Lib3dsIo *io) {
-    io->impl->log_indent--;
+    ((Lib3dsIoImpl*)io->impl)->log_indent--;
     lib3ds_io_seek(io, c->end, LIB3DS_SEEK_SET);
 }
 

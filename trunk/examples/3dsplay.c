@@ -190,7 +190,7 @@ timer_cb(int value) {
     if (!halt) {
 
         {
-            Lib3dsObjectNode* n = (Lib3dsObjectNode*)file->nodes;
+            Lib3dsMeshNode* n = (Lib3dsMeshNode*)file->nodes;
             float q[4];
             float vl;
             
@@ -262,10 +262,9 @@ load_model(void) {
         int i;
         for (i = 0; i < file->nmeshes; ++i) {
             Lib3dsMesh *mesh = file->meshes[i];
-            node = lib3ds_node_new(LIB3DS_OBJECT_NODE);
+            node = lib3ds_node_new(LIB3DS_NODE_MESH);
             strcpy(node->name, mesh->name);
-            node->parent_id = LIB3DS_NO_PARENT;
-            lib3ds_file_insert_node(file, node);
+            lib3ds_file_insert_node(file, node, NULL);
         }
     }
 
@@ -432,10 +431,10 @@ render_node(Lib3dsNode *node) {
             render_node(p);
         }
     }
-    if (node->type == LIB3DS_OBJECT_NODE) {
+    if (node->type == LIB3DS_NODE_MESH) {
         int index;
         Lib3dsMesh *mesh;
-        Lib3dsObjectNode *n = (Lib3dsObjectNode*)node;
+        Lib3dsMeshNode *n = (Lib3dsMeshNode*)node;
 
         if (strcmp(node->name, "$$$DUMMY") == 0) {
             return;
@@ -680,17 +679,17 @@ static void
 light_update(Lib3dsLight *l) {
     Lib3dsNode *ln, *sn;
 
-    ln = lib3ds_file_node_by_name(file, l->name, LIB3DS_LIGHT_NODE);
-    sn = lib3ds_file_node_by_name(file, l->name, LIB3DS_SPOT_NODE);
+    ln = lib3ds_file_node_by_name(file, l->name, LIB3DS_NODE_SPOTLIGHT);
+    sn = lib3ds_file_node_by_name(file, l->name, LIB3DS_NODE_SPOTLIGHT_TARGET);
 
     if (ln != NULL) {
-        Lib3dsLightNode *n = (Lib3dsLightNode*)ln;
+        Lib3dsSpotlightNode *n = (Lib3dsSpotlightNode*)ln;
         memcpy(l->color, n->color, 3 * sizeof(float));
         memcpy(l->position, n->pos, 3 * sizeof(float));
     }
 
     if (sn != NULL) {
-        Lib3dsSpotNode *n = (Lib3dsSpotNode*)sn;
+        Lib3dsTargetNode *n = (Lib3dsTargetNode*)sn;
         memcpy(l->spot, n->pos, 3* sizeof(float));
     }
 }
@@ -821,8 +820,8 @@ display(void) {
 
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, file->ambient);
 
-    c = (Lib3dsCameraNode*)lib3ds_file_node_by_name(file, camera, LIB3DS_CAMERA_NODE);
-    t = (Lib3dsTargetNode*)lib3ds_file_node_by_name(file, camera, LIB3DS_TARGET_NODE);
+    c = (Lib3dsCameraNode*)lib3ds_file_node_by_name(file, camera, LIB3DS_NODE_CAMERA);
+    t = (Lib3dsTargetNode*)lib3ds_file_node_by_name(file, camera, LIB3DS_NODE_CAMERA_TARGET);
 
     if (t != NULL) {
         tgt = t->pos;

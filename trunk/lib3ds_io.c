@@ -33,16 +33,18 @@ lib3ds_io_setup(Lib3dsIo *io) {
 
 void
 lib3ds_io_cleanup(Lib3dsIo *io) {
+    Lib3dsIoImpl *impl;
     assert(io);
-    if (io->impl->tmp_mem) {
-        free(io->impl->tmp_mem);
-        io->impl->tmp_mem = NULL;
+    impl = (Lib3dsIoImpl*)io->impl;
+    if (impl->tmp_mem) {
+        free(impl->tmp_mem);
+        impl->tmp_mem = NULL;
     }
-    if (io->impl->tmp_node) {
-        lib3ds_node_free(io->impl->tmp_node);
-        io->impl->tmp_node = NULL;
+    if (impl->tmp_node) {
+        lib3ds_node_free(impl->tmp_node);
+        impl->tmp_node = NULL;
     }
-    free(io->impl);
+    free(impl);
 }
 
 
@@ -90,7 +92,7 @@ static void
 lib3ds_io_log_str(Lib3dsIo *io, Lib3dsLogLevel level, const char *str) {
     if (!io || !io->log_func)
         return;
-    (*io->log_func)(io->self, level, io->impl->log_indent, str);
+    (*io->log_func)(io->self, level, ((Lib3dsIoImpl*)io->impl)->log_indent, str);
 }
 
 
@@ -108,7 +110,7 @@ lib3ds_io_log(Lib3dsIo *io, Lib3dsLogLevel level, const char *format, ...) {
     lib3ds_io_log_str(io, level, str);
 
     if (level == LIB3DS_LOG_ERROR) {
-        longjmp(io->impl->jmpbuf, 1);
+        longjmp(((Lib3dsIoImpl*)io->impl)->jmpbuf, 1);
     }
 }
 
@@ -118,7 +120,7 @@ lib3ds_io_log_indent(Lib3dsIo *io, int indent) {
     assert(io);
     if (!io)
         return;
-    io->impl->log_indent += indent;
+    ((Lib3dsIoImpl*)io->impl)->log_indent += indent;
 }
 
 

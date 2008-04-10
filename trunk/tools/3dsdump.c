@@ -312,10 +312,10 @@ lib3ds_material_dump(Lib3dsMaterial *material) {
     texture_dump("reflection_map", &material->reflection_map);
     texture_dump("reflection_mask", &material->reflection_mask);
     printf("  autorefl_map:\n");
-    printf("    flags        %X\n", (unsigned)material->autorefl_map.flags);
-    printf("    level        %d\n", (int)material->autorefl_map.anti_alias);
-    printf("    size         %d\n", (int)material->autorefl_map.size);
-    printf("    frame_step   %d\n", (int)material->autorefl_map.frame_step);
+    printf("    flags        %X\n", (unsigned)material->autorefl_map_flags);
+    printf("    level        %d\n", (int)material->autorefl_map_anti_alias);
+    printf("    size         %d\n", (int)material->autorefl_map_size);
+    printf("    frame_step   %d\n", (int)material->autorefl_map_frame_step);
     printf("\n");
 }
 
@@ -416,8 +416,8 @@ dump_instances(Lib3dsNode *node, const char* parent) {
     strcpy(name, parent);
     strcat(name, ".");
     strcat(name, node->name);
-    if (node->type == LIB3DS_OBJECT_NODE) {
-        Lib3dsObjectNode *n = (Lib3dsObjectNode*)node;
+    if (node->type == LIB3DS_NODE_MESH) {
+        Lib3dsMeshNode *n = (Lib3dsMeshNode*)node;
         printf("  %s : %s\n", name, n->instance);
     }
     for (p = node->childs; p != 0; p = p->next) {
@@ -427,13 +427,13 @@ dump_instances(Lib3dsNode *node, const char* parent) {
 
 
 static const char* node_names_table[] = {
-    "***Unknown***",
     "Ambient",
-    "Object",
+    "Mesh",
     "Camera",
-    "Target",
-    "Light",
-    "Spot"
+    "Camera Target",
+    "Omnilight",
+    "Spotlight",
+    "Spotlight Target"
 };
 
 
@@ -446,8 +446,8 @@ node_dump(Lib3dsNode *node, int level) {
     memset(l, ' ', 2*level);
     l[2*level] = 0;
 
-    if (node->type == LIB3DS_OBJECT_NODE) {
-        Lib3dsObjectNode *n = (Lib3dsObjectNode*)node; 
+    if (node->type == LIB3DS_NODE_MESH) {
+        Lib3dsMeshNode *n = (Lib3dsMeshNode*)node; 
         printf("%s%s [%s] (%s)\n",
             l,
             node->name,

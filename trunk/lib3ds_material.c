@@ -92,7 +92,7 @@ color_read(float rgb[3], Lib3dsIo *io) {
 
     while ((chunk = lib3ds_chunk_read_next(&c, io)) != 0) {
         switch (chunk) {
-            case LIB3DS_LIN_COLOR_24: {
+            case CHK_LIN_COLOR_24: {
                 int i;
                 for (i = 0; i < 3; ++i) {
                     rgb[i] = 1.0f * lib3ds_io_read_byte(io) / 255.0f;
@@ -101,7 +101,7 @@ color_read(float rgb[3], Lib3dsIo *io) {
                 break;
             }
 
-            case LIB3DS_COLOR_24: {
+            case CHK_COLOR_24: {
                 /* gamma corrected color chunk
                    replaced in 3ds R3 by LIN_COLOR_24 */
                 if (!have_lin) {
@@ -113,7 +113,7 @@ color_read(float rgb[3], Lib3dsIo *io) {
                 break;
             }
 
-            case LIB3DS_LIN_COLOR_F: {
+            case CHK_LIN_COLOR_F: {
                 int i;
                 for (i = 0; i < 3; ++i) {
                     rgb[i] = lib3ds_io_read_float(io);
@@ -122,7 +122,7 @@ color_read(float rgb[3], Lib3dsIo *io) {
                 break;
             }
 
-            case LIB3DS_COLOR_F: {
+            case CHK_COLOR_F: {
                 if (!have_lin) {
                     int i;
                     for (i = 0; i < 3; ++i) {
@@ -150,7 +150,7 @@ int_percentage_read(float *p, Lib3dsIo *io) {
 
     while ((chunk = lib3ds_chunk_read_next(&c, io)) != 0) {
         switch (chunk) {
-            case LIB3DS_INT_PERCENTAGE: {
+            case CHK_INT_PERCENTAGE: {
                 int16_t i = lib3ds_io_read_intw(io);
                 *p = (float)(1.0 * i / 100.0);
                 break;
@@ -174,78 +174,78 @@ texture_map_read(Lib3dsTextureMap *map, Lib3dsIo *io) {
 
     while ((chunk = lib3ds_chunk_read_next(&c, io)) != 0) {
         switch (chunk) {
-            case LIB3DS_INT_PERCENTAGE: {
+            case CHK_INT_PERCENTAGE: {
                 map->percent = 1.0f * lib3ds_io_read_intw(io) / 100.0f;
                 break;
             }
 
-            case LIB3DS_MAT_MAPNAME: {
+            case CHK_MAT_MAPNAME: {
                 lib3ds_io_read_string(io, map->name, 64);
                 lib3ds_io_log(io, LIB3DS_LOG_INFO, "  NAME=%s", map->name);
                 break;
             }
 
-            case LIB3DS_MAT_MAP_TILING: {
+            case CHK_MAT_MAP_TILING: {
                 map->flags = lib3ds_io_read_word(io);
                 break;
             }
 
-            case LIB3DS_MAT_MAP_TEXBLUR: 
+            case CHK_MAT_MAP_TEXBLUR: 
                 map->blur = lib3ds_io_read_float(io);
                 break;
 
-            case LIB3DS_MAT_MAP_USCALE:
+            case CHK_MAT_MAP_USCALE:
                 map->scale[0] = lib3ds_io_read_float(io);
                 break;
 
-            case LIB3DS_MAT_MAP_VSCALE: {
+            case CHK_MAT_MAP_VSCALE: {
                 map->scale[1] = lib3ds_io_read_float(io);
                 break;
             }
-            case LIB3DS_MAT_MAP_UOFFSET: {
+            case CHK_MAT_MAP_UOFFSET: {
                 map->offset[0] = lib3ds_io_read_float(io);
                 break;
             }
 
-            case LIB3DS_MAT_MAP_VOFFSET: {
+            case CHK_MAT_MAP_VOFFSET: {
                 map->offset[1] = lib3ds_io_read_float(io);
                 break;
             }
 
-            case LIB3DS_MAT_MAP_ANG: {
+            case CHK_MAT_MAP_ANG: {
                 map->rotation = lib3ds_io_read_float(io);
                 break;
             }
 
-            case LIB3DS_MAT_MAP_COL1: {
+            case CHK_MAT_MAP_COL1: {
                 map->tint_1[0] = 1.0f * lib3ds_io_read_byte(io) / 255.0f;
                 map->tint_1[1] = 1.0f * lib3ds_io_read_byte(io) / 255.0f;
                 map->tint_1[2] = 1.0f * lib3ds_io_read_byte(io) / 255.0f;
                 break;
             }
 
-            case LIB3DS_MAT_MAP_COL2: {
+            case CHK_MAT_MAP_COL2: {
                 map->tint_2[0] = 1.0f * lib3ds_io_read_byte(io) / 255.0f;
                 map->tint_2[1] = 1.0f * lib3ds_io_read_byte(io) / 255.0f;
                 map->tint_2[2] = 1.0f * lib3ds_io_read_byte(io) / 255.0f;
                 break;
             }
 
-            case LIB3DS_MAT_MAP_RCOL: {
+            case CHK_MAT_MAP_RCOL: {
                 map->tint_r[0] = 1.0f * lib3ds_io_read_byte(io) / 255.0f;
                 map->tint_r[1] = 1.0f * lib3ds_io_read_byte(io) / 255.0f;
                 map->tint_r[2] = 1.0f * lib3ds_io_read_byte(io) / 255.0f;
                 break;
             }
 
-            case LIB3DS_MAT_MAP_GCOL: {
+            case CHK_MAT_MAP_GCOL: {
                 map->tint_g[0] = 1.0f * lib3ds_io_read_byte(io) / 255.0f;
                 map->tint_g[1] = 1.0f * lib3ds_io_read_byte(io) / 255.0f;
                 map->tint_g[2] = 1.0f * lib3ds_io_read_byte(io) / 255.0f;
                 break;
             }
 
-            case LIB3DS_MAT_MAP_BCOL: {
+            case CHK_MAT_MAP_BCOL: {
                 map->tint_b[0] = 1.0f * lib3ds_io_read_byte(io) / 255.0f;
                 map->tint_b[1] = 1.0f * lib3ds_io_read_byte(io) / 255.0f;
                 map->tint_b[2] = 1.0f * lib3ds_io_read_byte(io) / 255.0f;
@@ -267,229 +267,229 @@ lib3ds_material_read(Lib3dsMaterial *material, Lib3dsIo *io) {
     uint16_t chunk;
 
     assert(material);
-    lib3ds_chunk_read_start(&c, LIB3DS_MAT_ENTRY, io);
+    lib3ds_chunk_read_start(&c, CHK_MAT_ENTRY, io);
 
     while ((chunk = lib3ds_chunk_read_next(&c, io)) != 0) {
         switch (chunk) {
-            case LIB3DS_MAT_NAME: {
+            case CHK_MAT_NAME: {
                 lib3ds_io_read_string(io, material->name, 64);
                 lib3ds_io_log(io, LIB3DS_LOG_INFO, "  NAME=%s", material->name);
                 break;
             }
 
-            case LIB3DS_MAT_AMBIENT: {
+            case CHK_MAT_AMBIENT: {
                 lib3ds_chunk_read_reset(&c, io);
                 color_read(material->ambient, io);
                 break;
             }
 
-            case LIB3DS_MAT_DIFFUSE: {
+            case CHK_MAT_DIFFUSE: {
                 lib3ds_chunk_read_reset(&c, io);
                 color_read(material->diffuse, io);
                 break;
             }
 
-            case LIB3DS_MAT_SPECULAR: {
+            case CHK_MAT_SPECULAR: {
                 lib3ds_chunk_read_reset(&c, io);
                 color_read(material->specular, io);
                 break;
             }
 
-            case LIB3DS_MAT_SHININESS: {
+            case CHK_MAT_SHININESS: {
                 lib3ds_chunk_read_reset(&c, io);
                 int_percentage_read(&material->shininess, io);
                 break;
             }
 
-            case LIB3DS_MAT_SHIN2PCT: {
+            case CHK_MAT_SHIN2PCT: {
                 lib3ds_chunk_read_reset(&c, io);
                 int_percentage_read(&material->shin_strength, io);
                 break;
             }
 
-            case LIB3DS_MAT_TRANSPARENCY: {
+            case CHK_MAT_TRANSPARENCY: {
                 lib3ds_chunk_read_reset(&c, io);
                 int_percentage_read(&material->transparency, io);
                 break;
             }
 
-            case LIB3DS_MAT_XPFALL: {
+            case CHK_MAT_XPFALL: {
                 lib3ds_chunk_read_reset(&c, io);
                 int_percentage_read(&material->falloff, io);
                 break;
             }
 
-            case LIB3DS_MAT_SELF_ILPCT: {
+            case CHK_MAT_SELF_ILPCT: {
                 lib3ds_chunk_read_reset(&c, io);
                 int_percentage_read(&material->self_ilpct, io);
                 break;
             }
 
-            case LIB3DS_MAT_USE_XPFALL: {
+            case CHK_MAT_USE_XPFALL: {
                 material->use_falloff = TRUE;
                 break;
             }
 
-            case LIB3DS_MAT_REFBLUR: {
+            case CHK_MAT_REFBLUR: {
                 lib3ds_chunk_read_reset(&c, io);
                 int_percentage_read(&material->blur, io);
                 break;
             }
 
-            case LIB3DS_MAT_USE_REFBLUR: {
+            case CHK_MAT_USE_REFBLUR: {
                 material->use_blur = TRUE;
                 break;
             }
 
-            case LIB3DS_MAT_SHADING: {
+            case CHK_MAT_SHADING: {
                 material->shading = lib3ds_io_read_intw(io);
                 break;
             }
 
-            case LIB3DS_MAT_SELF_ILLUM: {
+            case CHK_MAT_SELF_ILLUM: {
                 material->self_illum = TRUE;
                 break;
             }
 
-            case LIB3DS_MAT_TWO_SIDE: {
+            case CHK_MAT_TWO_SIDE: {
                 material->two_sided = TRUE;
                 break;
             }
 
-            case LIB3DS_MAT_DECAL: {
+            case CHK_MAT_DECAL: {
                 material->map_decal = TRUE;
                 break;
             }
 
-            case LIB3DS_MAT_ADDITIVE: {
+            case CHK_MAT_ADDITIVE: {
                 material->is_additive = TRUE;
                 break;
             }
 
-            case LIB3DS_MAT_FACEMAP: {
+            case CHK_MAT_FACEMAP: {
                 material->face_map = TRUE;
                 break;
             }
 
-            case LIB3DS_MAT_PHONGSOFT: {
+            case CHK_MAT_PHONGSOFT: {
                 material->soften = TRUE;
                 break;
             }
 
-            case LIB3DS_MAT_WIRE: {
+            case CHK_MAT_WIRE: {
                 material->use_wire = TRUE;
                 break;
             }
 
-            case LIB3DS_MAT_WIREABS: {
+            case CHK_MAT_WIREABS: {
                 material->use_wire_abs = TRUE;
                 break;
             }
-            case LIB3DS_MAT_WIRE_SIZE: {
+            case CHK_MAT_WIRE_SIZE: {
                 material->wire_size = lib3ds_io_read_float(io);
                 break;
             }
 
-            case LIB3DS_MAT_TEXMAP: {
+            case CHK_MAT_TEXMAP: {
                 lib3ds_chunk_read_reset(&c, io);
                 texture_map_read(&material->texture1_map, io);
                 break;
             }
 
-            case LIB3DS_MAT_TEXMASK: {
+            case CHK_MAT_TEXMASK: {
                 lib3ds_chunk_read_reset(&c, io);
                 texture_map_read(&material->texture1_mask, io);
                 break;
             }
 
-            case LIB3DS_MAT_TEX2MAP: {
+            case CHK_MAT_TEX2MAP: {
                 lib3ds_chunk_read_reset(&c, io);
                 texture_map_read(&material->texture2_map, io);
                 break;
             }
 
-            case LIB3DS_MAT_TEX2MASK: {
+            case CHK_MAT_TEX2MASK: {
                 lib3ds_chunk_read_reset(&c, io);
                 texture_map_read(&material->texture2_mask, io);
                 break;
             }
 
-            case LIB3DS_MAT_OPACMAP: {
+            case CHK_MAT_OPACMAP: {
                 lib3ds_chunk_read_reset(&c, io);
                 texture_map_read(&material->opacity_map, io);
                 break;
             }
 
-            case LIB3DS_MAT_OPACMASK: {
+            case CHK_MAT_OPACMASK: {
                 lib3ds_chunk_read_reset(&c, io);
                 texture_map_read(&material->opacity_mask, io);
                 break;
             }
 
-            case LIB3DS_MAT_BUMPMAP: {
+            case CHK_MAT_BUMPMAP: {
                 lib3ds_chunk_read_reset(&c, io);
                 texture_map_read(&material->bump_map, io);
                 break;
             }
-            case LIB3DS_MAT_BUMPMASK: {
+            case CHK_MAT_BUMPMASK: {
                 lib3ds_chunk_read_reset(&c, io);
                 texture_map_read(&material->bump_mask, io);
                 break;
             }
-            case LIB3DS_MAT_SPECMAP: {
+            case CHK_MAT_SPECMAP: {
                 lib3ds_chunk_read_reset(&c, io);
                 texture_map_read(&material->specular_map, io);
                 break;
             }
 
-            case LIB3DS_MAT_SPECMASK: {
+            case CHK_MAT_SPECMASK: {
                 lib3ds_chunk_read_reset(&c, io);
                 texture_map_read(&material->specular_mask, io);
                 break;
             }
 
-            case LIB3DS_MAT_SHINMAP: {
+            case CHK_MAT_SHINMAP: {
                 lib3ds_chunk_read_reset(&c, io);
                 texture_map_read(&material->shininess_map, io);
                 break;
             }
 
-            case LIB3DS_MAT_SHINMASK: {
+            case CHK_MAT_SHINMASK: {
                 lib3ds_chunk_read_reset(&c, io);
                 texture_map_read(&material->shininess_mask, io);
                 break;
             }
 
-            case LIB3DS_MAT_SELFIMAP: {
+            case CHK_MAT_SELFIMAP: {
                 lib3ds_chunk_read_reset(&c, io);
                 texture_map_read(&material->self_illum_map, io);
                 break;
             }
 
-            case LIB3DS_MAT_SELFIMASK: {
+            case CHK_MAT_SELFIMASK: {
                 lib3ds_chunk_read_reset(&c, io);
                 texture_map_read(&material->self_illum_mask, io);
                 break;
             }
 
-            case LIB3DS_MAT_REFLMAP: {
+            case CHK_MAT_REFLMAP: {
                 lib3ds_chunk_read_reset(&c, io);
                 texture_map_read(&material->reflection_map, io);
                 break;
             }
 
-            case LIB3DS_MAT_REFLMASK: {
+            case CHK_MAT_REFLMASK: {
                 lib3ds_chunk_read_reset(&c, io);
                 texture_map_read(&material->reflection_mask, io);
                 break;
             }
 
-            case LIB3DS_MAT_ACUBIC: {
+            case CHK_MAT_ACUBIC: {
                 lib3ds_io_read_intb(io);
-                material->autorefl_map.anti_alias = lib3ds_io_read_intb(io);
-                material->autorefl_map.flags = lib3ds_io_read_intw(io);
-                material->autorefl_map.size = lib3ds_io_read_intd(io);
-                material->autorefl_map.frame_step = lib3ds_io_read_intd(io);
+                material->autorefl_map_anti_alias = lib3ds_io_read_intb(io);
+                material->autorefl_map_flags = lib3ds_io_read_intw(io);
+                material->autorefl_map_size = lib3ds_io_read_intd(io);
+                material->autorefl_map_frame_step = lib3ds_io_read_intd(io);
                 break;
             }
 
@@ -506,14 +506,14 @@ static void
 color_write(float rgb[3], Lib3dsIo *io) {
     Lib3dsChunk c;
 
-    c.chunk = LIB3DS_COLOR_24;
+    c.chunk = CHK_COLOR_24;
     c.size = 9;
     lib3ds_chunk_write(&c, io);
     lib3ds_io_write_byte(io, (uint8_t)floor(255.0*rgb[0] + 0.5));
     lib3ds_io_write_byte(io, (uint8_t)floor(255.0*rgb[1] + 0.5));
     lib3ds_io_write_byte(io, (uint8_t)floor(255.0*rgb[2] + 0.5));
 
-    c.chunk = LIB3DS_LIN_COLOR_24;
+    c.chunk = CHK_LIN_COLOR_24;
     c.size = 9;
     lib3ds_chunk_write(&c, io);
     lib3ds_io_write_byte(io, (uint8_t)floor(255.0*rgb[0] + 0.5));
@@ -526,7 +526,7 @@ static void
 int_percentage_write(float p, Lib3dsIo *io) {
     Lib3dsChunk c;
 
-    c.chunk = LIB3DS_INT_PERCENTAGE;
+    c.chunk = CHK_INT_PERCENTAGE;
     c.size = 8;
     lib3ds_chunk_write(&c, io);
     lib3ds_io_write_intw(io, (uint8_t)floor(100.0*p + 0.5));
@@ -545,73 +545,73 @@ texture_map_write(uint16_t chunk, Lib3dsTextureMap *map, Lib3dsIo *io) {
 
     int_percentage_write(map->percent, io);
 
-    { /*---- LIB3DS_MAT_MAPNAME ----*/
+    { /*---- CHK_MAT_MAPNAME ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_MAT_MAPNAME;
+        c.chunk = CHK_MAT_MAPNAME;
         c.size = 6 + (uint32_t)strlen(map->name) + 1;
         lib3ds_chunk_write(&c, io);
         lib3ds_io_write_string(io, map->name);
     }
 
-    { /*---- LIB3DS_MAT_MAP_TILING ----*/
+    { /*---- CHK_MAT_MAP_TILING ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_MAT_MAP_TILING;
+        c.chunk = CHK_MAT_MAP_TILING;
         c.size = 8;
         lib3ds_chunk_write(&c, io);
         lib3ds_io_write_word(io, (uint16_t)map->flags);
     }
 
-    { /*---- LIB3DS_MAT_MAP_TEXBLUR ----*/
+    { /*---- CHK_MAT_MAP_TEXBLUR ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_MAT_MAP_TEXBLUR;
+        c.chunk = CHK_MAT_MAP_TEXBLUR;
         c.size = 10;
         lib3ds_chunk_write(&c, io);
         lib3ds_io_write_float(io, map->blur);
     }
 
-    { /*---- LIB3DS_MAT_MAP_USCALE ----*/
+    { /*---- CHK_MAT_MAP_USCALE ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_MAT_MAP_USCALE;
+        c.chunk = CHK_MAT_MAP_USCALE;
         c.size = 10;
         lib3ds_chunk_write(&c, io);
         lib3ds_io_write_float(io, map->scale[0]);
     }
 
-    { /*---- LIB3DS_MAT_MAP_VSCALE ----*/
+    { /*---- CHK_MAT_MAP_VSCALE ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_MAT_MAP_VSCALE;
+        c.chunk = CHK_MAT_MAP_VSCALE;
         c.size = 10;
         lib3ds_chunk_write(&c, io);
         lib3ds_io_write_float(io, map->scale[1]);
     }
 
-    { /*---- LIB3DS_MAT_MAP_UOFFSET ----*/
+    { /*---- CHK_MAT_MAP_UOFFSET ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_MAT_MAP_UOFFSET;
+        c.chunk = CHK_MAT_MAP_UOFFSET;
         c.size = 10;
         lib3ds_chunk_write(&c, io);
         lib3ds_io_write_float(io, map->offset[0]);
     }
 
-    { /*---- LIB3DS_MAT_MAP_VOFFSET ----*/
+    { /*---- CHK_MAT_MAP_VOFFSET ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_MAT_MAP_VOFFSET;
+        c.chunk = CHK_MAT_MAP_VOFFSET;
         c.size = 10;
         lib3ds_chunk_write(&c, io);
         lib3ds_io_write_float(io, map->offset[1]);
     }
 
-    { /*---- LIB3DS_MAT_MAP_ANG ----*/
+    { /*---- CHK_MAT_MAP_ANG ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_MAT_MAP_ANG;
+        c.chunk = CHK_MAT_MAP_ANG;
         c.size = 10;
         lib3ds_chunk_write(&c, io);
         lib3ds_io_write_float(io, map->rotation);
     }
 
-    { /*---- LIB3DS_MAT_MAP_COL1 ----*/
+    { /*---- CHK_MAT_MAP_COL1 ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_MAT_MAP_COL1;
+        c.chunk = CHK_MAT_MAP_COL1;
         c.size = 9;
         lib3ds_chunk_write(&c, io);
         lib3ds_io_write_byte(io, (uint8_t)floor(255.0*map->tint_1[0] + 0.5));
@@ -619,9 +619,9 @@ texture_map_write(uint16_t chunk, Lib3dsTextureMap *map, Lib3dsIo *io) {
         lib3ds_io_write_byte(io, (uint8_t)floor(255.0*map->tint_1[2] + 0.5));
     }
 
-    { /*---- LIB3DS_MAT_MAP_COL2 ----*/
+    { /*---- CHK_MAT_MAP_COL2 ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_MAT_MAP_COL2;
+        c.chunk = CHK_MAT_MAP_COL2;
         c.size = 9;
         lib3ds_chunk_write(&c, io);
         lib3ds_io_write_byte(io, (uint8_t)floor(255.0*map->tint_2[0] + 0.5));
@@ -629,9 +629,9 @@ texture_map_write(uint16_t chunk, Lib3dsTextureMap *map, Lib3dsIo *io) {
         lib3ds_io_write_byte(io, (uint8_t)floor(255.0*map->tint_2[2] + 0.5));
     }
 
-    { /*---- LIB3DS_MAT_MAP_RCOL ----*/
+    { /*---- CHK_MAT_MAP_RCOL ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_MAT_MAP_RCOL;
+        c.chunk = CHK_MAT_MAP_RCOL;
         c.size = 9;
         lib3ds_chunk_write(&c, io);
         lib3ds_io_write_byte(io, (uint8_t)floor(255.0*map->tint_r[0] + 0.5));
@@ -639,9 +639,9 @@ texture_map_write(uint16_t chunk, Lib3dsTextureMap *map, Lib3dsIo *io) {
         lib3ds_io_write_byte(io, (uint8_t)floor(255.0*map->tint_r[2] + 0.5));
     }
 
-    { /*---- LIB3DS_MAT_MAP_GCOL ----*/
+    { /*---- CHK_MAT_MAP_GCOL ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_MAT_MAP_GCOL;
+        c.chunk = CHK_MAT_MAP_GCOL;
         c.size = 9;
         lib3ds_chunk_write(&c, io);
         lib3ds_io_write_byte(io, (uint8_t)floor(255.0*map->tint_g[0] + 0.5));
@@ -649,9 +649,9 @@ texture_map_write(uint16_t chunk, Lib3dsTextureMap *map, Lib3dsIo *io) {
         lib3ds_io_write_byte(io, (uint8_t)floor(255.0*map->tint_g[2] + 0.5));
     }
 
-    { /*---- LIB3DS_MAT_MAP_BCOL ----*/
+    { /*---- CHK_MAT_MAP_BCOL ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_MAT_MAP_BCOL;
+        c.chunk = CHK_MAT_MAP_BCOL;
         c.size = 9;
         lib3ds_chunk_write(&c, io);
         lib3ds_io_write_byte(io, (uint8_t)floor(255.0*map->tint_b[0] + 0.5));
@@ -667,183 +667,195 @@ void
 lib3ds_material_write(Lib3dsMaterial *material, Lib3dsIo *io) {
     Lib3dsChunk c;
 
-    c.chunk = LIB3DS_MAT_ENTRY;
+    c.chunk = CHK_MAT_ENTRY;
     lib3ds_chunk_write_start(&c, io);
 
-    { /*---- LIB3DS_MAT_NAME ----*/
+    { /*---- CHK_MAT_NAME ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_MAT_NAME;
+        c.chunk = CHK_MAT_NAME;
         c.size = 6 + (uint32_t)strlen(material->name) + 1;
         lib3ds_chunk_write(&c, io);
         lib3ds_io_write_string(io, material->name);
     }
 
-    { /*---- LIB3DS_MAT_AMBIENT ----*/
+    { /*---- CHK_MAT_AMBIENT ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_MAT_AMBIENT;
+        c.chunk = CHK_MAT_AMBIENT;
         c.size = 24;
         lib3ds_chunk_write(&c, io);
         color_write(material->ambient, io);
     }
 
-    { /*---- LIB3DS_MAT_DIFFUSE ----*/
+    { /*---- CHK_MAT_DIFFUSE ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_MAT_DIFFUSE;
+        c.chunk = CHK_MAT_DIFFUSE;
         c.size = 24;
         lib3ds_chunk_write(&c, io);
         color_write(material->diffuse, io);
     }
 
-    { /*---- LIB3DS_MAT_SPECULAR ----*/
+    { /*---- CHK_MAT_SPECULAR ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_MAT_SPECULAR;
+        c.chunk = CHK_MAT_SPECULAR;
         c.size = 24;
         lib3ds_chunk_write(&c, io);
         color_write(material->specular, io);
     }
 
-    { /*---- LIB3DS_MAT_SHININESS ----*/
+    { /*---- CHK_MAT_SHININESS ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_MAT_SHININESS;
+        c.chunk = CHK_MAT_SHININESS;
         c.size = 14;
         lib3ds_chunk_write(&c, io);
         int_percentage_write(material->shininess, io);
     }
 
-    { /*---- LIB3DS_MAT_SHIN2PCT ----*/
+    { /*---- CHK_MAT_SHIN2PCT ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_MAT_SHIN2PCT;
+        c.chunk = CHK_MAT_SHIN2PCT;
         c.size = 14;
         lib3ds_chunk_write(&c, io);
         int_percentage_write(material->shin_strength, io);
     }
 
-    { /*---- LIB3DS_MAT_TRANSPARENCY ----*/
+    { /*---- CHK_MAT_TRANSPARENCY ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_MAT_TRANSPARENCY;
+        c.chunk = CHK_MAT_TRANSPARENCY;
         c.size = 14;
         lib3ds_chunk_write(&c, io);
         int_percentage_write(material->transparency, io);
     }
 
-    { /*---- LIB3DS_MAT_XPFALL ----*/
+    { /*---- CHK_MAT_XPFALL ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_MAT_XPFALL;
+        c.chunk = CHK_MAT_XPFALL;
         c.size = 14;
         lib3ds_chunk_write(&c, io);
         int_percentage_write(material->falloff, io);
     }
 
-    if (material->use_falloff) { /*---- LIB3DS_MAT_USE_XPFALL ----*/
+    if (material->use_falloff) { /*---- CHK_MAT_USE_XPFALL ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_MAT_USE_XPFALL;
+        c.chunk = CHK_MAT_USE_XPFALL;
         c.size = 6;
         lib3ds_chunk_write(&c, io);
     }
 
-    { /*---- LIB3DS_MAT_SHADING ----*/
+    { /*---- CHK_MAT_SHADING ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_MAT_SHADING;
+        c.chunk = CHK_MAT_SHADING;
         c.size = 8;
         lib3ds_chunk_write(&c, io);
         lib3ds_io_write_intw(io, material->shading);
     }
 
-    { /*---- LIB3DS_MAT_REFBLUR ----*/
+    { /*---- CHK_MAT_REFBLUR ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_MAT_REFBLUR;
+        c.chunk = CHK_MAT_REFBLUR;
         c.size = 14;
         lib3ds_chunk_write(&c, io);
         int_percentage_write(material->blur, io);
     }
 
-    if (material->use_blur) { /*---- LIB3DS_MAT_USE_REFBLUR ----*/
+    if (material->use_blur) { /*---- CHK_MAT_USE_REFBLUR ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_MAT_USE_REFBLUR;
+        c.chunk = CHK_MAT_USE_REFBLUR;
         c.size = 6;
         lib3ds_chunk_write(&c, io);
     }
 
-    if (material->self_illum) { /*---- LIB3DS_MAT_SELF_ILLUM ----*/
+    if (material->self_illum) { /*---- CHK_MAT_SELF_ILLUM ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_MAT_SELF_ILLUM;
+        c.chunk = CHK_MAT_SELF_ILLUM;
         c.size = 6;
         lib3ds_chunk_write(&c, io);
     }
 
-    if (material->two_sided) { /*---- LIB3DS_MAT_TWO_SIDE ----*/
+    if (material->two_sided) { /*---- CHK_MAT_TWO_SIDE ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_MAT_TWO_SIDE;
+        c.chunk = CHK_MAT_TWO_SIDE;
         c.size = 6;
         lib3ds_chunk_write(&c, io);
     }
 
-    if (material->map_decal) { /*---- LIB3DS_MAT_DECAL ----*/
+    if (material->map_decal) { /*---- CHK_MAT_DECAL ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_MAT_DECAL;
+        c.chunk = CHK_MAT_DECAL;
         c.size = 6;
         lib3ds_chunk_write(&c, io);
     }
 
-    if (material->is_additive) { /*---- LIB3DS_MAT_ADDITIVE ----*/
+    if (material->is_additive) { /*---- CHK_MAT_ADDITIVE ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_MAT_ADDITIVE;
+        c.chunk = CHK_MAT_ADDITIVE;
         c.size = 6;
         lib3ds_chunk_write(&c, io);
     }
 
-    if (material->use_wire) { /*---- LIB3DS_MAT_WIRE ----*/
+    if (material->use_wire) { /*---- CHK_MAT_WIRE ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_MAT_WIRE;
+        c.chunk = CHK_MAT_WIRE;
         c.size = 6;
         lib3ds_chunk_write(&c, io);
     }
 
-    if (material->use_wire_abs) { /*---- LIB3DS_MAT_WIREABS ----*/
+    if (material->use_wire_abs) { /*---- CHK_MAT_WIREABS ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_MAT_WIREABS;
+        c.chunk = CHK_MAT_WIREABS;
         c.size = 6;
         lib3ds_chunk_write(&c, io);
     }
 
-    { /*---- LIB3DS_MAT_WIRE_SIZE ----*/
+    { /*---- CHK_MAT_WIRE_SIZE ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_MAT_WIRE_SIZE;
+        c.chunk = CHK_MAT_WIRE_SIZE;
         c.size = 10;
         lib3ds_chunk_write(&c, io);
         lib3ds_io_write_float(io, material->wire_size);
     }
 
-    if (material->face_map) { /*---- LIB3DS_MAT_FACEMAP ----*/
+    if (material->face_map) { /*---- CHK_MAT_FACEMAP ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_MAT_FACEMAP;
+        c.chunk = CHK_MAT_FACEMAP;
         c.size = 6;
         lib3ds_chunk_write(&c, io);
     }
 
-    if (material->soften) { /*---- LIB3DS_MAT_PHONGSOFT ----*/
+    if (material->soften) { /*---- CHK_MAT_PHONGSOFT ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_MAT_PHONGSOFT;
+        c.chunk = CHK_MAT_PHONGSOFT;
         c.size = 6;
         lib3ds_chunk_write(&c, io);
     }
 
-    texture_map_write(LIB3DS_MAT_TEXMAP, &material->texture1_map, io);
-    texture_map_write(LIB3DS_MAT_TEXMASK, &material->texture1_mask, io);
-    texture_map_write(LIB3DS_MAT_TEX2MAP, &material->texture2_map, io);
-    texture_map_write(LIB3DS_MAT_TEX2MASK, &material->texture2_mask, io);
-    texture_map_write(LIB3DS_MAT_OPACMAP, &material->opacity_map, io);
-    texture_map_write(LIB3DS_MAT_OPACMASK, &material->opacity_mask, io);
-    texture_map_write(LIB3DS_MAT_BUMPMAP, &material->bump_map, io);
-    texture_map_write(LIB3DS_MAT_BUMPMASK, &material->bump_mask, io);
-    texture_map_write(LIB3DS_MAT_SPECMAP, &material->specular_map, io);
-    texture_map_write(LIB3DS_MAT_SPECMASK, &material->specular_mask, io);
-    texture_map_write(LIB3DS_MAT_SHINMAP, &material->shininess_map, io);
-    texture_map_write(LIB3DS_MAT_SHINMASK, &material->shininess_mask, io);
-    texture_map_write(LIB3DS_MAT_SELFIMAP, &material->self_illum_map, io);
-    texture_map_write(LIB3DS_MAT_SELFIMASK, &material->self_illum_mask, io);
-    texture_map_write(LIB3DS_MAT_REFLMAP,  &material->reflection_map, io);
-    texture_map_write(LIB3DS_MAT_REFLMASK,  &material->reflection_mask, io);
+    texture_map_write(CHK_MAT_TEXMAP, &material->texture1_map, io);
+    texture_map_write(CHK_MAT_TEXMASK, &material->texture1_mask, io);
+    texture_map_write(CHK_MAT_TEX2MAP, &material->texture2_map, io);
+    texture_map_write(CHK_MAT_TEX2MASK, &material->texture2_mask, io);
+    texture_map_write(CHK_MAT_OPACMAP, &material->opacity_map, io);
+    texture_map_write(CHK_MAT_OPACMASK, &material->opacity_mask, io);
+    texture_map_write(CHK_MAT_BUMPMAP, &material->bump_map, io);
+    texture_map_write(CHK_MAT_BUMPMASK, &material->bump_mask, io);
+    texture_map_write(CHK_MAT_SPECMAP, &material->specular_map, io);
+    texture_map_write(CHK_MAT_SPECMASK, &material->specular_mask, io);
+    texture_map_write(CHK_MAT_SHINMAP, &material->shininess_map, io);
+    texture_map_write(CHK_MAT_SHINMASK, &material->shininess_mask, io);
+    texture_map_write(CHK_MAT_SELFIMAP, &material->self_illum_map, io);
+    texture_map_write(CHK_MAT_SELFIMASK, &material->self_illum_mask, io);
+    texture_map_write(CHK_MAT_REFLMAP,  &material->reflection_map, io);
+    texture_map_write(CHK_MAT_REFLMASK,  &material->reflection_mask, io);
+
+    { /*---- CHK_MAT_ACUBIC ----*/
+        Lib3dsChunk c;
+        c.chunk = CHK_MAT_ACUBIC;
+        c.size = 20;
+        lib3ds_chunk_write(&c, io);
+        lib3ds_io_write_intb(io, 0);
+        lib3ds_io_write_intb(io, material->autorefl_map_anti_alias);
+        lib3ds_io_write_intw(io, material->autorefl_map_flags);
+        lib3ds_io_write_intd(io, material->autorefl_map_size);
+        lib3ds_io_write_intd(io, material->autorefl_map_frame_step);
+    }
 
     lib3ds_chunk_write_end(&c, io);
 }

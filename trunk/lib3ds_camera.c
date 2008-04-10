@@ -73,7 +73,7 @@ lib3ds_camera_read(Lib3dsCamera *camera, Lib3dsIo *io) {
     Lib3dsChunk c;
     uint16_t chunk;
 
-    lib3ds_chunk_read_start(&c, LIB3DS_N_CAMERA, io);
+    lib3ds_chunk_read_start(&c, CHK_N_CAMERA, io);
 
     {
         int i;
@@ -98,12 +98,12 @@ lib3ds_camera_read(Lib3dsCamera *camera, Lib3dsIo *io) {
 
     while ((chunk = lib3ds_chunk_read_next(&c, io)) != 0) {
         switch (chunk) {
-            case LIB3DS_CAM_SEE_CONE: {
+            case CHK_CAM_SEE_CONE: {
                 camera->see_cone = TRUE;
             }
             break;
 
-            case LIB3DS_CAM_RANGES: {
+            case CHK_CAM_RANGES: {
                 camera->near_range = lib3ds_io_read_float(io);
                 camera->far_range = lib3ds_io_read_float(io);
             }
@@ -133,7 +133,7 @@ void
 lib3ds_camera_write(Lib3dsCamera *camera, Lib3dsIo *io) {
     Lib3dsChunk c;
 
-    c.chunk = LIB3DS_N_CAMERA;
+    c.chunk = CHK_N_CAMERA;
     lib3ds_chunk_write_start(&c, io);
 
     lib3ds_io_write_vector(io, camera->position);
@@ -147,13 +147,13 @@ lib3ds_camera_write(Lib3dsCamera *camera, Lib3dsIo *io) {
 
     if (camera->see_cone) {
         Lib3dsChunk c;
-        c.chunk = LIB3DS_CAM_SEE_CONE;
+        c.chunk = CHK_CAM_SEE_CONE;
         c.size = 6;
         lib3ds_chunk_write(&c, io);
     }
     {
         Lib3dsChunk c;
-        c.chunk = LIB3DS_CAM_RANGES;
+        c.chunk = CHK_CAM_RANGES;
         c.size = 14;
         lib3ds_chunk_write(&c, io);
         lib3ds_io_write_float(io, camera->near_range);

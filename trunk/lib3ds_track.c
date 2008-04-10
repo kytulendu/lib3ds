@@ -195,7 +195,7 @@ find_index(Lib3dsTrack *track, float t, float *u) {
     
     t0 = track->keys[0].frame;
     t1 = track->keys[track->nkeys-1].frame;
-    if (track->flags & LIB3DS_REPEAT) {
+    if (track->flags & LIB3DS_TRACK_REPEAT) {
         nt = (float)fmod(t - t0, t1 - t0) + t0;
     } else {
         nt = t;
@@ -230,7 +230,7 @@ setup_segment(Lib3dsTrack *track, int index, Lib3dsKey *pp, Lib3dsKey *p0, Lib3d
         ip = index - 2;
         *pp = track->keys[index - 2];
     } else {
-        if (track->flags & LIB3DS_SMOOTH) {
+        if (track->flags & LIB3DS_TRACK_SMOOTH) {
             ip = track->nkeys - 2;
             *pp = track->keys[track->nkeys - 2];
             pp->frame = track->keys[track->nkeys - 2].frame - (track->keys[track->nkeys - 1].frame - track->keys[0].frame);
@@ -244,7 +244,7 @@ setup_segment(Lib3dsTrack *track, int index, Lib3dsKey *pp, Lib3dsKey *p0, Lib3d
         in = index + 1;
         *pn = track->keys[index + 1];
     } else {
-        if (track->flags & LIB3DS_SMOOTH) {
+        if (track->flags & LIB3DS_TRACK_SMOOTH) {
             in = 1;
             *pn = track->keys[1];
             pn->frame = track->keys[1].frame + (track->keys[track->nkeys-1].frame - track->keys[0].frame);
@@ -400,19 +400,19 @@ lib3ds_track_eval_quat(Lib3dsTrack *track, float q[4], float t) {
 static void 
 tcb_read(Lib3dsKey *key, Lib3dsIo *io) {
     key->flags = lib3ds_io_read_word(io);
-    if (key->flags & LIB3DS_USE_TENSION) {
+    if (key->flags & LIB3DS_KEY_USE_TENS) {
         key->tens = lib3ds_io_read_float(io);
     }
-    if (key->flags & LIB3DS_USE_CONTINUITY) {
+    if (key->flags & LIB3DS_KEY_USE_CONT) {
         key->cont = lib3ds_io_read_float(io);
     }
-    if (key->flags & LIB3DS_USE_BIAS) {
+    if (key->flags & LIB3DS_KEY_USE_BIAS) {
         key->bias = lib3ds_io_read_float(io);
     }
-    if (key->flags & LIB3DS_USE_EASE_TO) {
+    if (key->flags & LIB3DS_KEY_USE_EASE_TO) {
         key->ease_to = lib3ds_io_read_float(io);
     }
-    if (key->flags & LIB3DS_USE_EASE_FROM) {
+    if (key->flags & LIB3DS_KEY_USE_EASE_FROM) {
         key->ease_from = lib3ds_io_read_float(io);
     }
 }
@@ -479,19 +479,19 @@ lib3ds_track_read(Lib3dsTrack *track, Lib3dsIo *io) {
 void
 tcb_write(Lib3dsKey *key, Lib3dsIo *io) {
     lib3ds_io_write_word(io, key->flags);
-    if (key->flags & LIB3DS_USE_TENSION) {
+    if (key->flags & LIB3DS_KEY_USE_TENS) {
         lib3ds_io_write_float(io, key->tens);
     }
-    if (key->flags & LIB3DS_USE_CONTINUITY) {
+    if (key->flags & LIB3DS_KEY_USE_CONT) {
         lib3ds_io_write_float(io, key->cont);
     }
-    if (key->flags & LIB3DS_USE_BIAS) {
+    if (key->flags & LIB3DS_KEY_USE_BIAS) {
         lib3ds_io_write_float(io, key->bias);
     }
-    if (key->flags & LIB3DS_USE_EASE_TO) {
+    if (key->flags & LIB3DS_KEY_USE_EASE_TO) {
         lib3ds_io_write_float(io, key->ease_to);
     }
-    if (key->flags & LIB3DS_USE_EASE_FROM) {
+    if (key->flags & LIB3DS_KEY_USE_EASE_FROM) {
         lib3ds_io_write_float(io, key->ease_from);
     }
 }

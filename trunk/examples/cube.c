@@ -120,7 +120,7 @@ int main(int argc, char **argv) {
             mesh->faces[10+i].material = 2;
         }
 
-        lib3ds_file_new_mesh_node(file, mesh, NULL, NULL, NULL, NULL);
+        //lib3ds_file_new_mesh_node(file, mesh, NULL, NULL, NULL, NULL);
     }
 
     {
@@ -133,14 +133,16 @@ int main(int argc, char **argv) {
         lib3ds_vector_make(camera->position, 0.0, -100, 0.0);
         lib3ds_vector_make(camera->target, 0.0, 0.0, 0.0);
 
-        n = lib3ds_file_new_camera_node(file, camera, NULL);
-        lib3ds_file_new_target_node(file, camera, NULL);
+        //n = lib3ds_file_new_camera_node(file, camera, NULL);
+        //lib3ds_file_new_target_node(file, camera, NULL);
 
+        /*
         lib3ds_track_resize(&n->pos_track, 37);
         for (i = 0; i <= 36; i++) {
             n->pos_track.keys[i].frame = 10 * i;
             lib3ds_vector_make(n->pos_track.keys[i].value, (float)100.0 * cos(M_PI * i / 36.0), (float)100.0 * sin(M_PI * i / 36.0), 50.0);
         }
+        */
     }
 
     if (!lib3ds_file_save(file, "cube.3ds")) {

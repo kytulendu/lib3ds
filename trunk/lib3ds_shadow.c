@@ -24,27 +24,27 @@ lib3ds_shadow_read(Lib3dsShadow *shadow, Lib3dsIo *io) {
 
     lib3ds_chunk_read(&c, io);
     switch (c.chunk) {
-        case LIB3DS_SHADOW_MAP_SIZE: {
+        case CHK_SHADOW_MAP_SIZE: {
             shadow->map_size = lib3ds_io_read_intw(io);
             break;
         }
 
-        case LIB3DS_LO_SHADOW_BIAS: {
+        case CHK_LO_SHADOW_BIAS: {
             shadow->low_bias = lib3ds_io_read_float(io);
             break;
         }
 
-        case LIB3DS_HI_SHADOW_BIAS: {
+        case CHK_HI_SHADOW_BIAS: {
             shadow->hi_bias = lib3ds_io_read_float(io);
             break;
         }
 
-        case LIB3DS_SHADOW_FILTER: {
+        case CHK_SHADOW_FILTER: {
             shadow->filter = lib3ds_io_read_float(io);
             break;
         }
 
-        case LIB3DS_RAY_BIAS: {
+        case CHK_RAY_BIAS: {
             shadow->ray_bias = lib3ds_io_read_float(io);
             break;
         }
@@ -54,40 +54,40 @@ lib3ds_shadow_read(Lib3dsShadow *shadow, Lib3dsIo *io) {
 
 void
 lib3ds_shadow_write(Lib3dsShadow *shadow, Lib3dsIo *io) {
-    if (fabs(shadow->low_bias) > LIB3DS_EPSILON) { /*---- LIB3DS_LO_SHADOW_BIAS ----*/
+    if (fabs(shadow->low_bias) > LIB3DS_EPSILON) { /*---- CHK_LO_SHADOW_BIAS ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_LO_SHADOW_BIAS;
+        c.chunk = CHK_LO_SHADOW_BIAS;
         c.size = 10;
         lib3ds_chunk_write(&c, io);
         lib3ds_io_write_float(io, shadow->low_bias);
     }
 
-    if (fabs(shadow->hi_bias) > LIB3DS_EPSILON) { /*---- LIB3DS_HI_SHADOW_BIAS ----*/
+    if (fabs(shadow->hi_bias) > LIB3DS_EPSILON) { /*---- CHK_HI_SHADOW_BIAS ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_HI_SHADOW_BIAS;
+        c.chunk = CHK_HI_SHADOW_BIAS;
         c.size = 10;
         lib3ds_chunk_write(&c, io);
         lib3ds_io_write_float(io, shadow->hi_bias);
     }
 
-    if (shadow->map_size) { /*---- LIB3DS_SHADOW_MAP_SIZE ----*/
+    if (shadow->map_size) { /*---- CHK_SHADOW_MAP_SIZE ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_SHADOW_MAP_SIZE;
+        c.chunk = CHK_SHADOW_MAP_SIZE;
         c.size = 8;
         lib3ds_chunk_write(&c, io);
         lib3ds_io_write_intw(io, shadow->map_size);
     }
 
-    if (fabs(shadow->filter) > LIB3DS_EPSILON) { /*---- LIB3DS_SHADOW_FILTER ----*/
+    if (fabs(shadow->filter) > LIB3DS_EPSILON) { /*---- CHK_SHADOW_FILTER ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_SHADOW_FILTER;
+        c.chunk = CHK_SHADOW_FILTER;
         c.size = 10;
         lib3ds_chunk_write(&c, io);
         lib3ds_io_write_float(io, shadow->filter);
     }
-    if (fabs(shadow->ray_bias) > LIB3DS_EPSILON) { /*---- LIB3DS_RAY_BIAS ----*/
+    if (fabs(shadow->ray_bias) > LIB3DS_EPSILON) { /*---- CHK_RAY_BIAS ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_RAY_BIAS;
+        c.chunk = CHK_RAY_BIAS;
         c.size = 10;
         lib3ds_chunk_write(&c, io);
         lib3ds_io_write_float(io, shadow->ray_bias);

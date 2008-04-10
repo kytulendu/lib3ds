@@ -24,16 +24,16 @@ solid_bgnd_read(Lib3dsBackground *background, Lib3dsIo *io) {
     uint16_t chunk;
     int have_lin = FALSE;
 
-    lib3ds_chunk_read_start(&c, LIB3DS_SOLID_BGND, io);
+    lib3ds_chunk_read_start(&c, CHK_SOLID_BGND, io);
 
     while ((chunk = lib3ds_chunk_read_next(&c, io)) != 0) {
         switch (chunk) {
-            case LIB3DS_LIN_COLOR_F:
+            case CHK_LIN_COLOR_F:
                 lib3ds_io_read_rgb(io, background->solid_color);
                 have_lin = TRUE;
                 break;
 
-            case LIB3DS_COLOR_F:
+            case CHK_COLOR_F:
                 lib3ds_io_read_rgb(io, background->solid_color);
                 break;
 
@@ -54,7 +54,7 @@ v_gradient_read(Lib3dsBackground *background, Lib3dsIo *io) {
     float col[2][3][3];
     int have_lin = 0;
 
-    lib3ds_chunk_read_start(&c, LIB3DS_V_GRADIENT, io);
+    lib3ds_chunk_read_start(&c, CHK_V_GRADIENT, io);
 
     background->gradient_percent = lib3ds_io_read_float(io);
     lib3ds_chunk_read_tell(&c, io);
@@ -62,12 +62,12 @@ v_gradient_read(Lib3dsBackground *background, Lib3dsIo *io) {
     index[0] = index[1] = 0;
     while ((chunk = lib3ds_chunk_read_next(&c, io)) != 0) {
         switch (chunk) {
-            case LIB3DS_COLOR_F:
+            case CHK_COLOR_F:
                 lib3ds_io_read_rgb(io, col[0][index[0]]);
                 index[0]++;
                 break;
 
-            case LIB3DS_LIN_COLOR_F:
+            case CHK_LIN_COLOR_F:
                 lib3ds_io_read_rgb(io, col[1][index[1]]);
                 index[1]++;
                 have_lin = 1;
@@ -95,34 +95,34 @@ lib3ds_background_read(Lib3dsBackground *background, Lib3dsIo *io) {
 
     lib3ds_chunk_read(&c, io);
     switch (c.chunk) {
-        case LIB3DS_BIT_MAP: {
+        case CHK_BIT_MAP: {
             lib3ds_io_read_string(io, background->bitmap_name, 64);
             break;
         }
 
-        case LIB3DS_SOLID_BGND: {
+        case CHK_SOLID_BGND: {
             lib3ds_chunk_read_reset(&c, io);
             solid_bgnd_read(background, io);
             break;
         }
 
-        case LIB3DS_V_GRADIENT: {
+        case CHK_V_GRADIENT: {
             lib3ds_chunk_read_reset(&c, io);
             v_gradient_read(background, io);
             break;
         }
 
-        case LIB3DS_USE_BIT_MAP: {
+        case CHK_USE_BIT_MAP: {
             background->use_bitmap = TRUE;
             break;
         }
 
-        case LIB3DS_USE_SOLID_BGND: {
+        case CHK_USE_SOLID_BGND: {
             background->use_solid = TRUE;
             break;
         }
 
-        case LIB3DS_USE_V_GRADIENT: {
+        case CHK_USE_V_GRADIENT: {
             background->use_gradient = TRUE;
             break;
         }
@@ -134,12 +134,12 @@ static void
 colorf_write(float rgb[3], Lib3dsIo *io) {
     Lib3dsChunk c;
 
-    c.chunk = LIB3DS_COLOR_F;
+    c.chunk = CHK_COLOR_F;
     c.size = 18;
     lib3ds_chunk_write(&c, io);
     lib3ds_io_write_rgb(io, rgb);
 
-    c.chunk = LIB3DS_LIN_COLOR_F;
+    c.chunk = CHK_LIN_COLOR_F;
     c.size = 18;
     lib3ds_chunk_write(&c, io);
     lib3ds_io_write_rgb(io, rgb);
@@ -162,7 +162,7 @@ void
 lib3ds_background_write(Lib3dsBackground *background, Lib3dsIo *io) {
     if (strlen(background->bitmap_name)) { /*---- LIB3DS_BIT_MAP ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_BIT_MAP;
+        c.chunk = CHK_BIT_MAP;
         c.size = 6 + 1 + (uint32_t)strlen(background->bitmap_name);
         lib3ds_chunk_write(&c, io);
         lib3ds_io_write_string(io, background->bitmap_name);
@@ -170,7 +170,7 @@ lib3ds_background_write(Lib3dsBackground *background, Lib3dsIo *io) {
 
     if (colorf_defined(background->solid_color)) { /*---- LIB3DS_SOLID_BGND ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_SOLID_BGND;
+        c.chunk = CHK_SOLID_BGND;
         c.size = 42;
         lib3ds_chunk_write(&c, io);
         colorf_write(background->solid_color, io);
@@ -180,7 +180,7 @@ lib3ds_background_write(Lib3dsBackground *background, Lib3dsIo *io) {
         colorf_defined(background->gradient_middle) ||
         colorf_defined(background->gradient_bottom)) { /*---- LIB3DS_V_GRADIENT ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_V_GRADIENT;
+        c.chunk = CHK_V_GRADIENT;
         c.size = 118;
         lib3ds_chunk_write(&c, io);
         lib3ds_io_write_float(io, background->gradient_percent);
@@ -191,21 +191,21 @@ lib3ds_background_write(Lib3dsBackground *background, Lib3dsIo *io) {
 
     if (background->use_bitmap) { /*---- LIB3DS_USE_BIT_MAP ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_USE_BIT_MAP;
+        c.chunk = CHK_USE_BIT_MAP;
         c.size = 6;
         lib3ds_chunk_write(&c, io);
     }
 
     if (background->use_solid) { /*---- LIB3DS_USE_SOLID_BGND ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_USE_SOLID_BGND;
+        c.chunk = CHK_USE_SOLID_BGND;
         c.size = 6;
         lib3ds_chunk_write(&c, io);
     }
 
     if (background->use_gradient) { /*---- LIB3DS_USE_V_GRADIENT ----*/
         Lib3dsChunk c;
-        c.chunk = LIB3DS_USE_V_GRADIENT;
+        c.chunk = CHK_USE_V_GRADIENT;
         c.size = 6;
         lib3ds_chunk_write(&c, io);
     }

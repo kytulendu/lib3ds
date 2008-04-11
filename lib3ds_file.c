@@ -891,9 +891,11 @@ kfdata_write(Lib3dsFile *file, Lib3dsIo *io) {
 int
 lib3ds_file_write(Lib3dsFile *file, Lib3dsIo *io) {
     Lib3dsChunk c;
-    Lib3dsIoImpl *impl = (Lib3dsIoImpl*)io->impl;
+    Lib3dsIoImpl *impl;
 
     lib3ds_io_setup(io);
+    impl = (Lib3dsIoImpl*)io->impl;
+
     if (setjmp(impl->jmpbuf) != 0) {
         lib3ds_io_cleanup(io);
         return FALSE;

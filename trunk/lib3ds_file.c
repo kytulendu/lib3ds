@@ -505,10 +505,10 @@ kfdata_read(Lib3dsFile *file, Lib3dsIo *io) {
 
                 switch (chunk) {
                     case CHK_AMBIENT_NODE_TAG: 
-                        type = LIB3DS_NODE_AMBIENT;
+                        type = LIB3DS_NODE_AMBIENT_COLOR;
                         break;
                     case CHK_OBJECT_NODE_TAG: 
-                        type = LIB3DS_NODE_MESH;
+                        type = LIB3DS_NODE_MESH_INSTANCE;
                         break;
                     case CHK_CAMERA_NODE_TAG: 
                         type = LIB3DS_NODE_CAMERA;
@@ -821,7 +821,7 @@ nodes_write(Lib3dsNode *first_node, uint16_t *default_id, uint16_t parent_id, Li
     Lib3dsNode *p;
     for (p = first_node; p != NULL; p = p->next) {
         uint16_t node_id;
-        if ((p->type == LIB3DS_NODE_AMBIENT) || (p->node_id != 65535)) {
+        if ((p->type == LIB3DS_NODE_AMBIENT_COLOR) || (p->node_id != 65535)) {
             node_id = p->node_id;
         } else {
             node_id = *default_id;
@@ -993,50 +993,6 @@ lib3ds_file_camera_by_name(Lib3dsFile *file, const char *name) {
 }
 
 
-/*
-Lib3dsCameraNode* 
-lib3ds_file_new_camera_node(Lib3dsFile *file, Lib3dsCamera *camera, Lib3dsNode *parent) {
-    Lib3dsNode *n = lib3ds_node_new(LIB3DS_NODE_CAMERA);
-    Lib3dsCameraNode *c = (Lib3dsCameraNode*)n;
-    assert(camera);
-    if (parent) {
-        //n->parent_id = parent->node_id;
-    }
-    strcpy(n->name, camera->name);
-    lib3ds_file_insert_node(file, n);
-
-    lib3ds_track_resize(&c->pos_track, 1);
-    lib3ds_vector_copy(c->pos_track.keys[0].value, camera->position);
-
-    lib3ds_track_resize(&c->fov_track, 1);
-    c->fov_track.keys[0].value[0] = camera->fov;
-
-    lib3ds_track_resize(&c->roll_track, 1);
-    c->roll_track.keys[0].value[0] = camera->roll;
-
-    return c;
-}
-
-
-Lib3dsCameraTargetNode* 
-lib3ds_file_new_target_node(Lib3dsFile *file, Lib3dsCamera *camera, Lib3dsNode *parent) {
-    Lib3dsNode *n = lib3ds_node_new(LIB3DS_NODE_CAMERA_TARGET);
-    Lib3dsCameraTargetNode *t = (Lib3dsCameraTargetNode*)n;
-    assert(camera);
-    if (parent) {
-        //n->parent_id = parent->node_id;
-    }
-    strcpy(n->name, camera->name);
-    lib3ds_file_insert_node(file, n);
-
-    lib3ds_track_resize(&t->pos_track, 1);
-    lib3ds_vector_copy(t->pos_track.keys[0].value, camera->target);
-
-    return t;
-}
-*/
-
-
 void 
 lib3ds_file_reserve_lights(Lib3dsFile *file, int size, int force) {
     assert(file);
@@ -1070,56 +1026,6 @@ lib3ds_file_light_by_name(Lib3dsFile *file, const char *name) {
     }
     return -1;
 }
-
-
-/*
-Lib3dsLightNode* 
-lib3ds_file_new_light_node(Lib3dsFile *file, Lib3dsLight *light, Lib3dsNode *parent) {
-    Lib3dsNode *n = lib3ds_node_new(LIB3DS_NODE_LIGHT);
-    Lib3dsLightNode *l = (Lib3dsLightNode*)n;
-    assert(light);
-    if (parent) {
-        //n->parent_id = parent->node_id;
-    }
-    strcpy(n->name, light->name);
-    lib3ds_file_insert_node(file, n);
-
-    lib3ds_track_resize(&l->pos_track, 1);
-    lib3ds_vector_copy(l->pos_track.keys[0].value, light->position);
-
-    lib3ds_track_resize(&l->color_track, 1);
-    lib3ds_vector_copy(l->color_track.keys[0].value, light->color);
-
-    lib3ds_track_resize(&l->hotspot_track, 1);
-    l->hotspot_track.keys[0].value[0] = light->hotspot;
-
-    lib3ds_track_resize(&l->falloff_track, 1);
-    l->falloff_track.keys[0].value[0] = light->falloff;
-
-    lib3ds_track_resize(&l->roll_track, 1);
-    l->roll_track.keys[0].value[0] = light->roll;
-
-    return l;
-}
-
-
-Lib3dsSpotNode* 
-lib3ds_file_new_spot_node(Lib3dsFile *file, Lib3dsLight *light, Lib3dsNode *parent) {
-    Lib3dsNode *n = lib3ds_node_new(LIB3DS_NODE_SPOT);
-    Lib3dsSpotNode *s = (Lib3dsSpotNode*)n;
-    assert(light && light->spot_light);
-    if (parent) {
-        //n->parent_id = parent->node_id;
-    }
-    strcpy(n->name, light->name);
-    lib3ds_file_insert_node(file, n);
-
-    lib3ds_track_resize(&s->pos_track, 1);
-    lib3ds_vector_copy(s->pos_track.keys[0].value, light->position);
-
-    return s;
-}
-*/
 
 
 void 
@@ -1160,62 +1066,18 @@ lib3ds_file_mesh_by_name(Lib3dsFile *file, const char *name) {
 Lib3dsMesh* 
 lib3ds_file_mesh_for_node(Lib3dsFile *file, Lib3dsNode *node) {
     int index;
-    Lib3dsMeshNode *n;
+    Lib3dsMeshInstanceNode *n;
 
-    if (node->type != LIB3DS_NODE_MESH)
+    if (node->type != LIB3DS_NODE_MESH_INSTANCE)
         return NULL;
-    n = (Lib3dsMeshNode*)node;
+    n = (Lib3dsMeshInstanceNode*)node;
 
-    index = lib3ds_file_mesh_by_name(file, n->instance);
+    index = lib3ds_file_mesh_by_name(file, n->instance_name);
     if (index < 0)
         index = lib3ds_file_mesh_by_name(file, node->name);
 
     return (index >= 0)? file->meshes[index] : NULL;
 }
-
-
-/*
-Lib3dsMeshNode* 
-lib3ds_file_new_mesh_node(Lib3dsFile *file, Lib3dsMesh *mesh, Lib3dsNode *parent, float pos0[3], float scl0[3], float rot0[4]) {
-    Lib3dsNode *n;
-    Lib3dsMeshNode *o;
-    static float s_111[3] = { 1.0, 1.0, 1.0 };
-    int i;
-
-    n = lib3ds_node_new(LIB3DS_NODE_MESH);
-    if (parent) {
-        //n->parent_id = parent->node_id;
-    }
-    if (mesh) {
-        strcpy(n->name, mesh->name);
-    } else {
-        strcpy(n->name, "$$$DUMMY");
-    }
-    lib3ds_file_insert_node(file, n);
-
-    o = (Lib3dsMeshNode*)n;
-    lib3ds_track_resize(&o->pos_track, 1);
-    if (pos0) {
-        lib3ds_vector_copy(o->pos_track.keys[0].value, pos0);
-    }
-
-    lib3ds_track_resize(&o->scl_track, 1);
-    if (scl0) {
-        lib3ds_vector_copy(o->scl_track.keys[0].value, scl0);
-    } else {
-        lib3ds_vector_copy(o->scl_track.keys[0].value, s_111);
-    }
-
-    lib3ds_track_resize(&o->rot_track, 1);
-    if (rot0) {
-        for (i = 0; i < 4; ++i) o->rot_track.keys[0].value[i] = rot0[i];
-    } else {
-        for (i = 0; i < 4; ++i) o->rot_track.keys[0].value[i] = 0.0f;
-    }
-
-    return o;
-}
-*/
 
 
 /*!
@@ -1457,8 +1319,8 @@ lib3ds_file_bounding_box_of_objects(Lib3dsFile *file, int
             lib3ds_vector_min(bmin, file->lights[i]->position);
             lib3ds_vector_max(bmax, file->lights[i]->position);
             if (file->lights[i]->spot_light) {
-                lib3ds_vector_min(bmin, file->lights[i]->spot);
-                lib3ds_vector_max(bmax, file->lights[i]->spot);
+                lib3ds_vector_min(bmin, file->lights[i]->target);
+                lib3ds_vector_max(bmax, file->lights[i]->target);
             }
         }
     }
@@ -1470,12 +1332,12 @@ file_bounding_box_of_nodes_impl(Lib3dsNode *node, Lib3dsFile *file,
                                 int include_meshes, int include_cameras, int include_lights,
                                 float bmin[3], float bmax[3], float matrix[4][4]) {
     switch (node->type) {
-        case LIB3DS_NODE_MESH:
+        case LIB3DS_NODE_MESH_INSTANCE:
             if (include_meshes) {
                 int index;
-                Lib3dsMeshNode *n = (Lib3dsMeshNode*)node;
+                Lib3dsMeshInstanceNode *n = (Lib3dsMeshInstanceNode*)node;
 
-                index = lib3ds_file_mesh_by_name(file, n->instance);
+                index = lib3ds_file_mesh_by_name(file, n->instance_name);
                 if (index < 0)
                     index = lib3ds_file_mesh_by_name(file, node->name);
                 if (index >= 0) {

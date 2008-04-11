@@ -51,7 +51,7 @@ spotlight_read(Lib3dsLight *light, Lib3dsIo *io) {
 
     light->spot_light = TRUE;
     for (i = 0; i < 3; ++i) {
-        light->spot[i] = lib3ds_io_read_float(io);
+        light->target[i] = lib3ds_io_read_float(io);
     }
     light->hotspot = lib3ds_io_read_float(io);
     light->falloff = lib3ds_io_read_float(io);
@@ -241,7 +241,7 @@ lib3ds_light_write(Lib3dsLight *light, Lib3dsIo *io) {
         c.chunk = CHK_DL_SPOTLIGHT;
         lib3ds_chunk_write_start(&c, io);
 
-        lib3ds_io_write_vector(io, light->spot);
+        lib3ds_io_write_vector(io, light->target);
         lib3ds_io_write_float(io, light->hotspot);
         lib3ds_io_write_float(io, light->falloff);
 

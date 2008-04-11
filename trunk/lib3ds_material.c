@@ -848,7 +848,7 @@ lib3ds_material_write(Lib3dsMaterial *material, Lib3dsIo *io) {
     { /*---- CHK_MAT_ACUBIC ----*/
         Lib3dsChunk c;
         c.chunk = CHK_MAT_ACUBIC;
-        c.size = 20;
+        c.size = 18;
         lib3ds_chunk_write(&c, io);
         lib3ds_io_write_intb(io, 0);
         lib3ds_io_write_intb(io, material->autorefl_map_anti_alias);

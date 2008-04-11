@@ -94,6 +94,7 @@ int main(int argc, char **argv) {
     {
         int i, j;
         Lib3dsMesh *mesh = lib3ds_mesh_new("cube");
+        Lib3dsMeshInstanceNode *inst;        
         lib3ds_file_insert_mesh(file, mesh, -1);
 
         lib3ds_mesh_resize_vertices(mesh, 8);
@@ -120,12 +121,14 @@ int main(int argc, char **argv) {
             mesh->faces[10+i].material = 2;
         }
 
-        //lib3ds_file_new_mesh_node(file, mesh, NULL, NULL, NULL, NULL);
+        inst = lib3ds_node_new_mesh_instance(mesh, "01", NULL, NULL, NULL);
+        lib3ds_file_append_node(file, (Lib3dsNode*)inst, NULL);
     }
 
     {
         Lib3dsCamera *camera;
         Lib3dsCameraNode *n;
+        Lib3dsTargetNode *t;
         int i;
 
         camera = lib3ds_camera_new("camera01");
@@ -133,16 +136,20 @@ int main(int argc, char **argv) {
         lib3ds_vector_make(camera->position, 0.0, -100, 0.0);
         lib3ds_vector_make(camera->target, 0.0, 0.0, 0.0);
 
-        //n = lib3ds_file_new_camera_node(file, camera, NULL);
-        //lib3ds_file_new_target_node(file, camera, NULL);
+        n = lib3ds_node_new_camera(camera);
+        t = lib3ds_node_new_camera_target(camera);
+        lib3ds_file_append_node(file, (Lib3dsNode*)n, NULL);
+        lib3ds_file_append_node(file, (Lib3dsNode*)t, NULL);
 
-        /*
         lib3ds_track_resize(&n->pos_track, 37);
         for (i = 0; i <= 36; i++) {
             n->pos_track.keys[i].frame = 10 * i;
-            lib3ds_vector_make(n->pos_track.keys[i].value, (float)100.0 * cos(M_PI * i / 36.0), (float)100.0 * sin(M_PI * i / 36.0), 50.0);
+            lib3ds_vector_make(n->pos_track.keys[i].value, 
+                (float)(100.0 * cos(2 * M_PI * i / 36.0)), 
+                (float)(100.0 * sin(2 * M_PI * i / 36.0)), 
+                50.0
+            );
         }
-        */
     }
 
     if (!lib3ds_file_save(file, "cube.3ds")) {

@@ -347,8 +347,8 @@ light_dump(Lib3dsLight *light) {
         light->color[0], light->color[1], light->color[2]);
     printf("  position          (%f, %f, %f)\n",
         light->position[0], light->position[1], light->position[2]);
-    printf("  spot              (%f, %f, %f)\n",
-        light->spot[0], light->spot[1], light->spot[2]);
+    printf("  target              (%f, %f, %f)\n",
+        light->target[0], light->target[1], light->target[2]);
     printf("  roll:             %f\n", light->roll);
     printf("  off:              %s\n", light->off ? "yes" : "no");
     printf("  outer_range:      %f\n", light->outer_range);
@@ -416,9 +416,9 @@ dump_instances(Lib3dsNode *node, const char* parent) {
     strcpy(name, parent);
     strcat(name, ".");
     strcat(name, node->name);
-    if (node->type == LIB3DS_NODE_MESH) {
-        Lib3dsMeshNode *n = (Lib3dsMeshNode*)node;
-        printf("  %s : %s\n", name, n->instance);
+    if (node->type == LIB3DS_NODE_MESH_INSTANCE) {
+        Lib3dsMeshInstanceNode *n = (Lib3dsMeshInstanceNode*)node;
+        printf("  %s : %s\n", name, n->instance_name);
     }
     for (p = node->childs; p != 0; p = p->next) {
         dump_instances(p, parent);
@@ -446,12 +446,12 @@ node_dump(Lib3dsNode *node, int level) {
     memset(l, ' ', 2*level);
     l[2*level] = 0;
 
-    if (node->type == LIB3DS_NODE_MESH) {
-        Lib3dsMeshNode *n = (Lib3dsMeshNode*)node; 
+    if (node->type == LIB3DS_NODE_MESH_INSTANCE) {
+        Lib3dsMeshInstanceNode *n = (Lib3dsMeshInstanceNode*)node; 
         printf("%s%s [%s] (%s)\n",
             l,
             node->name,
-            n->instance,
+            n->instance_name,
             node_names_table[node->type]
         );
     } else {

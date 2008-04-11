@@ -30,16 +30,16 @@ Lib3dsNode*
 lib3ds_node_new(Lib3dsNodeType type) {
     Lib3dsNode *node;
     switch (type) {
-        case LIB3DS_NODE_AMBIENT: {
-            Lib3dsAmbientNode *n = calloc(sizeof(Lib3dsAmbientNode), 1);
+        case LIB3DS_NODE_AMBIENT_COLOR: {
+            Lib3dsAmbientColorNode *n = calloc(sizeof(Lib3dsAmbientColorNode), 1);
             node = (Lib3dsNode*)n;
             strcpy(node->name, "$AMBIENT$");
             n->color_track.type = LIB3DS_TRACK_VECTOR;
             break;
         }
 
-        case LIB3DS_NODE_MESH: {
-            Lib3dsMeshNode *n = calloc(sizeof(Lib3dsMeshNode), 1);
+        case LIB3DS_NODE_MESH_INSTANCE: {
+            Lib3dsMeshInstanceNode *n = calloc(sizeof(Lib3dsMeshInstanceNode), 1);
             node = (Lib3dsNode*)n;
             strcpy(node->name, "$$$DUMMY");
             n->pos_track.type = LIB3DS_TRACK_VECTOR;
@@ -104,18 +104,184 @@ lib3ds_node_new(Lib3dsNodeType type) {
 }
 
 
+Lib3dsAmbientColorNode* 
+lib3ds_node_new_ambient_color(float color0[3]) {
+    Lib3dsNode *node;
+    Lib3dsAmbientColorNode *n;
+
+    node = lib3ds_node_new(LIB3DS_NODE_AMBIENT_COLOR);
+
+    n = (Lib3dsAmbientColorNode*)node;
+    lib3ds_track_resize(&n->color_track, 1);
+    if (color0) {
+        lib3ds_vector_copy(n->color_track.keys[0].value, color0);
+    } else {
+        lib3ds_vector_zero(n->color_track.keys[0].value);
+    }
+
+    return n;
+}
+
+
+Lib3dsMeshInstanceNode* 
+lib3ds_node_new_mesh_instance(Lib3dsMesh *mesh, const char *instance_name, float pos0[3], float scl0[3], float rot0[4]) {
+    Lib3dsNode *node;
+    Lib3dsMeshInstanceNode *n;
+    int i;
+
+    node = lib3ds_node_new(LIB3DS_NODE_MESH_INSTANCE);
+    if (mesh) {
+        strcpy(node->name, mesh->name);
+    } else {
+        strcpy(node->name, "$$$DUMMY");
+    }
+
+    n = (Lib3dsMeshInstanceNode*)node;
+    if (instance_name) {
+        strcpy(n->instance_name, instance_name);
+    }
+
+    lib3ds_track_resize(&n->pos_track, 1);
+    if (pos0) {
+        lib3ds_vector_copy(n->pos_track.keys[0].value, pos0);
+    }
+
+    lib3ds_track_resize(&n->scl_track, 1);
+    if (scl0) {
+        lib3ds_vector_copy(n->scl_track.keys[0].value, scl0);
+    } else {
+        lib3ds_vector_make(n->scl_track.keys[0].value, 1, 1, 1);
+    }
+
+    lib3ds_track_resize(&n->rot_track, 1);
+    if (rot0) {
+        for (i = 0; i < 4; ++i) n->rot_track.keys[0].value[i] = rot0[i];
+    } else {
+        for (i = 0; i < 4; ++i) n->rot_track.keys[0].value[i] = 0;
+    }
+
+    return n;
+}
+
+
+Lib3dsCameraNode* 
+lib3ds_node_new_camera(Lib3dsCamera *camera) {
+    Lib3dsNode *node = lib3ds_node_new(LIB3DS_NODE_CAMERA);
+    Lib3dsCameraNode *n;
+    
+    assert(camera);
+    node = lib3ds_node_new(LIB3DS_NODE_CAMERA);
+    strcpy(node->name, camera->name);
+
+    n = (Lib3dsCameraNode*)node;
+    lib3ds_track_resize(&n->pos_track, 1);
+    lib3ds_vector_copy(n->pos_track.keys[0].value, camera->position);
+
+    lib3ds_track_resize(&n->fov_track, 1);
+    n->fov_track.keys[0].value[0] = camera->fov;
+
+    lib3ds_track_resize(&n->roll_track, 1);
+    n->roll_track.keys[0].value[0] = camera->roll;
+
+    return n;
+}
+
+
+Lib3dsTargetNode* 
+lib3ds_node_new_camera_target(Lib3dsCamera *camera) {
+    Lib3dsNode *node;
+    Lib3dsTargetNode *n;
+    
+    assert(camera);
+    node = lib3ds_node_new(LIB3DS_NODE_CAMERA_TARGET);
+    strcpy(node->name, camera->name);
+
+    n = (Lib3dsTargetNode*)node;
+    lib3ds_track_resize(&n->pos_track, 1);
+    lib3ds_vector_copy(n->pos_track.keys[0].value, camera->target);
+
+    return n;
+}
+
+
+Lib3dsOmnilightNode* 
+lib3ds_node_new_omnilight(Lib3dsLight *light) {
+    Lib3dsNode *node;
+    Lib3dsOmnilightNode *n;
+
+    assert(light);
+    node = lib3ds_node_new(LIB3DS_NODE_OMNILIGHT);
+    strcpy(node->name, light->name);
+
+    n = (Lib3dsOmnilightNode*)node;
+    lib3ds_track_resize(&n->pos_track, 1);
+    lib3ds_vector_copy(n->pos_track.keys[0].value, light->position);
+
+    lib3ds_track_resize(&n->color_track, 1);
+    lib3ds_vector_copy(n->color_track.keys[0].value, light->color);
+
+    return n;
+}
+
+
+Lib3dsSpotlightNode* 
+lib3ds_node_new_spotlight(Lib3dsLight *light) {
+    Lib3dsNode *node;
+    Lib3dsSpotlightNode *n;
+
+    assert(light);
+    node = lib3ds_node_new(LIB3DS_NODE_SPOTLIGHT);
+    strcpy(node->name, light->name);
+
+    n = (Lib3dsSpotlightNode*)node;
+    lib3ds_track_resize(&n->pos_track, 1);
+    lib3ds_vector_copy(n->pos_track.keys[0].value, light->position);
+
+    lib3ds_track_resize(&n->color_track, 1);
+    lib3ds_vector_copy(n->color_track.keys[0].value, light->color);
+
+    lib3ds_track_resize(&n->hotspot_track, 1);
+    n->hotspot_track.keys[0].value[0] = light->hotspot;
+
+    lib3ds_track_resize(&n->falloff_track, 1);
+    n->falloff_track.keys[0].value[0] = light->falloff;
+
+    lib3ds_track_resize(&n->roll_track, 1);
+    n->roll_track.keys[0].value[0] = light->roll;
+
+    return n;
+}
+
+
+Lib3dsTargetNode* 
+lib3ds_node_new_spotligf_target(Lib3dsLight *light) {
+    Lib3dsNode *node;
+    Lib3dsTargetNode *n;
+    
+    assert(light);
+    node = lib3ds_node_new(LIB3DS_NODE_SPOTLIGHT_TARGET);
+    strcpy(node->name, light->name);
+
+    n = (Lib3dsTargetNode*)node;
+    lib3ds_track_resize(&n->pos_track, 1);
+    lib3ds_vector_copy(n->pos_track.keys[0].value, light->target);
+
+    return n;
+}
+
+
 static void
 free_node_and_childs(Lib3dsNode *node) {
     assert(node);
     switch (node->type) {
-        case LIB3DS_NODE_AMBIENT: {
-            Lib3dsAmbientNode *n = (Lib3dsAmbientNode*)node;
+        case LIB3DS_NODE_AMBIENT_COLOR: {
+            Lib3dsAmbientColorNode *n = (Lib3dsAmbientColorNode*)node;
             lib3ds_track_resize(&n->color_track, 0);
             break;
         }
 
-        case LIB3DS_NODE_MESH: {
-            Lib3dsMeshNode *n = (Lib3dsMeshNode*)node;
+        case LIB3DS_NODE_MESH_INSTANCE: {
+            Lib3dsMeshInstanceNode *n = (Lib3dsMeshInstanceNode*)node;
             lib3ds_track_resize(&n->pos_track, 0);
             lib3ds_track_resize(&n->rot_track, 0);
             lib3ds_track_resize(&n->scl_track, 0);
@@ -196,8 +362,8 @@ void
 lib3ds_node_eval(Lib3dsNode *node, float t) {
     assert(node);
     switch (node->type) {
-        case LIB3DS_NODE_AMBIENT: {
-            Lib3dsAmbientNode *n = (Lib3dsAmbientNode*)node;
+        case LIB3DS_NODE_AMBIENT_COLOR: {
+            Lib3dsAmbientColorNode *n = (Lib3dsAmbientColorNode*)node;
             if (node->parent) {
                 lib3ds_matrix_copy(node->matrix, node->parent->matrix);
             } else {
@@ -207,9 +373,9 @@ lib3ds_node_eval(Lib3dsNode *node, float t) {
             break;
         }
 
-        case LIB3DS_NODE_MESH: {
+        case LIB3DS_NODE_MESH_INSTANCE: {
             float M[4][4];
-            Lib3dsMeshNode *n = (Lib3dsMeshNode*)node;
+            Lib3dsMeshInstanceNode *n = (Lib3dsMeshInstanceNode*)node;
 
             lib3ds_track_eval_vector(&n->pos_track, n->pos, t);
             lib3ds_track_eval_quat(&n->rot_track, n->rot, t);
@@ -410,8 +576,8 @@ lib3ds_node_read(Lib3dsNode *node, Lib3dsIo *io) {
             }
 
             case CHK_PIVOT: {
-                if (node->type == LIB3DS_NODE_MESH) {
-                    Lib3dsMeshNode *n = (Lib3dsMeshNode*)node;
+                if (node->type == LIB3DS_NODE_MESH_INSTANCE) {
+                    Lib3dsMeshInstanceNode *n = (Lib3dsMeshInstanceNode*)node;
                     lib3ds_io_read_vector(io, n->pivot);
                 } else {
                     lib3ds_chunk_unknown(chunk, io);
@@ -420,9 +586,9 @@ lib3ds_node_read(Lib3dsNode *node, Lib3dsIo *io) {
             }
 
             case CHK_INSTANCE_NAME: {
-                if (node->type == LIB3DS_NODE_MESH) {
-                    Lib3dsMeshNode *n = (Lib3dsMeshNode*)node;
-                    lib3ds_io_read_string(io, n->instance, 64);
+                if (node->type == LIB3DS_NODE_MESH_INSTANCE) {
+                    Lib3dsMeshInstanceNode *n = (Lib3dsMeshInstanceNode*)node;
+                    lib3ds_io_read_string(io, n->instance_name, 64);
                 } else {
                     lib3ds_chunk_unknown(chunk, io);
                 }
@@ -430,8 +596,8 @@ lib3ds_node_read(Lib3dsNode *node, Lib3dsIo *io) {
             }
 
             case CHK_BOUNDBOX: {
-                if (node->type == LIB3DS_NODE_MESH) {
-                    Lib3dsMeshNode *n = (Lib3dsMeshNode*)node;
+                if (node->type == LIB3DS_NODE_MESH_INSTANCE) {
+                    Lib3dsMeshInstanceNode *n = (Lib3dsMeshInstanceNode*)node;
                     lib3ds_io_read_vector(io, n->bbox_min);
                     lib3ds_io_read_vector(io, n->bbox_max);
                 } else {
@@ -443,8 +609,8 @@ lib3ds_node_read(Lib3dsNode *node, Lib3dsIo *io) {
             case CHK_COL_TRACK_TAG: {
                 Lib3dsTrack *track = 0;
                 switch (node->type) {
-                    case LIB3DS_NODE_AMBIENT: {
-                        Lib3dsAmbientNode *n = (Lib3dsAmbientNode*)node;
+                    case LIB3DS_NODE_AMBIENT_COLOR: {
+                        Lib3dsAmbientColorNode *n = (Lib3dsAmbientColorNode*)node;
                         track = &n->color_track;
                         break;
                     }              
@@ -470,8 +636,8 @@ lib3ds_node_read(Lib3dsNode *node, Lib3dsIo *io) {
             case CHK_POS_TRACK_TAG: {
                 Lib3dsTrack *track = 0;
                 switch (node->type) {
-                    case LIB3DS_NODE_MESH: {
-                        Lib3dsMeshNode *n = (Lib3dsMeshNode*)node;
+                    case LIB3DS_NODE_MESH_INSTANCE: {
+                        Lib3dsMeshInstanceNode *n = (Lib3dsMeshInstanceNode*)node;
                         track = &n->pos_track;
                         break;
                     }
@@ -510,8 +676,8 @@ lib3ds_node_read(Lib3dsNode *node, Lib3dsIo *io) {
             }
 
             case CHK_ROT_TRACK_TAG: {
-                if (node->type == LIB3DS_NODE_MESH) {
-                    Lib3dsMeshNode *n = (Lib3dsMeshNode*)node;
+                if (node->type == LIB3DS_NODE_MESH_INSTANCE) {
+                    Lib3dsMeshInstanceNode *n = (Lib3dsMeshInstanceNode*)node;
                     n->rot_track.type = LIB3DS_TRACK_QUAT;
                     lib3ds_track_read(&n->rot_track, io);
                 } else {
@@ -521,8 +687,8 @@ lib3ds_node_read(Lib3dsNode *node, Lib3dsIo *io) {
             }
 
             case CHK_SCL_TRACK_TAG: {
-                if (node->type == LIB3DS_NODE_MESH) {
-                    Lib3dsMeshNode *n = (Lib3dsMeshNode*)node;
+                if (node->type == LIB3DS_NODE_MESH_INSTANCE) {
+                    Lib3dsMeshInstanceNode *n = (Lib3dsMeshInstanceNode*)node;
                     n->scl_track.type = LIB3DS_TRACK_VECTOR;
                     lib3ds_track_read(&n->scl_track, io);
                 } else {
@@ -585,8 +751,8 @@ lib3ds_node_read(Lib3dsNode *node, Lib3dsIo *io) {
             }
 
             case CHK_HIDE_TRACK_TAG: {
-                if (node->type == LIB3DS_NODE_MESH) {
-                    Lib3dsMeshNode *n = (Lib3dsMeshNode*)node;
+                if (node->type == LIB3DS_NODE_MESH_INSTANCE) {
+                    Lib3dsMeshInstanceNode *n = (Lib3dsMeshInstanceNode*)node;
                     n->hide_track.type = LIB3DS_TRACK_BOOL;
                     lib3ds_track_read(&n->hide_track, io);
                 } else {
@@ -596,8 +762,8 @@ lib3ds_node_read(Lib3dsNode *node, Lib3dsIo *io) {
             }
 
             case CHK_MORPH_SMOOTH: {
-                if (node->type == LIB3DS_NODE_MESH) {
-                    Lib3dsMeshNode *n = (Lib3dsMeshNode*)node;
+                if (node->type == LIB3DS_NODE_MESH_INSTANCE) {
+                    Lib3dsMeshInstanceNode *n = (Lib3dsMeshInstanceNode*)node;
                     n->morph_smooth = lib3ds_io_read_float(io);
                 } else {
                     lib3ds_chunk_unknown(chunk, io);
@@ -607,8 +773,8 @@ lib3ds_node_read(Lib3dsNode *node, Lib3dsIo *io) {
 
             /*
             case LIB3DS_MORPH_TRACK_TAG: {
-                if (node->type == LIB3DS_NODE_MESH) {
-                    Lib3dsMeshNode *n = (Lib3dsMeshNode*)node;
+                if (node->type == LIB3DS_NODE_MESH_INSTANCE) {
+                    Lib3dsMeshInstanceNode *n = (Lib3dsMeshInstanceNode*)node;
                     n->morph_track = lib3ds_track_new(node, LIB3DS_TRACK_MORPH, 0);
                     lib3ds_track_read(n->morph_track, io);
                 } else {
@@ -632,11 +798,11 @@ lib3ds_node_write(Lib3dsNode *node, uint16_t node_id, uint16_t parent_id, Lib3ds
     Lib3dsChunk c;
 
     switch (node->type) {
-        case LIB3DS_NODE_AMBIENT:
+        case LIB3DS_NODE_AMBIENT_COLOR:
             c.chunk = CHK_AMBIENT_NODE_TAG;
             break;
 
-        case LIB3DS_NODE_MESH:
+        case LIB3DS_NODE_MESH_INSTANCE:
             c.chunk = CHK_OBJECT_NODE_TAG;
             break;
 
@@ -688,7 +854,7 @@ lib3ds_node_write(Lib3dsNode *node, uint16_t node_id, uint16_t parent_id, Lib3ds
 
     switch (c.chunk) {
         case CHK_AMBIENT_NODE_TAG: {
-            Lib3dsAmbientNode *n = (Lib3dsAmbientNode*)node;
+            Lib3dsAmbientColorNode *n = (Lib3dsAmbientColorNode*)node;
             if (n->color_track.nkeys) { /*---- CHK_COL_TRACK_TAG ----*/
                 Lib3dsChunk c;
                 c.chunk = CHK_COL_TRACK_TAG;
@@ -700,7 +866,7 @@ lib3ds_node_write(Lib3dsNode *node, uint16_t node_id, uint16_t parent_id, Lib3ds
         }
 
         case CHK_OBJECT_NODE_TAG: {
-            Lib3dsMeshNode *n = (Lib3dsMeshNode*)node;
+            Lib3dsMeshInstanceNode *n = (Lib3dsMeshInstanceNode*)node;
             { /*---- CHK_PIVOT ----*/
                 Lib3dsChunk c;
                 c.chunk = CHK_PIVOT;
@@ -712,8 +878,8 @@ lib3ds_node_write(Lib3dsNode *node, uint16_t node_id, uint16_t parent_id, Lib3ds
             { /*---- CHK_INSTANCE_NAME ----*/
                 Lib3dsChunk c;
                 const char *name;
-                if (strlen(n->instance)) {
-                    name = n->instance;
+                if (strlen(n->instance_name)) {
+                    name = n->instance_name;
 
                     c.chunk = CHK_INSTANCE_NAME;
                     c.size = 6 + 1 + (uint32_t)strlen(name);

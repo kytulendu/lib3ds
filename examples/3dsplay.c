@@ -188,23 +188,6 @@ build_menu() {
 static void
 timer_cb(int value) {
     if (!halt) {
-
-        {
-            Lib3dsMeshNode* n = (Lib3dsMeshNode*)file->nodes;
-            float q[4];
-            float vl;
-            
-            assert(n);
-            lib3ds_file_eval(file, current_frame);
-            lib3ds_quat_copy(q, n->rot);
-            vl = sqrt(q[0]*q[0] + q[1]*q[1] + q[2]*q[2]);
-            printf("%8f - %8f %8f %8f - %8f\n",
-                current_frame,
-                q[0]/vl, q[1]/vl, q[2]/vl,  
-                2.0 * acos(q[3]) * 180.0 / LIB3DS_PI
-            );
-        }
-
         view_rotz += anim_rotz;
         current_frame+= 1;
         if (current_frame > file->frames)
@@ -262,7 +245,7 @@ load_model(void) {
         int i;
         for (i = 0; i < file->nmeshes; ++i) {
             Lib3dsMesh *mesh = file->meshes[i];
-            node = lib3ds_node_new(LIB3DS_NODE_MESH);
+            node = lib3ds_node_new(LIB3DS_NODE_MESH_INSTANCE);
             strcpy(node->name, mesh->name);
             lib3ds_file_insert_node(file, node, NULL);
         }
@@ -431,16 +414,16 @@ render_node(Lib3dsNode *node) {
             render_node(p);
         }
     }
-    if (node->type == LIB3DS_NODE_MESH) {
+    if (node->type == LIB3DS_NODE_MESH_INSTANCE) {
         int index;
         Lib3dsMesh *mesh;
-        Lib3dsMeshNode *n = (Lib3dsMeshNode*)node;
+        Lib3dsMeshInstanceNode *n = (Lib3dsMeshInstanceNode*)node;
 
         if (strcmp(node->name, "$$$DUMMY") == 0) {
             return;
         }
 
-        index = lib3ds_file_mesh_by_name(file, n->instance);
+        index = lib3ds_file_mesh_by_name(file, n->instance_name);
         if (index < 0)
             index = lib3ds_file_mesh_by_name(file, node->name);
         if (index < 0) {
@@ -690,7 +673,7 @@ light_update(Lib3dsLight *l) {
 
     if (sn != NULL) {
         Lib3dsTargetNode *n = (Lib3dsTargetNode*)sn;
-        memcpy(l->spot, n->pos, 3* sizeof(float));
+        memcpy(l->target, n->pos, 3* sizeof(float));
     }
 }
 
@@ -911,9 +894,9 @@ display(void) {
             glLightfv(li, GL_POSITION, p);
 
             if (l->spot_light) {
-                p[0] = l->spot[0] - l->position[0];
-                p[1] = l->spot[1] - l->position[1];
-                p[2] = l->spot[2] - l->position[2];
+                p[0] = l->target[0] - l->position[0];
+                p[1] = l->target[1] - l->position[1];
+                p[2] = l->target[2] - l->position[2];
                 glLightfv(li, GL_SPOT_DIRECTION, p);
             }
             ++li;

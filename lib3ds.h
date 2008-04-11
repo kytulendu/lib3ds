@@ -296,12 +296,12 @@ typedef struct Lib3dsLight {
     unsigned    user_id;
     void*       user_ptr;
     char        name[64];
-    unsigned    object_flags; /*< @see Lib3dsObjectFlags */ 
+    unsigned    object_flags; 
     int         spot_light;     /* bool */
     int         see_cone;
     float       color[3];
     float       position[3];
-    float       spot[3];
+    float       target[3];
     float       roll;
     int         off;              /* bool */
     float       outer_range;
@@ -370,9 +370,20 @@ typedef struct Lib3dsMesh {
     float           matrix[4][4];        /* Transformation matrix for mesh data */
     unsigned short  nvertices;		     /* Number of vertices in vertex array (max. 65535) */
     Lib3dsVertex*   vertices;	         /* Point list */
+
+    //unsigned short* vertex_flags;
+    //float           (*vertices)[3];
+    //float           (*texcos)[2];
+
     unsigned short  nfaces;	             /* Number of faces in face array (max. 65535) */
 	Lib3dsFace*     faces;               /* Array */
-	char            box_front[64];
+
+    //unsigned short  (*faces)[3];
+    //unsigned short* face_flags;
+    //int*            material_indices;
+    //unsigned*       smoothing_groups;
+    
+    char            box_front[64];
 	char            box_back[64];
 	char            box_left[64];
 	char            box_right[64];
@@ -388,8 +399,8 @@ typedef struct Lib3dsMesh {
 } Lib3dsMesh; 
 
 typedef enum Lib3dsNodeType {
-    LIB3DS_NODE_AMBIENT         = 0,
-    LIB3DS_NODE_MESH            = 1,
+    LIB3DS_NODE_AMBIENT_COLOR   = 0,
+    LIB3DS_NODE_MESH_INSTANCE   = 1,
     LIB3DS_NODE_CAMERA          = 2,
     LIB3DS_NODE_CAMERA_TARGET   = 3,
     LIB3DS_NODE_OMNILIGHT       = 4,
@@ -468,16 +479,16 @@ typedef struct Lib3dsTrack {
     Lib3dsKey*      keys;   
 } Lib3dsTrack;
 
-typedef struct Lib3dsAmbientNode {
+typedef struct Lib3dsAmbientColorNode {
     Lib3dsNode      base;
     float           color[3];
     Lib3dsTrack     color_track;
-} Lib3dsAmbientNode;
+} Lib3dsAmbientColorNode;
 
-typedef struct Lib3dsMeshNode {
+typedef struct Lib3dsMeshInstanceNode {
     Lib3dsNode      base;
     float           pivot[3];
-    char            instance[64];
+    char            instance_name[64];
     float           bbox_min[3];
     float           bbox_max[3];
     int             hide;
@@ -490,7 +501,7 @@ typedef struct Lib3dsMeshNode {
     Lib3dsTrack     rot_track;
     Lib3dsTrack     scl_track;
     Lib3dsTrack     hide_track;
-} Lib3dsMeshNode;
+} Lib3dsMeshInstanceNode;
 
 typedef struct Lib3dsCameraNode {
     Lib3dsNode      base;
@@ -573,27 +584,22 @@ extern LIB3DSAPI void lib3ds_file_free(Lib3dsFile *file);
 extern LIB3DSAPI void lib3ds_file_eval(Lib3dsFile *file, float t);
 extern LIB3DSAPI int lib3ds_file_read(Lib3dsFile *file, Lib3dsIo *io);
 extern LIB3DSAPI int lib3ds_file_write(Lib3dsFile *file, Lib3dsIo *io);
-
 extern LIB3DSAPI void lib3ds_file_reserve_materials(Lib3dsFile *file, int size, int force);
 extern LIB3DSAPI void lib3ds_file_insert_material(Lib3dsFile *file, Lib3dsMaterial *material, int index);
 extern LIB3DSAPI void lib3ds_file_remove_material(Lib3dsFile *file, int index);
 extern LIB3DSAPI int lib3ds_file_material_by_name(Lib3dsFile *file, const char *name);
-
 extern LIB3DSAPI void lib3ds_file_reserve_cameras(Lib3dsFile *file, int size, int force);
 extern LIB3DSAPI void lib3ds_file_insert_camera(Lib3dsFile *file, Lib3dsCamera *camera, int index);
 extern LIB3DSAPI void lib3ds_file_remove_camera(Lib3dsFile *file, int index);
 extern LIB3DSAPI int lib3ds_file_camera_by_name(Lib3dsFile *file, const char *name);
-
 extern LIB3DSAPI void lib3ds_file_reserve_lights(Lib3dsFile *file, int size, int force);
 extern LIB3DSAPI void lib3ds_file_insert_light(Lib3dsFile *file, Lib3dsLight *light, int index);
 extern LIB3DSAPI void lib3ds_file_remove_light(Lib3dsFile *file, int index);
 extern LIB3DSAPI int lib3ds_file_light_by_name(Lib3dsFile *file, const char *name);
-
 extern LIB3DSAPI void lib3ds_file_reserve_meshes(Lib3dsFile *file, int size, int force);
 extern LIB3DSAPI void lib3ds_file_insert_mesh(Lib3dsFile *file, Lib3dsMesh *mesh, int index);
 extern LIB3DSAPI void lib3ds_file_remove_mesh(Lib3dsFile *file, int index);
 extern LIB3DSAPI int lib3ds_file_mesh_by_name(Lib3dsFile *file, const char *name);
-
 extern LIB3DSAPI Lib3dsNode* lib3ds_file_node_by_name(Lib3dsFile *file, const char* name, Lib3dsNodeType type);
 extern LIB3DSAPI Lib3dsNode* lib3ds_file_node_by_id(Lib3dsFile *file, unsigned short node_id);
 extern LIB3DSAPI void lib3ds_file_append_node(Lib3dsFile *file, Lib3dsNode *node, Lib3dsNode *parent);
@@ -605,13 +611,10 @@ extern LIB3DSAPI void lib3ds_file_bounding_box_of_nodes(Lib3dsFile *file, int in
 
 extern LIB3DSAPI Lib3dsMaterial* lib3ds_material_new(const char *name);
 extern LIB3DSAPI void lib3ds_material_free(Lib3dsMaterial *material);
-
 extern LIB3DSAPI Lib3dsCamera* lib3ds_camera_new(const char *name);
 extern LIB3DSAPI void lib3ds_camera_free(Lib3dsCamera *mesh);
-
 extern LIB3DSAPI Lib3dsLight* lib3ds_light_new(const char *name);
 extern LIB3DSAPI void lib3ds_light_free(Lib3dsLight *mesh);
-
 extern LIB3DSAPI Lib3dsMesh* lib3ds_mesh_new(const char *name);
 extern LIB3DSAPI void lib3ds_mesh_free(Lib3dsMesh *mesh);
 extern LIB3DSAPI void lib3ds_mesh_resize_vertices(Lib3dsMesh *mesh, int nvertices);
@@ -621,6 +624,13 @@ extern LIB3DSAPI void lib3ds_mesh_calculate_face_normals(Lib3dsMesh *mesh, float
 extern LIB3DSAPI void lib3ds_mesh_calculate_normals(Lib3dsMesh *mesh, float (*normalL)[3]);
 
 extern LIB3DSAPI Lib3dsNode* lib3ds_node_new(Lib3dsNodeType type);
+extern LIB3DSAPI Lib3dsAmbientColorNode* lib3ds_node_new_ambient_color(float color0[3]);
+extern LIB3DSAPI Lib3dsMeshInstanceNode* lib3ds_node_new_mesh_instance(Lib3dsMesh *mesh, const char* instance_name, float pos0[3], float scl0[3], float rot0[4]);
+extern LIB3DSAPI Lib3dsCameraNode* lib3ds_node_new_camera(Lib3dsCamera *camera);
+extern LIB3DSAPI Lib3dsTargetNode* lib3ds_node_new_camera_target(Lib3dsCamera *camera);
+extern LIB3DSAPI Lib3dsOmnilightNode* lib3ds_node_new_omnilight(Lib3dsLight *light);
+extern LIB3DSAPI Lib3dsSpotlightNode* lib3ds_node_new_spotlight(Lib3dsLight *light);
+extern LIB3DSAPI Lib3dsTargetNode* lib3ds_node_new_spotlight_target(Lib3dsLight *light);
 extern LIB3DSAPI void lib3ds_node_free(Lib3dsNode *node);
 extern LIB3DSAPI void lib3ds_node_eval(Lib3dsNode *node, float t);
 extern LIB3DSAPI Lib3dsNode* lib3ds_node_by_name(Lib3dsNode *node, const char* name, Lib3dsNodeType type);

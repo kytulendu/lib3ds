@@ -21,14 +21,16 @@
 
 #include <stddef.h>
 
-#ifdef _MSC_VER
-    #ifdef LIB3DS_EXPORTS
-        #define LIB3DSAPI __declspec(dllexport)
-    #else               
-        #define LIB3DSAPI __declspec(dllimport)
-    #endif           
-#else
-    #define LIB3DSAPI
+#ifndef LIB3DSAPI
+    #ifdef _MSC_VER
+        #ifdef LIB3DS_EXPORTS
+            #define LIB3DSAPI __declspec(dllexport)
+        #else               
+            #define LIB3DSAPI __declspec(dllimport)
+        #endif           
+    #else
+        #define LIB3DSAPI
+    #endif
 #endif
 
 #ifdef __cplusplus

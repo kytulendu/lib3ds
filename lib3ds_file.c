@@ -1072,9 +1072,7 @@ lib3ds_file_mesh_for_node(Lib3dsFile *file, Lib3dsNode *node) {
         return NULL;
     n = (Lib3dsMeshInstanceNode*)node;
 
-    index = lib3ds_file_mesh_by_name(file, n->instance_name);
-    if (index < 0)
-        index = lib3ds_file_mesh_by_name(file, node->name);
+    index = lib3ds_file_mesh_by_name(file, node->name);
 
     return (index >= 0)? file->meshes[index] : NULL;
 }
@@ -1354,7 +1352,7 @@ file_bounding_box_of_nodes_impl(Lib3dsNode *node, Lib3dsFile *file,
                     lib3ds_matrix_mult(M, M, inv_matrix);
 
                     for (i = 0; i < mesh->nvertices; ++i) {
-                        lib3ds_vector_transform(v, M, mesh->vertices[i].pos);
+                        lib3ds_vector_transform(v, M, mesh->vertices[i]);
                         lib3ds_vector_min(bmin, v);
                         lib3ds_vector_max(bmax, v);
                     }

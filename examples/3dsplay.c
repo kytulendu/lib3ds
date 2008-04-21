@@ -618,11 +618,11 @@ render_node(Lib3dsNode *node) {
 
                             if (tex_mode) {
                                 glTexCoord2f(
-                                    mesh->vertices[mesh->faces[p].index[i]].tex[1]*pt->scale_x,
-                                    pt->scale_y - mesh->vertices[mesh->faces[p].index[i]].tex[0]*pt->scale_y);
+                                    mesh->texcos[mesh->faces[p].index[i]][1]*pt->scale_x,
+                                    pt->scale_y - mesh->texcos[mesh->faces[p].index[i]][0]*pt->scale_y);
                             }
 
-                            glVertex3fv(mesh->vertices[mesh->faces[p].index[i]].pos);
+                            glVertex3fv(mesh->vertices[mesh->faces[p].index[i]]);
                         }
                         glEnd();
 

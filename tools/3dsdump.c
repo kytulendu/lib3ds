@@ -387,11 +387,11 @@ mesh_dump(Lib3dsMesh *mesh) {
     matrix_dump(mesh->matrix);
     printf("  vertices (x, y, z, u, v):\n");
     for (i = 0; i < mesh->nvertices; ++i) {
-        lib3ds_vector_copy(p, mesh->vertices[i].pos);
+        lib3ds_vector_copy(p, mesh->vertices[i]);
         printf("    %10.5f %10.5f %10.5f %10.5f %10.5f\n", 
             p[0], p[1], p[2],
-            mesh->vertices[i].tex[0],
-            mesh->vertices[i].tex[1]
+            mesh->texcos[i][0],
+            mesh->texcos[i][1]
         );
     }
     printf("  facelist:\n");

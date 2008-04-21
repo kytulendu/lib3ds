@@ -16,6 +16,7 @@
     along with  this program; If not, see <http://www.gnu.org/licenses/>. 
 */
 #include <lib3ds.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -97,11 +98,11 @@ int main(int argc, char **argv) {
         Lib3dsMeshInstanceNode *inst;        
         lib3ds_file_insert_mesh(file, mesh, -1);
 
-        lib3ds_mesh_resize_vertices(mesh, 8);
+        lib3ds_mesh_resize_vertices(mesh, 8, 1, 0);
         for (i = 0; i < 8; ++i) {
-            lib3ds_vector_copy(mesh->vertices[i].pos, g_vertices[i]);
-            mesh->vertices[i].tex[0] = g_texcoords[i][0];
-            mesh->vertices[i].tex[1] = g_texcoords[i][1];
+            lib3ds_vector_copy(mesh->vertices[i], g_vertices[i]);
+            mesh->texcos[i][0] = g_texcoords[i][0];
+            mesh->texcos[i][1] = g_texcoords[i][1];
         }
 
         lib3ds_mesh_resize_faces(mesh, 12);

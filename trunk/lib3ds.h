@@ -347,12 +347,6 @@ typedef enum Lib3dsFaceFlags {
   LIB3DS_FACE_SELECT_1  = (1<<15),    /* Bit 15: Selection of the face in selection 1*/
 } Lib3dsFaceFlags;
 
-typedef struct Lib3dsVertex {
-    float       pos[3];
-    float       tex[2];
-    unsigned    flags;
-} Lib3dsVertex; 
-
 typedef struct Lib3dsFace {
     unsigned short  index[3];
     unsigned short  flags;
@@ -369,20 +363,11 @@ typedef struct Lib3dsMesh {
     int             color;               /* Index to editor palette [0..255] */
     float           matrix[4][4];        /* Transformation matrix for mesh data */
     unsigned short  nvertices;		     /* Number of vertices in vertex array (max. 65535) */
-    Lib3dsVertex*   vertices;	         /* Point list */
-
-    //unsigned short* vertex_flags;
-    //float           (*vertices)[3];
-    //float           (*texcos)[2];
-
+    float           (*vertices)[3];
+    float           (*texcos)[2];
+    unsigned short* vflags;
     unsigned short  nfaces;	             /* Number of faces in face array (max. 65535) */
 	Lib3dsFace*     faces;               /* Array */
-
-    //unsigned short  (*faces)[3];
-    //unsigned short* face_flags;
-    //int*            material_indices;
-    //unsigned*       smoothing_groups;
-    
     char            box_front[64];
 	char            box_back[64];
 	char            box_left[64];
@@ -600,6 +585,7 @@ extern LIB3DSAPI void lib3ds_file_reserve_meshes(Lib3dsFile *file, int size, int
 extern LIB3DSAPI void lib3ds_file_insert_mesh(Lib3dsFile *file, Lib3dsMesh *mesh, int index);
 extern LIB3DSAPI void lib3ds_file_remove_mesh(Lib3dsFile *file, int index);
 extern LIB3DSAPI int lib3ds_file_mesh_by_name(Lib3dsFile *file, const char *name);
+extern LIB3DSAPI Lib3dsMesh* lib3ds_file_mesh_for_node(Lib3dsFile *file, Lib3dsNode *node);
 extern LIB3DSAPI Lib3dsNode* lib3ds_file_node_by_name(Lib3dsFile *file, const char* name, Lib3dsNodeType type);
 extern LIB3DSAPI Lib3dsNode* lib3ds_file_node_by_id(Lib3dsFile *file, unsigned short node_id);
 extern LIB3DSAPI void lib3ds_file_append_node(Lib3dsFile *file, Lib3dsNode *node, Lib3dsNode *parent);
@@ -617,7 +603,7 @@ extern LIB3DSAPI Lib3dsLight* lib3ds_light_new(const char *name);
 extern LIB3DSAPI void lib3ds_light_free(Lib3dsLight *mesh);
 extern LIB3DSAPI Lib3dsMesh* lib3ds_mesh_new(const char *name);
 extern LIB3DSAPI void lib3ds_mesh_free(Lib3dsMesh *mesh);
-extern LIB3DSAPI void lib3ds_mesh_resize_vertices(Lib3dsMesh *mesh, int nvertices);
+extern LIB3DSAPI void lib3ds_mesh_resize_vertices(Lib3dsMesh *mesh, int nvertices, int use_texcos, int use_flags);
 extern LIB3DSAPI void lib3ds_mesh_resize_faces(Lib3dsMesh *mesh, int nfaces);
 extern LIB3DSAPI void lib3ds_mesh_bounding_box(Lib3dsMesh *mesh, float bmin[3], float bmax[3]);
 extern LIB3DSAPI void lib3ds_mesh_calculate_face_normals(Lib3dsMesh *mesh, float (*face_normals)[3]);

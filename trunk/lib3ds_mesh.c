@@ -55,7 +55,7 @@ lib3ds_mesh_new(const char *name) {
  */
 void
 lib3ds_mesh_free(Lib3dsMesh *mesh) {
-    lib3ds_mesh_resize_vertices(mesh, 0);
+    lib3ds_mesh_resize_vertices(mesh, 0, 0, 0);
     lib3ds_mesh_resize_faces(mesh, 0);
     memset(mesh, 0, sizeof(Lib3dsMesh));
     free(mesh);
@@ -63,9 +63,21 @@ lib3ds_mesh_free(Lib3dsMesh *mesh) {
 
 
 void
-lib3ds_mesh_resize_vertices(Lib3dsMesh *mesh, int nvertices) {
+lib3ds_mesh_resize_vertices(Lib3dsMesh *mesh, int nvertices, int use_texcos, int use_flags) {
     assert(mesh);
-    mesh->vertices = lib3ds_util_realloc_array(mesh->vertices, mesh->nvertices, nvertices, sizeof(Lib3dsVertex));
+    mesh->vertices = lib3ds_util_realloc_array(mesh->vertices, mesh->nvertices, nvertices, 3 * sizeof(float));
+    mesh->texcos = lib3ds_util_realloc_array(
+        mesh->texcos, 
+        mesh->texcos? mesh->nvertices : 0, 
+        use_texcos? nvertices : 0, 
+        2 * sizeof(float)
+    );
+    mesh->vflags = lib3ds_util_realloc_array(
+        mesh->vflags, 
+        mesh->vflags? mesh->nvertices : 0, 
+        use_flags? nvertices : 0, 
+        2 * sizeof(float)
+    );
     mesh->nvertices = nvertices;
 }
 
@@ -96,8 +108,8 @@ lib3ds_mesh_bounding_box(Lib3dsMesh *mesh, float bmin[3], float bmax[3]) {
     bmax[0] = bmax[1] = bmax[2] = -FLT_MAX;
 
     for (i = 0; i < mesh->nvertices; ++i) {
-        lib3ds_vector_min(bmin, mesh->vertices[i].pos);
-        lib3ds_vector_max(bmax, mesh->vertices[i].pos);
+        lib3ds_vector_min(bmin, mesh->vertices[i]);
+        lib3ds_vector_max(bmax, mesh->vertices[i]);
     }
 }
 
@@ -112,9 +124,9 @@ lib3ds_mesh_calculate_face_normals(Lib3dsMesh *mesh, float (*face_normals)[3]) {
     for (i = 0; i < mesh->nfaces; ++i) {
         lib3ds_vector_normal(
             face_normals[i],
-            mesh->vertices[mesh->faces[i].index[0]].pos,
-            mesh->vertices[mesh->faces[i].index[1]].pos,
-            mesh->vertices[mesh->faces[i].index[2]].pos
+            mesh->vertices[mesh->faces[i].index[0]],
+            mesh->vertices[mesh->faces[i].index[1]],
+            mesh->vertices[mesh->faces[i].index[2]]
         );
     }
 }
@@ -179,9 +191,9 @@ lib3ds_mesh_calculate_normals(Lib3dsMesh *mesh, float (*normals)[3]) {
 
         lib3ds_vector_normal(
             fn[i],
-            mesh->vertices[mesh->faces[i].index[0]].pos,
-            mesh->vertices[mesh->faces[i].index[1]].pos,
-            mesh->vertices[mesh->faces[i].index[2]].pos
+            mesh->vertices[mesh->faces[i].index[0]],
+            mesh->vertices[mesh->faces[i].index[1]],
+            mesh->vertices[mesh->faces[i].index[2]]
         );
     }
 
@@ -340,9 +352,9 @@ lib3ds_mesh_read(Lib3dsFile *file, Lib3dsMesh *mesh, Lib3dsIo *io) {
             case CHK_POINT_ARRAY: {
                 int i;
                 uint16_t nvertices = lib3ds_io_read_word(io);
-                lib3ds_mesh_resize_vertices(mesh, nvertices);
+                lib3ds_mesh_resize_vertices(mesh, nvertices, mesh->texcos != NULL, mesh->vflags != NULL);
                 for (i = 0; i < mesh->nvertices; ++i) {
-                    lib3ds_io_read_vector(io, mesh->vertices[i].pos);
+                    lib3ds_io_read_vector(io, mesh->vertices[i]);
                 }
                 break;
             }
@@ -350,15 +362,10 @@ lib3ds_mesh_read(Lib3dsFile *file, Lib3dsMesh *mesh, Lib3dsIo *io) {
             case CHK_POINT_FLAG_ARRAY: {
                 int i;
                 uint16_t nflags = lib3ds_io_read_word(io);
-                if (mesh->nvertices && (nflags > mesh->nvertices)) {
-                   // TODO: warning
-                   nflags = mesh->nvertices;
-                }
-                if (!mesh->vertices) {
-                    lib3ds_mesh_resize_vertices(mesh, nflags);
-                }
+                uint16_t nvertices = (mesh->nvertices >= nflags)? mesh->nvertices : nflags;
+                lib3ds_mesh_resize_vertices(mesh, nvertices, mesh->texcos != NULL, 1);
                 for (i = 0; i < nflags; ++i) {
-                    mesh->vertices[i].flags = lib3ds_io_read_word(io);
+                    mesh->vflags[i] = lib3ds_io_read_word(io);
                 }
                 break;
             }
@@ -397,19 +404,14 @@ lib3ds_mesh_read(Lib3dsFile *file, Lib3dsMesh *mesh, Lib3dsIo *io) {
 
             case CHK_TEX_VERTS: {
                 int i;
-                int ntexcos;
-
-                ntexcos = lib3ds_io_read_word(io);
-                if (mesh->nvertices && (ntexcos > mesh->nvertices)) {
-                    // TODO: warning
-                    ntexcos = mesh->nvertices;
-                }
-                if (!mesh->vertices) {
-                    lib3ds_mesh_resize_vertices(mesh, ntexcos);
+                uint16_t ntexcos = lib3ds_io_read_word(io);
+                uint16_t nvertices = (mesh->nvertices >= ntexcos)? mesh->nvertices : ntexcos;;
+                if (!mesh->texcos) {
+                    lib3ds_mesh_resize_vertices(mesh, nvertices, 1, mesh->vflags != NULL);
                 }
                 for (i = 0; i < ntexcos; ++i) {
-                    mesh->vertices[i].tex[0] = lib3ds_io_read_float(io);
-                    mesh->vertices[i].tex[1] = lib3ds_io_read_float(io);
+                    mesh->texcos[i][0] = lib3ds_io_read_float(io);
+                    mesh->texcos[i][1] = lib3ds_io_read_float(io);
                 }
                 break;
             }
@@ -434,8 +436,8 @@ lib3ds_mesh_read(Lib3dsFile *file, Lib3dsMesh *mesh, Lib3dsIo *io) {
         lib3ds_matrix_mult(M, M, inv_matrix);
 
         for (i = 0; i < mesh->nvertices; ++i) {
-            lib3ds_vector_transform(tmp, M, mesh->vertices[i].pos);
-            lib3ds_vector_copy(mesh->vertices[i].pos, tmp);
+            lib3ds_vector_transform(tmp, M, mesh->vertices[i]);
+            lib3ds_vector_copy(mesh->vertices[i], tmp);
         }
     }
 
@@ -460,7 +462,7 @@ point_array_write(Lib3dsMesh *mesh, Lib3dsIo *io) {
 
     if (lib3ds_matrix_det(mesh->matrix) >= 0.0f) {
         for (i = 0; i < mesh->nvertices; ++i) {
-            lib3ds_io_write_vector(io, mesh->vertices[i].pos);
+            lib3ds_io_write_vector(io, mesh->vertices[i]);
         }
     } else {
         /* Flip X coordinate of vertices if mesh matrix
@@ -475,7 +477,7 @@ point_array_write(Lib3dsMesh *mesh, Lib3dsIo *io) {
         lib3ds_matrix_mult(M, M, inv_matrix);
 
         for (i = 0; i < mesh->nvertices; ++i) {
-            lib3ds_vector_transform(tmp, M, mesh->vertices[i].pos);
+            lib3ds_vector_transform(tmp, M, mesh->vertices[i]);
             lib3ds_io_write_vector(io, tmp);
         }
     }
@@ -487,16 +489,17 @@ flag_array_write(Lib3dsMesh *mesh, Lib3dsIo *io) {
     Lib3dsChunk c;
     int i;
 
-    if (mesh->nvertices == 0) {
+    if (!mesh->vflags) {
         return;
     }
+
     c.chunk = CHK_POINT_FLAG_ARRAY;
     c.size = 8 + 2 * mesh->nvertices;
     lib3ds_chunk_write(&c, io);
 
     lib3ds_io_write_word(io, (uint16_t) mesh->nvertices);
     for (i = 0; i < mesh->nvertices; ++i) {
-        lib3ds_io_write_word(io, mesh->vertices[i].flags);
+        lib3ds_io_write_word(io, mesh->vflags[i]);
     }
 }
 
@@ -607,7 +610,7 @@ texco_array_write(Lib3dsMesh *mesh, Lib3dsIo *io) {
     Lib3dsChunk c;
     int i;
 
-    if (mesh->nvertices == 0) {
+    if (!mesh->texcos) {
         return;
     }
      
@@ -617,8 +620,8 @@ texco_array_write(Lib3dsMesh *mesh, Lib3dsIo *io) {
 
     lib3ds_io_write_word(io, mesh->nvertices);
     for (i = 0; i < mesh->nvertices; ++i) {
-        lib3ds_io_write_float(io, mesh->vertices[i].tex[0]);
-        lib3ds_io_write_float(io, mesh->vertices[i].tex[1]);
+        lib3ds_io_write_float(io, mesh->texcos[i][0]);
+        lib3ds_io_write_float(io, mesh->texcos[i][1]);
     }
 }
 

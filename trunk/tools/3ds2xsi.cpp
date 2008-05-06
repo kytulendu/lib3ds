@@ -87,6 +87,7 @@ main(int argc, char **argv) {
     scene.Create(5, 0, FORMAT_TEXT);
     scene.Write(output);
 
+
     lib3ds_file_free(f);
     return 0;
 }

@@ -29,13 +29,13 @@ div#navigation {
 div#navigation a {
 	padding: 0px 15px;
 }
-div.contents > p {
-	margin: 0px;
+p {
+	margin: 4px 0px 0px;
 	padding: 0px;
 }
-div.contents > p > TABLE > tbody > tr > td[colspan="2"], div.contents > TABLE > tbody > tr > td[colspan="2"] {
+/*div.contents > p > TABLE > tbody > tr > td[colspan="2"], div.contents > TABLE > tbody > tr > td[colspan="2"] {
 	border-bottom: 1px solid #CCCCCC;
-}
+}*/
 div#footer {
 	font-size: 10px;
 	text-align: center;

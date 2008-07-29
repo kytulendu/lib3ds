@@ -45,7 +45,7 @@ changed to GNU Lesser General Public License (LGPL).
  
 \section license License
 
-Copyright (C) 1996-2008 by Jan Eric Kyprianidis <<a href="http://www.kyprianidis.com">www.kyprianidis.com</a>><br>
+Copyright (C) 1996-2008 by Jan Eric Kyprianidis <<a href="http://www.kyprianidis.com">www.kyprianidis.com</a>>.<br>
 All rights reserved.
 
 This program is  free  software; you can redistribute it and/or modify it

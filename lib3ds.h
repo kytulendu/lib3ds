@@ -37,6 +37,9 @@
 extern "C" {
 #endif
 
+/** @defgroup api lib3ds API */
+/** @{ */
+
 typedef enum Lib3dsIoSeek {
     LIB3DS_SEEK_SET     = 0,
     LIB3DS_SEEK_CUR     = 1,
@@ -62,38 +65,38 @@ typedef struct Lib3dsIo {
 
 /* Atmosphere settings */
 typedef struct Lib3dsAtmosphere {
-	int         use_fog;
-	float       fog_color[3];
-	int         fog_background;
-	float       fog_near_plane;
-	float       fog_near_density;
-	float       fog_far_plane;
-	float       fog_far_density;
-	int         use_layer_fog;
-	unsigned    layer_fog_flags;
-	float       layer_fog_color[3];
-	float       layer_fog_near_y;
-	float       layer_fog_far_y;
-	float       layer_fog_density;
-	int         use_dist_cue;
-	int         dist_cue_background;     /* bool */
-	float       dist_cue_near_plane;
-	float       dist_cue_near_dimming;
-	float       dist_cue_far_plane;
-	float       dist_cue_far_dimming;
+    int         use_fog;
+    float       fog_color[3];
+    int         fog_background;
+    float       fog_near_plane;
+    float       fog_near_density;
+    float       fog_far_plane;
+    float       fog_far_density;
+    int         use_layer_fog;
+    unsigned    layer_fog_flags;
+    float       layer_fog_color[3];
+    float       layer_fog_near_y;
+    float       layer_fog_far_y;
+    float       layer_fog_density;
+    int         use_dist_cue;
+    int         dist_cue_background;     /* bool */
+    float       dist_cue_near_plane;
+    float       dist_cue_near_dimming;
+    float       dist_cue_far_plane;
+    float       dist_cue_far_dimming;
 } Lib3dsAtmosphere;
 
 /* Background settings */
 typedef struct Lib3dsBackground {
     int         use_bitmap;
-	char        bitmap_name[64];
+    char        bitmap_name[64];
     int         use_solid;
     float       solid_color[3];
-	int         use_gradient;
-	float       gradient_percent;
-	float       gradient_top[3];
-	float       gradient_middle[3];
-	float       gradient_bottom[3];
+    int         use_gradient;
+    float       gradient_percent;
+    float       gradient_top[3];
+    float       gradient_middle[3];
+    float       gradient_bottom[3];
 } Lib3dsBackground;
 
 /* Shadow settings */
@@ -152,22 +155,22 @@ typedef struct Lib3dsView {
 
 /* Viewport and default view settings */
 typedef struct Lib3dsViewport {
-	int             layout_style;
-	int             layout_active;
-	int             layout_swap;
-	int             layout_swap_prior;
-	int             layout_swap_view;
-	unsigned short  layout_position[2];
-	unsigned short  layout_size[2];
-	int             layout_nviews;
-	Lib3dsView      layout_views[LIB3DS_LAYOUT_MAX_VIEWS];
-	int             default_type;
-	float           default_position[3];
-	float           default_width;
-	float           default_horiz_angle;
-	float           default_vert_angle;
-	float           default_roll_angle;
-	char            default_camera[64];
+    int             layout_style;
+    int             layout_active;
+    int             layout_swap;
+    int             layout_swap_prior;
+    int             layout_swap_view;
+    unsigned short  layout_position[2];
+    unsigned short  layout_size[2];
+    int             layout_nviews;
+    Lib3dsView      layout_views[LIB3DS_LAYOUT_MAX_VIEWS];
+    int             default_type;
+    float           default_position[3];
+    float           default_width;
+    float           default_horiz_angle;
+    float           default_vert_angle;
+    float           default_roll_angle;
+    char            default_camera[64];
 } Lib3dsViewport;
 
 /* Material texture map flags */
@@ -210,22 +213,22 @@ typedef enum Lib3dsAutoReflMapFlags {
 
 /* Material shading type */
 typedef enum Lib3dsShading {
-	LIB3DS_SHADING_WIRE_FRAME = 0,
-	LIB3DS_SHADING_FLAT       = 1, 
-	LIB3DS_SHADING_GOURAUD    = 2, 
-	LIB3DS_SHADING_PHONG      = 3, 
-	LIB3DS_SHADING_METAL      = 4
+    LIB3DS_SHADING_WIRE_FRAME = 0,
+    LIB3DS_SHADING_FLAT       = 1, 
+    LIB3DS_SHADING_GOURAUD    = 2, 
+    LIB3DS_SHADING_PHONG      = 3, 
+    LIB3DS_SHADING_METAL      = 4
 } Lib3dsShading; 
 
 /** Material */
 typedef struct Lib3dsMaterial {
     unsigned            user_id;
     void*               user_ptr;
-    char                name[64];			/* Material name */
-    float               ambient[3];			/* Material ambient reflectivity */
-    float               diffuse[3];			/* Material diffuse reflectivity */
-    float               specular[3];		/* Material specular reflectivity */
-    float               shininess;		    /* Material specular exponent */
+    char                name[64];           /* Material name */
+    float               ambient[3];         /* Material ambient reflectivity */
+    float               diffuse[3];         /* Material diffuse reflectivity */
+    float               specular[3];        /* Material specular reflectivity */
+    float               shininess;          /* Material specular exponent */
     float               shin_strength;
     int                 use_blur;
     float               blur;
@@ -238,7 +241,7 @@ typedef struct Lib3dsMaterial {
     int                 shading;
     int                 soften;         /* bool */
     int                 face_map;       /* bool */
-    int                 two_sided;		/* Material visible from back */
+    int                 two_sided;      /* Material visible from back */
     int                 map_decal;      /* bool */
     int                 use_wire;
     int                 use_wire_abs;
@@ -332,19 +335,17 @@ typedef enum {
   LIB3DS_MAP_SPHERICAL      = 2
 } Lib3dsMapType;
 
-/*
- * Meaning of _Lib3dsFace::flags. ABC are points of the current face 
- * (A: is 1st vertex, B is 2nd vertex, C is 3rd vertex) 
- */
+/**  Meaning of Lib3dsFace::flags. ABC are points of the current face 
+    (A: is 1st vertex, B is 2nd vertex, C is 3rd vertex) */
 typedef enum Lib3dsFaceFlags {
-  LIB3DS_FACE_VIS_AC    = 0x01,       /* Bit 0: Edge visibility AC */
-  LIB3DS_FACE_VIS_BC    = 0x02,       /* Bit 1: Edge visibility BC */
-  LIB3DS_FACE_VIS_AB    = 0x04,       /* Bit 2: Edge visibility AB */
-  LIB3DS_FACE_WRAP_U    = 0x08,       /* Bit 3: Face is at tex U wrap seam */
-  LIB3DS_FACE_WRAP_V    = 0x10,       /* Bit 4: Face is at tex V wrap seam */
-  LIB3DS_FACE_SELECT_3  = (1<<13),    /* Bit 13: Selection of the face in selection 3*/
-  LIB3DS_FACE_SELECT_2  = (1<<14),    /* Bit 14: Selection of the face in selection 2*/
-  LIB3DS_FACE_SELECT_1  = (1<<15),    /* Bit 15: Selection of the face in selection 1*/
+  LIB3DS_FACE_VIS_AC    = 0x01,       /**< Bit 0: Edge visibility AC */
+  LIB3DS_FACE_VIS_BC    = 0x02,       /**< Bit 1: Edge visibility BC */
+  LIB3DS_FACE_VIS_AB    = 0x04,       /**< Bit 2: Edge visibility AB */
+  LIB3DS_FACE_WRAP_U    = 0x08,       /**< Bit 3: Face is at tex U wrap seam */
+  LIB3DS_FACE_WRAP_V    = 0x10,       /**< Bit 4: Face is at tex V wrap seam */
+  LIB3DS_FACE_SELECT_3  = (1<<13),    /**< Bit 13: Selection of the face in selection 3*/
+  LIB3DS_FACE_SELECT_2  = (1<<14),    /**< Bit 14: Selection of the face in selection 2*/
+  LIB3DS_FACE_SELECT_1  = (1<<15),    /**< Bit 15: Selection of the face in selection 1*/
 } Lib3dsFaceFlags;
 
 typedef struct Lib3dsFace {
@@ -358,29 +359,29 @@ typedef struct Lib3dsFace {
 typedef struct Lib3dsMesh {
     unsigned        user_id;
     void*           user_ptr;
-    char            name[64];		     /* Mesh name. Don't use more than 8 characters  */
-    unsigned        object_flags;        /* @see Lib3dsObjectFlags */ 
-    int             color;               /* Index to editor palette [0..255] */
-    float           matrix[4][4];        /* Transformation matrix for mesh data */
-    unsigned short  nvertices;		     /* Number of vertices in vertex array (max. 65535) */
+    char            name[64];            /**< Mesh name. Don't use more than 8 characters  */
+    unsigned        object_flags;        /**< @see Lib3dsObjectFlags */ 
+    int             color;               /**< Index to editor palette [0..255] */
+    float           matrix[4][4];        /**< Transformation matrix for mesh data */
+    unsigned short  nvertices;           /**< Number of vertices in vertex array (max. 65535) */
     float           (*vertices)[3];
     float           (*texcos)[2];
     unsigned short* vflags;
-    unsigned short  nfaces;	             /* Number of faces in face array (max. 65535) */
-	Lib3dsFace*     faces;               /* Array */
+    unsigned short  nfaces;              /**< Number of faces in face array (max. 65535) */
+    Lib3dsFace*     faces;               
     char            box_front[64];
-	char            box_back[64];
-	char            box_left[64];
-	char            box_right[64];
-	char            box_top[64];
-	char            box_bottom[64];
-	int             map_type;
-	float           map_pos[3];
-	float           map_matrix[4][4];
-	float           map_scale;
-	float           map_tile[2];
-	float           map_planar_size[2];
-	float           map_cylinder_height;
+    char            box_back[64];
+    char            box_left[64];
+    char            box_right[64];
+    char            box_top[64];
+    char            box_bottom[64];
+    int             map_type;
+    float           map_pos[3];
+    float           map_matrix[4][4];
+    float           map_scale;
+    float           map_tile[2];
+    float           map_planar_size[2];
+    float           map_cylinder_height;
 } Lib3dsMesh; 
 
 typedef enum Lib3dsNodeType {
@@ -393,9 +394,6 @@ typedef enum Lib3dsNodeType {
     LIB3DS_NODE_SPOTLIGHT_TARGET= 6
 } Lib3dsNodeType;
 
-/*!
- * Node flags
- */
 typedef enum Lib3dsNodeFlags{
     LIB3DS_NODE_HIDDEN           = 0x000800,
     LIB3DS_NODE_SHOW_PATH        = 0x010000,
@@ -404,9 +402,6 @@ typedef enum Lib3dsNodeFlags{
     LIB3DS_NODE_MORPH_MATERIALS  = 0x400000
 } Lib3dsNodeFlags;
 
-/*!
- * Scene graph node
- */
 typedef struct Lib3dsNode {
     unsigned            user_id;
     void*               user_ptr;
@@ -414,7 +409,7 @@ typedef struct Lib3dsNode {
     struct Lib3dsNode*  childs;
     struct Lib3dsNode*  parent;
     Lib3dsNodeType      type;
-    unsigned short      node_id;            /* 0..65535 */
+    unsigned short      node_id;            /**< 0..65535 */
     char                name[64];
     unsigned            flags;
     float               matrix[4][4];
@@ -526,9 +521,6 @@ typedef struct Lib3dsSpotlightNode {
     Lib3dsTrack     roll_track;
 } Lib3dsSpotlightNode;
 
-/*!
-    3DS file structure 
- */
 typedef struct Lib3dsFile {
     unsigned            user_id;
     void*               user_ptr;
@@ -592,8 +584,47 @@ extern LIB3DSAPI void lib3ds_file_append_node(Lib3dsFile *file, Lib3dsNode *node
 extern LIB3DSAPI void lib3ds_file_insert_node(Lib3dsFile *file, Lib3dsNode *node, Lib3dsNode *at);
 extern LIB3DSAPI void lib3ds_file_remove_node(Lib3dsFile *file, Lib3dsNode *node);
 extern LIB3DSAPI void lib3ds_file_minmax_node_id(Lib3dsFile *file, unsigned short *min_id, unsigned short *max_id);
-extern LIB3DSAPI void lib3ds_file_bounding_box_of_objects(Lib3dsFile *file, int include_meshes, int include_cameras, int include_lights, float bmin[3], float bmax[3]);
-extern LIB3DSAPI void lib3ds_file_bounding_box_of_nodes(Lib3dsFile *file, int include_meshes, int include_cameras, int include_lights, float bmin[3], float bmax[3], float matrix[4][4]);
+
+/**
+    This function computes the bounding box of meshes, cameras 
+    and lights defined in the 3D editor.
+
+    \param file             The Lib3dsFile object to be examined.
+    \param include_meshes   Include meshes in bounding box calculation.
+    \param include_cameras  Include cameras in bounding box calculation.
+    \param include_lights   Include lights in bounding box calculation.
+    \param bmin             Returned minimum x,y,z values.
+    \param bmax             Returned maximum x,y,z values.
+ */
+extern LIB3DSAPI void lib3ds_file_bounding_box_of_objects(
+    Lib3dsFile *file, 
+    int include_meshes, 
+    int include_cameras,
+    int include_lights,
+    float bmin[3],
+    float bmax[3]);
+
+/**
+    This function computes the bounding box of mesh, camera 
+    and light instances defined in the Keyframer.
+    
+    \param file             The Lib3dsFile object to be examined.
+    \param include_meshes   Include meshes in bounding box calculation.
+    \param include_cameras  Include cameras in bounding box calculation.
+    \param include_lights   Include lights in bounding box calculation.
+    \param bmin             Returned minimum x,y,z values.
+    \param bmax             Returned maximum x,y,z values.
+    \param matrix           A matrix describing the coordinate system to
+                            calculate the bounding box in.
+ */
+extern LIB3DSAPI void lib3ds_file_bounding_box_of_nodes(
+    Lib3dsFile *file, 
+    int include_meshes, 
+    int include_cameras, 
+    int include_lights, 
+    float bmin[3], 
+    float bmax[3], 
+    float matrix[4][4]);
 
 extern LIB3DSAPI Lib3dsMaterial* lib3ds_material_new(const char *name);
 extern LIB3DSAPI void lib3ds_material_free(Lib3dsMaterial *material);
@@ -632,16 +663,12 @@ extern LIB3DSAPI void lib3ds_track_eval_quat(Lib3dsTrack *track, float q[4], flo
 
 /** 
     Calculates the ease in/out function. See Lib3dsKey for details. 
-    \param fp 
-        [in] Previous frame number.
-    \param fc
-        [in] Current frame number.
-    \param fn
-        [in] Next frame number. 
-    \param ease_from
-        [in] Ease in value [0, 1.0] 
-    \param ease_to
-        [in] Ease out value [0, 1.0]
+    
+    \param fp           Previous frame number.
+    \param fc           Current frame number.
+    \param fn           Next frame number. 
+    \param ease_from    Ease in value [0, 1.0] 
+    \param ease_to      Ease out value [0, 1.0]
 */
 extern LIB3DSAPI float lib3ds_math_ease(
     float fp,
@@ -668,7 +695,7 @@ extern LIB3DSAPI float lib3ds_math_ease(
         [in] Parameter value [0...1] 
 */
 extern LIB3DSAPI void lib3ds_math_cubic_interp(
-    float *v,
+    float *v, 
     float *a,
     float *p,
     float *q,
@@ -758,6 +785,7 @@ extern LIB3DSAPI void lib3ds_matrix_rotate_quat(float m[4][4], float q[4]);
 extern LIB3DSAPI void lib3ds_matrix_rotate(float m[4][4], float angle, float ax, float ay, float az);
 extern LIB3DSAPI void lib3ds_matrix_camera(float m[4][4], float pos[3], float tgt[3], float roll);
 
+/** @} */
 #ifdef __cplusplus
 }
 #endif

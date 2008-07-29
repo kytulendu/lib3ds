@@ -1275,17 +1275,6 @@ lib3ds_file_minmax_node_id(Lib3dsFile *file, uint16_t *min_id, uint16_t *max_id)
 }
 
 
-/*!
- * This function computes the bounding box of meshes, cameras and lights
- * defined in the 3D editor.
- *
- * \param file              The Lib3dsFile object to be examined.
- * \param include_meshes    Include meshes in bounding box calculation.
- * \param include_cameras   Include cameras in bounding box calculation.
- * \param include_lights    Include lights in bounding box calculation.
- * \param bmin              Returned minimum x,y,z values.
- * \param bmax              Returned maximum x,y,z values.
- */
 void
 lib3ds_file_bounding_box_of_objects(Lib3dsFile *file, int 
                                     include_meshes, int include_cameras, int include_lights,
@@ -1397,17 +1386,6 @@ file_bounding_box_of_nodes_impl(Lib3dsNode *node, Lib3dsFile *file,
 }
 
 
-/*!
- * This function computes the bounding box of mesh, camera and light instances
- * defined in the Keyframer.
- *
- * \param file              The Lib3dsFile object to be examined.
- * \param include_meshes    Include meshes in bounding box calculation.
- * \param include_cameras   Include cameras in bounding box calculation.
- * \param include_lights    Include lights in bounding box calculation.
- * \param bmin              Returned minimum x,y,z values.
- * \param bmax              Returned maximum x,y,z values.
- */
 void
 lib3ds_file_bounding_box_of_nodes(Lib3dsFile *file, 
                                   int include_meshes, int include_cameras,int include_lights,

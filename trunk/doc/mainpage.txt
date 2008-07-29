@@ -1,6 +1,6 @@
 /*! 
 
-\mainpage lib3ds
+\mainpage lib3ds Homepage
 
 \section introduction Introduction
 

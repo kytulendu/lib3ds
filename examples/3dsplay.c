@@ -38,12 +38,12 @@
 #define MOUSE_SCALE .1 /* degrees/pixel movement */
 
 /*!
-\example player.c
+\example 3dsplay.c
 
 Previews a <i>3DS</i> file using OpenGL.
 
 \code
-Syntax: player filename
+Syntax: 3dsplay filename
 \endcode
 
 \warning To compile this program you must have OpenGL and glut installed.

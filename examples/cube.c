@@ -21,6 +21,10 @@
 #include <string.h>
 #include <math.h>
 
+/** 
+	@example cube.c
+	This examples demonstrates how to export a textured cube using lib3ds.
+*/
 
 #ifndef MPI
 #define M_PI 3.14159265358979323846

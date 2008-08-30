@@ -37,7 +37,7 @@
 extern "C" {
 #endif
 
-/** @defgroup api lib3ds API */
+/** @defgroup api API */
 /** @{ */
 
 typedef enum Lib3dsIoSeek {

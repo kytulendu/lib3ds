@@ -584,6 +584,8 @@ extern LIB3DSAPI void lib3ds_file_append_node(Lib3dsFile *file, Lib3dsNode *node
 extern LIB3DSAPI void lib3ds_file_insert_node(Lib3dsFile *file, Lib3dsNode *node, Lib3dsNode *at);
 extern LIB3DSAPI void lib3ds_file_remove_node(Lib3dsFile *file, Lib3dsNode *node);
 extern LIB3DSAPI void lib3ds_file_minmax_node_id(Lib3dsFile *file, unsigned short *min_id, unsigned short *max_id);
+extern LIB3DSAPI void lib3ds_file_create_nodes_for_meshes(Lib3dsFile *file);
+
 
 /**
     This function computes the bounding box of meshes, cameras 
@@ -638,7 +640,7 @@ extern LIB3DSAPI void lib3ds_mesh_resize_vertices(Lib3dsMesh *mesh, int nvertice
 extern LIB3DSAPI void lib3ds_mesh_resize_faces(Lib3dsMesh *mesh, int nfaces);
 extern LIB3DSAPI void lib3ds_mesh_bounding_box(Lib3dsMesh *mesh, float bmin[3], float bmax[3]);
 extern LIB3DSAPI void lib3ds_mesh_calculate_face_normals(Lib3dsMesh *mesh, float (*face_normals)[3]);
-extern LIB3DSAPI void lib3ds_mesh_calculate_normals(Lib3dsMesh *mesh, float (*normalL)[3]);
+extern LIB3DSAPI void lib3ds_mesh_calculate_vertex_normals(Lib3dsMesh *mesh, float (*normals)[3]);
 
 extern LIB3DSAPI Lib3dsNode* lib3ds_node_new(Lib3dsNodeType type);
 extern LIB3DSAPI Lib3dsAmbientColorNode* lib3ds_node_new_ambient_color(float color0[3]);
@@ -740,7 +742,7 @@ extern LIB3DSAPI void lib3ds_vector_make(float c[3], float x, float y, float z);
 extern LIB3DSAPI void lib3ds_vector_zero(float c[3]);
 extern LIB3DSAPI void lib3ds_vector_add(float c[3], float a[3], float b[3]);
 extern LIB3DSAPI void lib3ds_vector_sub(float c[3], float a[3], float b[3]);
-extern LIB3DSAPI void lib3ds_vector_scalar_mul(float c[3], float k);
+extern LIB3DSAPI void lib3ds_vector_scalar_mul(float c[3], float a[3], float k);
 extern LIB3DSAPI void lib3ds_vector_cross(float c[3], float a[3], float b[3]);
 extern LIB3DSAPI float lib3ds_vector_dot(float a[3], float b[3]);
 extern LIB3DSAPI float lib3ds_vector_length(float c[3]);

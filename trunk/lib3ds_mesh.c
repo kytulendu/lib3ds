@@ -135,6 +135,7 @@ lib3ds_mesh_calculate_face_normals(Lib3dsMesh *mesh, float (*face_normals)[3]) {
 typedef struct Lib3dsFaces {
     struct Lib3dsFaces *next;
     int index;
+    float normal[3];
 } Lib3dsFaces;
 
 
@@ -159,42 +160,39 @@ typedef struct Lib3dsFaces {
  * \endcode
  */
 void
-lib3ds_mesh_calculate_normals(Lib3dsMesh *mesh, float (*normals)[3]) {
+lib3ds_mesh_calculate_vertex_normals(Lib3dsMesh *mesh, float (*normals)[3]) {
     Lib3dsFaces **fl;
     Lib3dsFaces *fa;
-    float (*fn)[3];
-    int i, j, k;
-    float (*N)[3];
-    int N_size = 128;
+    int i, j;
 
     if (!mesh->nfaces) {
         return;
     }
 
     fl = calloc(sizeof(Lib3dsFaces*), mesh->nvertices);
-    fa = calloc(sizeof(Lib3dsFaces), 3 * mesh->nfaces);
-    fn = calloc(3 * sizeof(float), mesh->nfaces);
-    N = calloc(3 * sizeof(float), N_size);
+    fa = malloc(sizeof(Lib3dsFaces) * 3 * mesh->nfaces);
 
-    k = 0;
     for (i = 0; i < mesh->nfaces; ++i) {
-        assert(mesh->faces[i].index[0] < mesh->nvertices);
-        assert(mesh->faces[i].index[1] < mesh->nvertices);
-        assert(mesh->faces[i].index[2] < mesh->nvertices);
-
         for (j = 0; j < 3; ++j) {
-            Lib3dsFaces* l = &fa[k++];
+            Lib3dsFaces* l = &fa[3*i+j];
+            float p[3], q[3], n[3];
+            float len, weight;
+
             l->index = i;
             l->next = fl[mesh->faces[i].index[j]];
             fl[mesh->faces[i].index[j]] = l;
-        }
 
-        lib3ds_vector_normal(
-            fn[i],
-            mesh->vertices[mesh->faces[i].index[0]],
-            mesh->vertices[mesh->faces[i].index[1]],
-            mesh->vertices[mesh->faces[i].index[2]]
-        );
+            lib3ds_vector_sub(p, mesh->vertices[mesh->faces[i].index[j<2? j + 1 : 0]], mesh->vertices[mesh->faces[i].index[j]]);
+            lib3ds_vector_sub(q, mesh->vertices[mesh->faces[i].index[j>0? j - 1 : 2]], mesh->vertices[mesh->faces[i].index[j]]);
+            lib3ds_vector_cross(n, p, q);
+            len = lib3ds_vector_length(n);
+            if (len > 0) {       
+                weight = (float)atan2(len, lib3ds_vector_dot(p, q));
+                lib3ds_vector_scalar_mul(l->normal, n, weight / len);
+            } else {
+                lib3ds_vector_zero(l->normal);
+            }
+        }
     }
 
     for (i = 0; i < mesh->nfaces; ++i) {
@@ -203,39 +201,27 @@ lib3ds_mesh_calculate_normals(Lib3dsMesh *mesh, float (*normals)[3]) {
             float n[3];
             Lib3dsFaces *p;
             Lib3dsFace *pf;
-            int k, l;
-            int found;
 
             assert(mesh->faces[i].index[j] < mesh->nvertices);
 
             if (f->smoothing_group) {
+                unsigned smoothing_group = f->smoothing_group;
+
                 lib3ds_vector_zero(n);
-                k = 0;
                 for (p = fl[mesh->faces[i].index[j]]; p; p = p->next) {
                     pf = &mesh->faces[p->index];
+                    if (pf->smoothing_group & f->smoothing_group)
+                        smoothing_group |= pf->smoothing_group;
+                }
 
-                    found = 0;
-                    for (l = 0; l < k; ++l) {
-                        if (l >= N_size) {
-                            N_size *= 2;
-                            N = realloc(N, 3 * sizeof(float) * N_size);
-                        }
-                        if (fabs(lib3ds_vector_dot(N[l], fn[p->index]) - 1.0) < 1e-5) {
-                            found = 1;
-                            break;
-                        }
-                    }
-
-                    if (!found) {
-                        if (f->smoothing_group & pf->smoothing_group) {
-                            lib3ds_vector_add(n, n, fn[p->index]);
-                            lib3ds_vector_copy(N[k], fn[p->index]);
-                            ++k;
-                        }
+                for (p = fl[mesh->faces[i].index[j]]; p; p = p->next) {
+                    pf = &mesh->faces[p->index];                
+                    if (smoothing_group & pf->smoothing_group) {
+                        lib3ds_vector_add(n, n, p->normal);
                     }
                 }
             } else {
-                lib3ds_vector_copy(n, fn[i]);
+                lib3ds_vector_copy(n, fa[3*i+j].normal);
             }
 
             lib3ds_vector_normalize(n);
@@ -243,8 +229,6 @@ lib3ds_mesh_calculate_normals(Lib3dsMesh *mesh, float (*normals)[3]) {
         }
     }
 
-    free(N);
-    free(fn);
     free(fa);
     free(fl);
 }

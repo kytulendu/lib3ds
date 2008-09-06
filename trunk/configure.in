@@ -20,6 +20,7 @@ AC_PROG_LIBTOOL
 AC_OUTPUT([ \
   lib3ds-config \
   Makefile \
+  source/Makefile \
   examples/Makefile \
   examples/3ds2obj/Makefile \
 ],[chmod a+x lib3ds-config])

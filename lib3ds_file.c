@@ -1407,3 +1407,16 @@ lib3ds_file_bounding_box_of_nodes(Lib3dsFile *file,
         p = p->next;
     }
 }
+
+
+void
+lib3ds_file_create_nodes_for_meshes(Lib3dsFile *file) {
+    Lib3dsNode *p;
+    int i;
+    for (i = 0; i < file->nmeshes; ++i) {
+        Lib3dsMesh *mesh = file->meshes[i];
+        p = lib3ds_node_new(LIB3DS_NODE_MESH_INSTANCE);
+        strcpy(p->name, mesh->name);
+        lib3ds_file_insert_node(file, p, NULL);
+    }
+}

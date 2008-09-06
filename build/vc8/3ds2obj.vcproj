@@ -327,7 +327,7 @@
 	</References>
 	<Files>
 		<File
-			RelativePath="..\..\tools\3ds2obj.c"
+			RelativePath="..\..\tools\3ds2obj.cpp"
 			>
 		</File>
 	</Files>

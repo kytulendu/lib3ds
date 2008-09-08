@@ -6,7 +6,7 @@ bin_SCRIPTS = lib3ds-config
 
 EXTRA_DIST = \
   lib3ds.m4 \
-  lib3ds-config.1 \
+  lib3ds-config.in \
   lib3ds.sln
 
 m4datadir = $(datadir)/aclocal

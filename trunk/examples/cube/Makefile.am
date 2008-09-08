@@ -1,4 +1,4 @@
-INCLUDES = -I$(top_srcdir)/sources 
+INCLUDES = -I$(top_srcdir)/src 
 
 bin_PROGRAMS = cube
 cube_SOURCES = cube.c

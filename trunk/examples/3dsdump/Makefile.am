@@ -1,4 +1,4 @@
-INCLUDES = -I$(top_srcdir)/sources 
+INCLUDES = -I$(top_srcdir)/src
 
 bin_PROGRAMS = 3dsdump
 3dsdump_SOURCES = 3dsdump.c

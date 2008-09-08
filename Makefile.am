@@ -1,6 +1,6 @@
 VERSION = @LIB3DS_VERSION@
 
-SUBDIRS = sources examples
+SUBDIRS = src examples
 
 bin_SCRIPTS = lib3ds-config
 

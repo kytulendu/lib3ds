@@ -926,21 +926,22 @@ lib3ds_file_write(Lib3dsFile *file, Lib3dsIo *io) {
 
 void lib3ds_file_reserve_materials(Lib3dsFile *file, int size, int force) {
     assert(file);
-    lib3ds_util_reserve_array(&file->materials, &file->nmaterials, &file->materials_size, size, force, (Lib3dsFreeFunc)lib3ds_material_free);
+    lib3ds_util_reserve_array((void***)&file->materials, &file->nmaterials, &file->materials_size, 
+                              size, force, (Lib3dsFreeFunc)lib3ds_material_free);
 }
 
 
 void
 lib3ds_file_insert_material(Lib3dsFile *file, Lib3dsMaterial *material, int index) {
     assert(file);
-    lib3ds_util_insert_array(&file->materials, &file->nmaterials, &file->materials_size, material, index);
+    lib3ds_util_insert_array((void***)&file->materials, &file->nmaterials, &file->materials_size, material, index);
 }
 
 
 void
 lib3ds_file_remove_material(Lib3dsFile *file, int index) {
     assert(file);
-    lib3ds_util_remove_array(&file->materials, &file->nmaterials, index, (Lib3dsFreeFunc)lib3ds_material_free);
+    lib3ds_util_remove_array((void***)&file->materials, &file->nmaterials, index, (Lib3dsFreeFunc)lib3ds_material_free);
 }
 
 
@@ -961,21 +962,22 @@ lib3ds_file_material_by_name(Lib3dsFile *file, const char *name) {
 void 
 lib3ds_file_reserve_cameras(Lib3dsFile *file, int size, int force) {
     assert(file);
-    lib3ds_util_reserve_array(&file->cameras, &file->ncameras, &file->cameras_size, size, force, (Lib3dsFreeFunc)lib3ds_camera_free);
+    lib3ds_util_reserve_array((void***)&file->cameras, &file->ncameras, &file->cameras_size, 
+                              size, force, (Lib3dsFreeFunc)lib3ds_camera_free);
 }
 
 
 void
 lib3ds_file_insert_camera(Lib3dsFile *file, Lib3dsCamera *camera, int index) {
     assert(file);
-    lib3ds_util_insert_array(&file->cameras, &file->ncameras, &file->cameras_size, camera, index);
+    lib3ds_util_insert_array((void***)&file->cameras, &file->ncameras, &file->cameras_size, camera, index);
 }
 
 
 void
 lib3ds_file_remove_camera(Lib3dsFile *file, int index) {
     assert(file);
-    lib3ds_util_remove_array(&file->cameras, &file->ncameras, index, (Lib3dsFreeFunc)lib3ds_camera_free);
+    lib3ds_util_remove_array((void***)&file->cameras, &file->ncameras, index, (Lib3dsFreeFunc)lib3ds_camera_free);
 }
 
 
@@ -996,21 +998,22 @@ lib3ds_file_camera_by_name(Lib3dsFile *file, const char *name) {
 void 
 lib3ds_file_reserve_lights(Lib3dsFile *file, int size, int force) {
     assert(file);
-    lib3ds_util_reserve_array(&file->lights, &file->nlights, &file->lights_size, size, force, (Lib3dsFreeFunc)lib3ds_light_free);
+    lib3ds_util_reserve_array((void***)&file->lights, &file->nlights, &file->lights_size, 
+                              size, force, (Lib3dsFreeFunc)lib3ds_light_free);
 }
 
 
 void
 lib3ds_file_insert_light(Lib3dsFile *file, Lib3dsLight *light, int index) {
     assert(file);
-    lib3ds_util_insert_array(&file->lights, &file->nlights, &file->lights_size, light, index);
+    lib3ds_util_insert_array((void***)&file->lights, &file->nlights, &file->lights_size, light, index);
 }
 
 
 void
 lib3ds_file_remove_light(Lib3dsFile *file, int index) {
     assert(file);
-    lib3ds_util_remove_array(&file->lights, &file->nlights, index, (Lib3dsFreeFunc)lib3ds_light_free);
+    lib3ds_util_remove_array((void***)&file->lights, &file->nlights, index, (Lib3dsFreeFunc)lib3ds_light_free);
 }
 
 
@@ -1031,21 +1034,22 @@ lib3ds_file_light_by_name(Lib3dsFile *file, const char *name) {
 void 
 lib3ds_file_reserve_meshes(Lib3dsFile *file, int size, int force) {
     assert(file);
-    lib3ds_util_reserve_array(&file->meshes, &file->nmeshes, &file->meshes_size, size, force, (Lib3dsFreeFunc)lib3ds_mesh_free);
+    lib3ds_util_reserve_array((void***)&file->meshes, &file->nmeshes, &file->meshes_size, 
+                               size, force, (Lib3dsFreeFunc)lib3ds_mesh_free);
 }
 
 
 void
 lib3ds_file_insert_mesh(Lib3dsFile *file, Lib3dsMesh *mesh, int index) {
     assert(file);
-    lib3ds_util_insert_array(&file->meshes, &file->nmeshes, &file->meshes_size, mesh, index);
+    lib3ds_util_insert_array((void***)&file->meshes, &file->nmeshes, &file->meshes_size, mesh, index);
 }
 
 
 void
 lib3ds_file_remove_mesh(Lib3dsFile *file, int index) {
     assert(file);
-    lib3ds_util_remove_array(&file->meshes, &file->nmeshes, index, (Lib3dsFreeFunc)lib3ds_mesh_free);
+    lib3ds_util_remove_array((void***)&file->meshes, &file->nmeshes, index, (Lib3dsFreeFunc)lib3ds_mesh_free);
 }
 
 

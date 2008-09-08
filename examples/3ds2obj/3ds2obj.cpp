@@ -30,16 +30,8 @@
 
 
 /*!
-\example 3ds2obj.c
-
-Converts a <i>3DS</i> file to an <i>OBJ</i> file.
-
-\code
-Syntax: 3ds2obj [options] filename [options]\n"
-
-Options:
-  -h           This help\n"
-\endcode
+    @example 3ds2obj.cpp
+    Converts a 3DS file to an Wavefront OBJ file.
 */
 
 

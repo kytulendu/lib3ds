@@ -434,10 +434,6 @@ point_array_write(Lib3dsMesh *mesh, Lib3dsIo *io) {
     Lib3dsChunk c;
     int i;
 
-    if ((mesh->nvertices < 0) || (mesh->nvertices > 65535)) {
-        return;
-    }
-
     c.chunk = CHK_POINT_ARRAY;
     c.size = 8 + 12 * mesh->nvertices;
     lib3ds_chunk_write(&c, io);

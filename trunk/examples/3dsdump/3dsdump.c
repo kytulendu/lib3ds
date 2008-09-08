@@ -26,25 +26,9 @@
 #endif
 
 
-/*!
-\example 3dsdump.c
-
-Displays information about the content of a <i>3DS</i> file.
-
-\code
-Syntax: 3dsdump [options] filename [options]\n"
-
-Options:
-  -h           This help\n"
-  -d level     Set log level (0=ERROR, 1=WARN, 2=INFO, 3=DEBUG)
-  -m           Dump materials
-  -t           Dump trimeshes
-  -i           Dump instances
-  -c           Dump cameras
-  -l           Dump lights
-  -n           Dump node hierarchy
-  -w filename  Write new 3ds file to disk
-\endcode
+/**
+    @example 3dsdump.c
+    Displays information about the content of a 3DS file.
 */
 
 

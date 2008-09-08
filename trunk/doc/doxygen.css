@@ -4,6 +4,12 @@ BODY,H1,H2,H3,H4,H5,H6,P,CENTER,TD,TH,UL,DL,DIV {
 BODY,TD {
 	font-size: 12px;
 }
+BODY {
+	background: white;
+	color: black;
+	margin: 0px auto;
+	min-height: 1000px;
+}
 H1 {
 	text-align: center;
 	font-size: 24px;
@@ -18,16 +24,41 @@ H3 {
 	font-size: 14px;
 }
 CAPTION { 
-	font-weight: bold 
+	font-weight: bold;
 }
 h1 {
 	clear: both;
 }
-div#navigation {
+div#header {
+	background: #204070;
+	color: #ffffff;
+	height: 80px;
+	margin-bottom: 15px;
 	text-align: center;
 }
+div#title {
+	font-family: Arial, Helvetica, sans-serif;
+	font-weight: normal;
+	font-size: 28px;
+	letter-spacing: 2px;
+	padding-top: 10px;
+}
+div#navigation {
+	padding-top: 4px;
+}
+div#contents, div#navigation {
+	width: 800px;
+	margin: 0px auto;
+}
+div#contents {
+	min-height: 600px;
+}
 div#navigation a {
+	font-family: Arial, Helvetica, sans-serif;
+	font-weight: bold;
+	font-size: 12px;
 	padding: 0px 15px;
+	color: #ffffff;
 }
 p {
 	margin: 10px 0px;
@@ -37,10 +68,16 @@ p {
 	border-bottom: 1px solid #CCCCCC;
 }*/
 div#footer {
-	font-size: 10px;
+	background: #204070;
+	color: #ffffff;
+	font-size: 9px;
+	margin-top: 20px;
+	padding: 0px;
 	text-align: center;
-	margin: 0px;
-	padding: 0px 0px 8px;
+}
+div#footer img {
+	vertical-align:middle;
+	padding: 17px 0px;
 }
 
 div.contents > TABLE {
@@ -185,13 +222,6 @@ DIV.groupText {
 	margin-left: 16px; 
 	font-style: italic; 
 	font-size: 10px; 
-}
-BODY {
-	background: white;
-	color: black;
-	width: 800px;
-	margin: 0px auto;
-	min-height: 1000px;
 }
 TD.indexkey {
 	width: 200px;

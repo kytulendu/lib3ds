@@ -15,6 +15,10 @@
     You should  have received a copy of the GNU Lesser General Public License
     along with  this program; If not, see <http://www.gnu.org/licenses/>. 
 */
+
+/** @file lib3ds_quat.c
+	Quaternion mathematics implementation */
+
 #include "lib3ds_impl.h"
 
 

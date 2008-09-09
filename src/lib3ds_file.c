@@ -75,9 +75,9 @@ fileio_write_func(void *self, const void *buffer, size_t size) {
  *
  * \note     To free the returned structure use lib3ds_free.
  *
- * \see lib3ds_file_save
- * \see lib3ds_file_new
- * \see lib3ds_file_free
+ * \see 	 lib3ds_file_save,
+ *           lib3ds_file_new,
+ *           lib3ds_file_free
  */
 Lib3dsFile*
 lib3ds_file_open(const char *filename) {

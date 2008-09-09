@@ -20,8 +20,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include <map>
-#include <vector>
+#include <math.h>
+#include <ctype.h>
+#include <string.h>
 
 
 #ifdef _MSC_VER
@@ -29,7 +30,7 @@
 #endif
 
 
-/*!
+/**
     @example 3ds2obj.cpp
     Converts a 3DS file to an Wavefront OBJ file.
 */
@@ -38,28 +39,21 @@
 static void
 help() {
     fprintf(stderr,
-            "3ds2obj\n"
-            "Copyright (C) 2008 by Jan Eric Kyprianidis <www.kyprianidis.com>\n"
-            "All rights reserved.\n"
-            "\n"
-            "Syntax: 3dsdump [options] 3ds-file obj-file\n"
-            "\n"
-            "Options:\n"
-            "  -h           This help\n"
-            "\n"
-           );
+        "Syntax: 3ds2obj 3ds-file [obj-file] [mtl-file]\n"
+    );
     exit(1);     
 }
 
 
 static const char* input = 0;
-static const char* output = 0;
+static char* obj_file = 0;
+static char* mtl_file = 0;
 static int max_vertices = 0;
 static int max_texcos = 0;
 static int max_normals = 0;
 
 
-static void parse_args(int argc, char **argv) {
+void parse_args(int argc, char **argv) {
     int i;
 
     for (i = 1; i < argc; ++i) {
@@ -72,25 +66,110 @@ static void parse_args(int argc, char **argv) {
         } else {
             if (!input) {
                 input = argv[i];
-            } else if (!output) {
-                output = argv[i];
+            } else if (!obj_file) {
+                obj_file = argv[i];
+            } else if (!mtl_file) {
+                mtl_file = argv[i];
             } else {
                 help();
             }
         }
     }
-    if (!input || !output) {
+
+    if (input) {
+        size_t input_len = strlen(input);
+        if ((input_len > 4) && (strcmp(input + input_len - 4, ".3ds") == 0)) {
+            if (!obj_file) {
+                obj_file = (char*)malloc(sizeof(char*) * (input_len + 1));
+                strcpy(obj_file, input);
+                strcpy(obj_file + input_len - 4, ".obj");
+            }
+            if (!mtl_file) {
+                mtl_file = (char*)malloc(sizeof(char*) * (input_len + 1));
+                strcpy(mtl_file, input);
+                strcpy(mtl_file + input_len - 4, ".mtl");
+            }
+        }
+    }
+
+    if (!input || !obj_file) {
         help();
     }
 }
 
 
-static void save_mesh(FILE *o, Lib3dsFile *f, Lib3dsMeshInstanceNode *node) {
+void write_mtl(FILE *mtl, Lib3dsFile *f) {
+    int i, j;
+
+    fprintf(mtl, "# Wavefront material file\n");
+    fprintf(mtl, "# Converted by 3ds2obj\n");
+    fprintf(mtl, "# http://www.lib3ds.org\n\n");
+
+    bool unique = true;
+    for (i = 0; i < f->nmaterials; ++i) {
+        for (char *p = f->materials[i]->name; *p; ++p) {
+            if (!isalnum(*p) && (*p != '_')) *p = '_';
+        }
+
+        for (j = 0; j < i; ++j) {
+            if (strcmp(f->materials[i]->name, f->materials[j]->name) == 0) {
+                unique = false;
+                break;
+            }
+        }
+        if (!unique)
+            break;
+    }
+    if (!unique) {
+        for (i = 0; i < f->nmaterials; ++i) {
+            sprintf(f->materials[i]->name, "mat_%d", i);
+        }
+    }
+
+    for (i = 0; i < f->nmaterials; ++i) {
+        Lib3dsMaterial *m = f->materials[i];
+        fprintf(mtl, "newmtl %s\n", m->name);
+        fprintf(mtl, "Ka %f %f %f\n", m->ambient[0], m->ambient[1], m->ambient[2]);
+        fprintf(mtl, "Kd %f %f %f\n", m->diffuse[0], m->diffuse[1], m->diffuse[2]);
+        fprintf(mtl, "Ks %f %f %f\n", m->specular[0], m->specular[1], m->specular[2]);
+        fprintf(mtl, "illum 2\n");
+        fprintf(mtl, "Ns %f\n", pow(2, 10 * m->shininess + 1));
+        fprintf(mtl, "d %f\n", 1.0 - m->transparency);
+        fprintf(mtl, "map_Kd %s\n", m->texture1_map.name);
+        fprintf(mtl, "map_bump %s\n", m->bump_map.name);
+        fprintf(mtl, "map_d %s\n", m->opacity_map.name);
+        fprintf(mtl, "refl %s\n", m->reflection_map.name);
+        fprintf(mtl, "map_KS %s\n", m->specular_map.name);
+        fprintf(mtl, "\n");
+    }
+}
+
+
+void write_mesh(FILE *o, Lib3dsFile *f, Lib3dsMeshInstanceNode *node) {
     Lib3dsMesh *mesh = lib3ds_file_mesh_for_node(f, (Lib3dsNode*)node);
     if (!mesh || !mesh->vertices) return;
 
     fprintf(o, "# object %s\n", node->base.name);
     fprintf(o, "g %s\n", node->instance_name[0]? node->instance_name : node->base.name);
+
+    float (*orig_vertices)[3] = (float(*)[3])malloc(sizeof(float) * 3 * mesh->nvertices);
+    memcpy(orig_vertices, mesh->vertices, sizeof(float) * 3 * mesh->nvertices);
+     {
+         float inv_matrix[4][4], M[4][4];
+         float tmp[3];
+         int i;
+ 
+         lib3ds_matrix_copy(M, node->base.matrix);
+         lib3ds_matrix_translate(M, -node->pivot[0], -node->pivot[1], -node->pivot[2]);
+         lib3ds_matrix_copy(inv_matrix, mesh->matrix);
+         lib3ds_matrix_inv(inv_matrix);
+         lib3ds_matrix_mult(M, M, inv_matrix);
+ 
+         for (i = 0; i < mesh->nvertices; ++i) {
+             lib3ds_vector_transform(tmp, M, mesh->vertices[i]);
+             lib3ds_vector_copy(mesh->vertices[i], tmp);
+         }
+     }
 
     bool export_texcos = (mesh->texcos != 0);
     bool export_normals = (mesh->faces != 0);
@@ -122,55 +201,33 @@ static void save_mesh(FILE *o, Lib3dsFile *f, Lib3dsMeshInstanceNode *node) {
         fprintf(o, "# %d normals\n", 3 * mesh->nfaces);
     }
 
-    switch ((int)export_texcos | ((int)export_normals << 1)) {
-        case 0:
-            for (int i = 0; i < mesh->nfaces; ++i) {
-                fprintf(o, "f %d %d %d\n", 
-                    mesh->faces[i].index[0] + max_vertices + 1,
-                    mesh->faces[i].index[1] + max_vertices + 1,
-                    mesh->faces[i].index[2] + max_vertices + 1);
+    {
+        int mat_index = -1;
+        for (int i = 0; i < mesh->nfaces; ++i) {
+            if (mat_index != mesh->faces[i].material) {
+                mat_index = mesh->faces[i].material;
+                if (mat_index != -1) {
+                    fprintf(o, "usemtl %s\n", f->materials[mat_index]->name);
+                }
             }
-            break;
 
-        case 1:
-            for (int i = 0; i < mesh->nfaces; ++i) {
-                fprintf(o, "f %d/%d %d/%d %d/%d\n", 
-                    mesh->faces[i].index[0] + max_vertices + 1,
-                    mesh->faces[i].index[0] + max_texcos + 1,
-                    mesh->faces[i].index[1] + max_vertices + 1,
-                    mesh->faces[i].index[1] + max_texcos + 1,
-                    mesh->faces[i].index[2] + max_vertices + 1,
-                    mesh->faces[i].index[2] + max_texcos + 1);
+            fprintf(o, "f ");
+            for (int j = 0; j < 3; ++j) {
+                fprintf(o, "%d", mesh->faces[i].index[j] + max_vertices + 1);
+                if (export_texcos) {
+                    fprintf(o, "/%d", mesh->faces[i].index[j] + max_texcos + 1);
+                } else if (export_normals) {
+                    fprintf(o, "/");
+                }
+                if (export_normals) {
+                    fprintf(o, "/%d", 3 * i + j + max_normals + 1);
+                }
+                if (j < 3) {
+                    fprintf(o, " ");
+                }
             }
-            break;
-
-        case 2:
-            for (int i = 0; i < mesh->nfaces; ++i) {
-                fprintf(o, "#smoothing: 0x%x\n", mesh->faces[i].smoothing_group);
-                fprintf(o, "f %d//%d %d//%d %d//%d\n", 
-                    mesh->faces[i].index[0] + max_vertices + 1,
-                    3 * i + 0 + max_normals + 1,
-                    mesh->faces[i].index[1] + max_vertices + 1,
-                    3 * i + 1 + max_normals + 1,
-                    mesh->faces[i].index[2] + max_vertices + 1,
-                    3 * i + 2 + max_normals + 1);
-            }
-            break;
-
-        case 3:
-            for (int i = 0; i < mesh->nfaces; ++i) {
-                fprintf(o, "f %d/%d/%d %d/%d/%d %d/%d/%d\n", 
-                    mesh->faces[i].index[0] + max_vertices + 1,
-                    mesh->faces[i].index[0] + max_texcos + 1,
-                    3 * i + 0 + max_normals + 1,
-                    mesh->faces[i].index[1] + max_vertices + 1,
-                    mesh->faces[i].index[1] + max_texcos + 1,
-                    3 * i + 1 + max_normals + 1,
-                    mesh->faces[i].index[2] + max_vertices + 1,
-                    mesh->faces[i].index[2] + max_texcos + 1,
-                    3 * i + 2 + max_normals + 1);
-            }
-            break;
+            fprintf(o, "\n");
+        }
     }
 
     max_vertices += mesh->nvertices;
@@ -178,14 +235,17 @@ static void save_mesh(FILE *o, Lib3dsFile *f, Lib3dsMeshInstanceNode *node) {
         max_texcos += mesh->nvertices;
     if (export_normals) 
         max_normals += 3 * mesh->nfaces;
+    
+    memcpy(mesh->vertices, orig_vertices, sizeof(float) * 3 * mesh->nvertices);
+    free(orig_vertices);
 }
 
 
-static void save_node(FILE *o, Lib3dsFile *f, Lib3dsNode *first_node) {
+void write_nodes(FILE *o, Lib3dsFile *f, Lib3dsNode *first_node) {
     for (Lib3dsNode *p = first_node; p; p = p->next) {
         if (p->type == LIB3DS_NODE_MESH_INSTANCE) {
-            save_mesh(o, f, (Lib3dsMeshInstanceNode*)p);
-            save_node(o, f, p->childs);
+            write_mesh(o, f, (Lib3dsMeshInstanceNode*)p);
+            write_nodes(o, f, p->childs);
         }
     }
 }
@@ -193,8 +253,6 @@ static void save_node(FILE *o, Lib3dsFile *f, Lib3dsNode *first_node) {
 
 int main(int argc, char **argv) {
     Lib3dsFile *f;
-    FILE *o;
-
     parse_args(argc, argv);
 
     f = lib3ds_file_open(input);
@@ -203,18 +261,37 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
-    o = fopen(output, "wt");
-    if (!f) {
-        fprintf(stderr, "***ERROR***\nCreating output file failed: %s\n", output);
-        exit(1);
+    if (mtl_file) {
+        FILE *mtl = fopen(mtl_file, "wt");
+        if (!mtl) {
+            fprintf(stderr, "***ERROR***\nCreating output file failed: %s\n", mtl_file);
+            exit(1);
+        }
+        write_mtl(mtl, f);
+        fclose(mtl);
     }
 
-    if (!f->nodes)
-        lib3ds_file_create_nodes_for_meshes(f);
-    lib3ds_file_eval(f, 0);
-    save_node(o, f, f->nodes);
+    {
+        FILE *obj = fopen(obj_file, "wt");
+        if (!obj) {
+            fprintf(stderr, "***ERROR***\nCreating output file failed: %s\n", obj_file);
+            exit(1);
+        }
 
-    fclose(o);
+        if (!f->nodes)
+            lib3ds_file_create_nodes_for_meshes(f);
+        lib3ds_file_eval(f, 0);
+        
+        fprintf(obj, "# Wavefront OBJ file\n");
+        fprintf(obj, "# Converted by 3ds2obj\n");
+        fprintf(obj, "# http://www.lib3ds.org\n\n");
+        if (mtl_file) {
+            fprintf(obj, "mtllib %s\n", mtl_file);
+        }
+
+        write_nodes(obj, f, f->nodes);
+        fclose(obj);
+    }
 
     lib3ds_file_free(f);
     return 0;

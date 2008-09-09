@@ -235,9 +235,9 @@ typedef struct Lib3dsMaterial {
     float               transparency;
     float               falloff;
     int                 is_additive;
-    float               self_ilpct;
+    int                 self_illum_flag; /* bool */
+    float               self_illum;
     int                 use_falloff;
-    int                 self_illum;     /* bool */
     int                 shading;
     int                 soften;         /* bool */
     int                 face_map;       /* bool */

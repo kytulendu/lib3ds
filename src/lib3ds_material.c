@@ -321,7 +321,7 @@ lib3ds_material_read(Lib3dsMaterial *material, Lib3dsIo *io) {
 
             case CHK_MAT_SELF_ILPCT: {
                 lib3ds_chunk_read_reset(&c, io);
-                int_percentage_read(&material->self_ilpct, io);
+                int_percentage_read(&material->self_illum, io);
                 break;
             }
 
@@ -347,7 +347,7 @@ lib3ds_material_read(Lib3dsMaterial *material, Lib3dsIo *io) {
             }
 
             case CHK_MAT_SELF_ILLUM: {
-                material->self_illum = TRUE;
+                material->self_illum_flag = TRUE;
                 break;
             }
 
@@ -764,7 +764,7 @@ lib3ds_material_write(Lib3dsMaterial *material, Lib3dsIo *io) {
         lib3ds_chunk_write(&c, io);
     }
 
-    if (material->self_illum) { /*---- CHK_MAT_SELF_ILLUM ----*/
+    if (material->self_illum_flag) { /*---- CHK_MAT_SELF_ILLUM ----*/
         Lib3dsChunk c;
         c.chunk = CHK_MAT_SELF_ILLUM;
         c.size = 6;

@@ -105,24 +105,27 @@ void write_mtl(FILE *mtl, Lib3dsFile *f) {
     fprintf(mtl, "# Converted by 3ds2obj\n");
     fprintf(mtl, "# http://www.lib3ds.org\n\n");
 
-    bool unique = true;
-    for (i = 0; i < f->nmaterials; ++i) {
-        for (char *p = f->materials[i]->name; *p; ++p) {
-            if (!isalnum(*p) && (*p != '_')) *p = '_';
-        }
-
-        for (j = 0; j < i; ++j) {
-            if (strcmp(f->materials[i]->name, f->materials[j]->name) == 0) {
-                unique = false;
-                break;
-            }
-        }
-        if (!unique)
-            break;
-    }
-    if (!unique) {
+    {
+        int unique = 1;
         for (i = 0; i < f->nmaterials; ++i) {
-            sprintf(f->materials[i]->name, "mat_%d", i);
+            char *p;
+            for (p = f->materials[i]->name; *p; ++p) {
+                if (!isalnum(*p) && (*p != '_')) *p = '_';
+            }
+
+            for (j = 0; j < i; ++j) {
+                if (strcmp(f->materials[i]->name, f->materials[j]->name) == 0) {
+                    unique = 0;
+                    break;
+                }
+            }
+            if (!unique)
+                break;
+        }
+        if (!unique) {
+            for (i = 0; i < f->nmaterials; ++i) {
+                sprintf(f->materials[i]->name, "mat_%d", i);
+            }
         }
     }
 
@@ -146,13 +149,19 @@ void write_mtl(FILE *mtl, Lib3dsFile *f) {
 
 
 void write_mesh(FILE *o, Lib3dsFile *f, Lib3dsMeshInstanceNode *node) {
-    Lib3dsMesh *mesh = lib3ds_file_mesh_for_node(f, (Lib3dsNode*)node);
+    float (*orig_vertices)[3];
+    int export_texcos;
+    int export_normals;
+    int i, j;
+    Lib3dsMesh *mesh;
+        
+    mesh = lib3ds_file_mesh_for_node(f, (Lib3dsNode*)node);
     if (!mesh || !mesh->vertices) return;
 
     fprintf(o, "# object %s\n", node->base.name);
     fprintf(o, "g %s\n", node->instance_name[0]? node->instance_name : node->base.name);
 
-    float (*orig_vertices)[3] = (float(*)[3])malloc(sizeof(float) * 3 * mesh->nvertices);
+    orig_vertices = (float(*)[3])malloc(sizeof(float) * 3 * mesh->nvertices);
     memcpy(orig_vertices, mesh->vertices, sizeof(float) * 3 * mesh->nvertices);
      {
          float inv_matrix[4][4], M[4][4];
@@ -171,10 +180,10 @@ void write_mesh(FILE *o, Lib3dsFile *f, Lib3dsMeshInstanceNode *node) {
          }
      }
 
-    bool export_texcos = (mesh->texcos != 0);
-    bool export_normals = (mesh->faces != 0);
+    export_texcos = (mesh->texcos != 0);
+    export_normals = (mesh->faces != 0);
 
-    for (int i = 0; i < mesh->nvertices; ++i) {
+    for (i = 0; i < mesh->nvertices; ++i) {
         fprintf(o, "v %f %f %f\n", mesh->vertices[i][0], 
                                    mesh->vertices[i][1], 
                                    mesh->vertices[i][2]);
@@ -182,7 +191,7 @@ void write_mesh(FILE *o, Lib3dsFile *f, Lib3dsMeshInstanceNode *node) {
     fprintf(o, "# %d vertices\n", mesh->nvertices);
 
     if (export_texcos) {
-        for (int i = 0; i < mesh->nvertices; ++i) {
+        for (i = 0; i < mesh->nvertices; ++i) {
             fprintf(o, "vt %f %f\n", mesh->texcos[i][0], 
                                      mesh->texcos[i][1]);
         }
@@ -192,7 +201,7 @@ void write_mesh(FILE *o, Lib3dsFile *f, Lib3dsMeshInstanceNode *node) {
     if (export_normals) {
         float (*normals)[3] = (float(*)[3])malloc(sizeof(float) * 9 * mesh->nfaces);
         lib3ds_mesh_calculate_vertex_normals(mesh, normals);
-        for (int i = 0; i < 3 * mesh->nfaces; ++i) {
+        for (i = 0; i < 3 * mesh->nfaces; ++i) {
             fprintf(o, "vn %f %f %f\n", normals[i][0],
                                         normals[i][1],
                                         normals[i][2]);
@@ -203,7 +212,7 @@ void write_mesh(FILE *o, Lib3dsFile *f, Lib3dsMeshInstanceNode *node) {
 
     {
         int mat_index = -1;
-        for (int i = 0; i < mesh->nfaces; ++i) {
+        for (i = 0; i < mesh->nfaces; ++i) {
             if (mat_index != mesh->faces[i].material) {
                 mat_index = mesh->faces[i].material;
                 if (mat_index != -1) {
@@ -212,7 +221,7 @@ void write_mesh(FILE *o, Lib3dsFile *f, Lib3dsMeshInstanceNode *node) {
             }
 
             fprintf(o, "f ");
-            for (int j = 0; j < 3; ++j) {
+            for (j = 0; j < 3; ++j) {
                 fprintf(o, "%d", mesh->faces[i].index[j] + max_vertices + 1);
                 if (export_texcos) {
                     fprintf(o, "/%d", mesh->faces[i].index[j] + max_texcos + 1);
@@ -242,7 +251,8 @@ void write_mesh(FILE *o, Lib3dsFile *f, Lib3dsMeshInstanceNode *node) {
 
 
 void write_nodes(FILE *o, Lib3dsFile *f, Lib3dsNode *first_node) {
-    for (Lib3dsNode *p = first_node; p; p = p->next) {
+    Lib3dsNode *p;
+    for (p = first_node; p; p = p->next) {
         if (p->type == LIB3DS_NODE_MESH_INSTANCE) {
             write_mesh(o, f, (Lib3dsMeshInstanceNode*)p);
             write_nodes(o, f, p->childs);

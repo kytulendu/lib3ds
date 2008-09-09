@@ -28,7 +28,7 @@
 
 /**
     @example 3dsdump.c
-    Displays information about the content of a 3DS file.
+    A utility to display information about the content of a 3DS file.
 */
 
 
@@ -253,7 +253,7 @@ texture_dump(const char *maptype, Lib3dsTextureMap *texture) {
 
 
 static void
-lib3ds_material_dump(Lib3dsMaterial *material) {
+material_dump(Lib3dsMaterial *material) {
     assert(material);
     printf("  name:          %s\n", material->name);
     printf("  ambient:       (%f, %f, %f)\n",
@@ -267,7 +267,7 @@ lib3ds_material_dump(Lib3dsMaterial *material) {
     printf("  use_blur:      %s\n", material->use_blur ? "yes" : "no");
     printf("  blur:          %f\n", material->blur);
     printf("  falloff:       %f\n", material->falloff);
-    printf("  is_additive:    %s\n", material->is_additive ? "yes" : "no");
+    printf("  is_additive:   %s\n", material->is_additive ? "yes" : "no");
     printf("  use_falloff:   %s\n", material->use_falloff ? "yes" : "no");
     printf("  self_illum:    %s\n", material->self_illum ? "yes" : "no");
     printf("  self_ilpct:    %f\n", material->self_ilpct);
@@ -365,18 +365,17 @@ mesh_dump(Lib3dsMesh *mesh) {
     printf("  %s vertices=%ld faces=%ld\n",
         mesh->name,
         mesh->nvertices,
-        mesh->nfaces
-        );
+        mesh->nfaces);
     printf("  matrix:\n");
     matrix_dump(mesh->matrix);
     printf("  vertices (x, y, z, u, v):\n");
     for (i = 0; i < mesh->nvertices; ++i) {
         lib3ds_vector_copy(p, mesh->vertices[i]);
-        printf("    %10.5f %10.5f %10.5f %10.5f %10.5f\n", 
-            p[0], p[1], p[2],
-            mesh->texcos[i][0],
-            mesh->texcos[i][1]
-        );
+        printf("    %10.5f %10.5f %10.5f", p[0], p[1], p[2]);
+        if (mesh->texcos) {
+            printf("%10.5f %10.5f", mesh->texcos[i][0], mesh->texcos[i][1]);
+        }
+        printf("\n");
     }
     printf("  facelist:\n");
     for (i = 0; i < mesh->nfaces; ++i) {
@@ -489,7 +488,7 @@ main(int argc, char **argv) {
 
     if (flags & LIB3DSDUMP_MATERIALS) {
         printf("Dumping materials:\n");
-        //lib3ds_file_dump_materials(f);
+        for (i = 0; i < f->nmaterials; ++i) material_dump(f->materials[i]);
         printf("\n");
     }
     if (flags & LIB3DSDUMP_TRIMESHES) {

@@ -32,7 +32,7 @@
 
 /**
     @example 3ds2obj.cpp
-    Converts a 3DS file to an Wavefront OBJ file.
+    This example shows how to convert a 3DS file to a Wavefront OBJ file.
 */
 
 

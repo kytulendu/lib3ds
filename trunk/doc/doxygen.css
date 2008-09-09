@@ -11,9 +11,14 @@ BODY,TD {
 BODY {
 	background: white;
 	color: black;
-        width: 800px;
-	margin: 0 auto;
-        min-height: 1000px;
+    min-height: 1000px;
+	margin: 0; 
+    text-align: center;
+}
+div#wrapper {
+    margin: 0 auto;
+    width:800px;
+    text-align: left;
 }
 H1 {
 	text-align: center;

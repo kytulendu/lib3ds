@@ -15,6 +15,12 @@
     You should  have received a copy of the GNU Lesser General Public License
     along with  this program; If not, see <http://www.gnu.org/licenses/>. 
 */
+
+/**	@file 3ds2obj.c
+    Implementation of 3ds2obj converter. */
+/**	@example 3ds2obj.c
+    This example shows how to convert a 3DS file to a Wavefront OBJ file. */
+
 #include <lib3ds.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,16 +30,9 @@
 #include <ctype.h>
 #include <string.h>
 
-
 #ifdef _MSC_VER
 #pragma warning ( disable : 4996 )
 #endif
-
-
-/**
-    @example 3ds2obj.cpp
-    This example shows how to convert a 3DS file to a Wavefront OBJ file.
-*/
 
 
 static void

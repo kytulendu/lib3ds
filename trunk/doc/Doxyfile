@@ -5,11 +5,11 @@
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = lib3ds
-PROJECT_NUMBER         = SVN
+PROJECT_NUMBER         = 2.0
 OUTPUT_DIRECTORY       = 
 CREATE_SUBDIRS         = NO
 OUTPUT_LANGUAGE        = English
-BRIEF_MEMBER_DESC      = NO
+BRIEF_MEMBER_DESC      = YES
 REPEAT_BRIEF           = YES
 ABBREVIATE_BRIEF       = 
 ALWAYS_DETAILED_SEC    = NO
@@ -18,10 +18,10 @@ FULL_PATH_NAMES        = NO
 STRIP_FROM_PATH        = 
 STRIP_FROM_INC_PATH    = 
 SHORT_NAMES            = NO
-JAVADOC_AUTOBRIEF      = NO
+JAVADOC_AUTOBRIEF      = YES
 QT_AUTOBRIEF           = NO
 MULTILINE_CPP_IS_BRIEF = NO
-DETAILS_AT_TOP         = NO
+DETAILS_AT_TOP         = YES
 INHERIT_DOCS           = NO
 SEPARATE_MEMBER_PAGES  = NO
 TAB_SIZE               = 8
@@ -40,7 +40,7 @@ TYPEDEF_HIDES_STRUCT   = YES
 #---------------------------------------------------------------------------
 # Build related configuration options
 #---------------------------------------------------------------------------
-EXTRACT_ALL            = YES
+EXTRACT_ALL            = NO
 EXTRACT_PRIVATE        = NO
 EXTRACT_STATIC         = NO
 EXTRACT_LOCAL_CLASSES  = NO
@@ -65,7 +65,7 @@ GENERATE_BUGLIST       = NO
 GENERATE_DEPRECATEDLIST= NO
 ENABLED_SECTIONS       = 
 MAX_INITIALIZER_LINES  = 0
-SHOW_USED_FILES        = YES
+SHOW_USED_FILES        = NO
 SHOW_DIRECTORIES       = NO
 SHOW_FILES             = NO
 SHOW_NAMESPACES        = NO
@@ -89,7 +89,7 @@ FILE_PATTERNS          = *.c *.cpp *.h *.txt
 RECURSIVE              = YES
 EXCLUDE                = 
 EXCLUDE_SYMLINKS       = NO
-EXCLUDE_PATTERNS       = 
+EXCLUDE_PATTERNS       = 3ds2xsi 3dsplay
 EXCLUDE_SYMBOLS        = 
 EXAMPLE_PATH           = ../examples
 EXAMPLE_PATTERNS       = 
@@ -106,7 +106,7 @@ INLINE_SOURCES         = NO
 STRIP_CODE_COMMENTS    = YES
 REFERENCED_BY_RELATION = NO
 REFERENCES_RELATION    = NO
-REFERENCES_LINK_SOURCE = NO
+REFERENCES_LINK_SOURCE = YES
 USE_HTAGS              = NO
 VERBATIM_HEADERS       = YES
 #---------------------------------------------------------------------------

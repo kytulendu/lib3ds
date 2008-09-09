@@ -15,16 +15,17 @@
     You should  have received a copy of the GNU Lesser General Public License
     along with  this program; If not, see <http://www.gnu.org/licenses/>. 
 */
+
+/** @file cube.c 
+	Implementation of cube example. */
+/** @example cube.c
+	This examples demonstrates how to export a textured cube using lib3ds. */
+
 #include <lib3ds.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-
-/** 
-	@example cube.c
-	This examples demonstrates how to export a textured cube using lib3ds.
-*/
 
 #ifndef MPI
 #define M_PI 3.14159265358979323846

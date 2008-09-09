@@ -19,6 +19,9 @@
     along with  this program; If not, see <http://www.gnu.org/licenses/>. 
 */
 
+/** @file lib3ds_impl.h 
+	Private header file used internally by lib3ds */ 
+
 #include "lib3ds.h"
 #include <stdio.h>
 #include <stdlib.h>

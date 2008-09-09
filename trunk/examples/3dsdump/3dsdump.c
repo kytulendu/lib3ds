@@ -15,6 +15,12 @@
     You should  have received a copy of the GNU Lesser General Public License
     along with  this program; If not, see <http://www.gnu.org/licenses/>. 
 */
+
+/**	@file 3dsdump.c 
+	Implementation of 3DS dump utility. */
+/** @example 3dsdump.c
+    A utility to display information about the content of a 3DS file. */
+
 #include <lib3ds.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,12 +30,6 @@
 #ifdef _MSC_VER
 #pragma warning ( disable : 4996 )
 #endif
-
-
-/**
-    @example 3dsdump.c
-    A utility to display information about the content of a 3DS file.
-*/
 
 
 static void

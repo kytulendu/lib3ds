@@ -5,3 +5,4 @@ bin_PROGRAMS = 3dsdump
  
 LDADD = $(top_builddir)/src/lib3ds.la 
 
+EXTRA_DIST = 3dsdump.vcproj

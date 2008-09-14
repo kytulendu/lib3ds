@@ -14,7 +14,7 @@ was completely rewritten in ANSI-C to attain more hardware platform
 independence. To enable commercial application the license was
 changed to GNU Lesser General Public License (LGPL).
 
-\section features Features:
+\section features Features
 
 - Written in portable <b>ANSI-C</b>
 - Supported platforms:
@@ -39,9 +39,9 @@ changed to GNU Lesser General Public License (LGPL).
   - <b>Vector</b> mathematics module
   - <b>Quaternion</b> mathematics module
   - <b>Matrix</b> mathematics module
-- Integrates seamless with <b><i>OpenGL</i></b>
+- Integrates seamless with <b>OpenGL</b>
 
- 
+
 \section license License
 
 Copyright (C) 1996-2008 by Jan Eric Kyprianidis <<a href="http://www.kyprianidis.com">www.kyprianidis.com</a>>.<br>
@@ -58,23 +58,17 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 <a href="http://www.gnu.org/copyleft/lesser.html">GNU Lesser General Public License</a>
 for more details.
 
-\section participation Project Participation
+\section links Links
 
   - Mailing List: 
       [<a href="http://lists.sourceforge.net/mailman/listinfo/lib3ds-devel">Developer</a>]
   - <a href="http://sourceforge.net/tracker/?group_id=4041&atid=104041">Bugs</a>
   - <a href="http://sourceforge.net/tracker/?group_id=4041&atid=304041">Patches</a>
   - Sourceforge.NET <a href="http://sourceforge.net/projects/lib3ds">project</a> page
-
-\section download Download
-
-The latest <b>official release</b> of lib3ds can be downloaded 
-<a href="http://sourceforge.net/project/showfiles.php?group_id=4041">here</a>. 
-The current development version is available via <a href="http://sourceforge.net/svn/?group_id=4041">SVN</a>.
+  - <a href="http://sourceforge.net/svn/?group_id=4041">SVN</a>
 
 
 \htmlonly
-<br/>
 <center>  
 <a href="http://sourceforge.net/donate/index.php?group_id=4041">
 <img src="http://images.sourceforge.net/images/project-support.jpg" width="88" height="32" border="0" alt="Support This Project" />

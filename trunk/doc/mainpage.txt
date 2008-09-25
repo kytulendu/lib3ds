@@ -68,6 +68,8 @@ for more details.
   - <a href="http://sourceforge.net/svn/?group_id=4041">SVN</a>
 
 
+Please send me <a href="http://www.kyprianidis.com/send-message">feedback</a> if you like (or don't like) lib3ds - I'm always curious who is using it!
+
 \htmlonly
 <center>  
 <a href="http://sourceforge.net/donate/index.php?group_id=4041">

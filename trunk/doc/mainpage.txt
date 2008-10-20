@@ -81,6 +81,8 @@ Please send me <a href="http://www.kyprianidis.com/send-message">feedback</a> if
 
 */
 
+/** \defgroup api API */
+/** \defgroup util Utilities */
 
 
 

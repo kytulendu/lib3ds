@@ -1,0 +1,3 @@
+INCLUDE_DIRECTORIES( ${lib3ds_SOURCE_DIR}/src )
+ADD_EXECUTABLE(3dsplay 3dsplay.cpp)
+TARGET_LINK_LIBRARIES(3dsplay lib3ds)

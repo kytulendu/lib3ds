@@ -27,6 +27,8 @@
 #include <string.h>
 #include <math.h>
 
+#pragma warning ( disable : 4996 )
+
 #ifndef MPI
 #define M_PI 3.14159265358979323846
 #endif

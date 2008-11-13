@@ -149,7 +149,7 @@ camera_menu(int menu, int value, void *client) {
 */
 static void
 toggle_bool(int menu, int value, void *client) {
-    int *var = client;
+    int *var = (int*)client;
     *var = !*var;
     glutPostRedisplay();
 }
@@ -432,7 +432,7 @@ render_node(Lib3dsNode *node) {
 
             {
                 int p;
-                float (*normalL)[3] = malloc(3 * 3 * sizeof(float) * mesh->nfaces);
+                float (*normalL)[3] = (float(*)[3])malloc(3 * 3 * sizeof(float) * mesh->nfaces);
                 Lib3dsMaterial *oldmat = (Lib3dsMaterial *) - 1;
                 {
                     float M[4][4];
@@ -440,7 +440,7 @@ render_node(Lib3dsNode *node) {
                     lib3ds_matrix_inv(M);
                     glMultMatrixf(&M[0][0]);
                 }
-                lib3ds_mesh_calculate_normals(mesh, normalL);
+                lib3ds_mesh_calculate_vertex_normals(mesh, normalL);
 
                 for (p = 0; p < mesh->nfaces; ++p) {
                     Lib3dsMaterial *mat = 0;
@@ -467,7 +467,7 @@ render_node(Lib3dsNode *node) {
                                 Lib3dsTextureMap *tex = &mat->texture1_map;
                                 if (!tex->user_ptr) {  /* no player texture yet? */
                                     char texname[1024];
-                                    pt = malloc(sizeof(*pt));
+                                    pt = (Player_texture*)malloc(sizeof(*pt));
                                     tex->user_ptr = pt;
                                     //snprintf(texname, sizeof(texname), "%s/%s", datapath, tex->name);
                                     strcpy(texname, datapath);
@@ -1239,7 +1239,7 @@ solidCylinder(double r, double h, int slices) {
 
 static const char *
 Basename(const char *filename) {
-    char *ptr = strrchr(filename, '/');
+    const char *ptr = strrchr(filename, '/');
     return ptr != NULL ? ptr + 1 : filename;
 }
 

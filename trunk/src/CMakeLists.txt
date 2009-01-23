@@ -25,9 +25,3 @@ ADD_LIBRARY(lib3ds SHARED
     lib3ds_vector.c
     lib3ds_viewport.c
     lib3ds.rc)
-
-IF(MSVC)
-    INSTALL(TARGETS lib3ds
-        DESTINATION . 
-        CONFIGURATIONS Release)
-ENDIF(MSVC)

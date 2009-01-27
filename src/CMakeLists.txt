@@ -25,3 +25,13 @@ ADD_LIBRARY(lib3ds SHARED
     lib3ds_vector.c
     lib3ds_viewport.c
     lib3ds.rc)
+
+IF(WIN32)
+    SET_TARGET_PROPERTIES(lib3ds PROPERTIES 
+        OUTPUT_NAME "lib3ds-2_0" 
+        DEBUG_POSTFIX "d")
+ENDIF(WIN32)
+
+SET_TARGET_PROPERTIES(lib3ds
+    PROPERTIES VERSION 2.0)
+    

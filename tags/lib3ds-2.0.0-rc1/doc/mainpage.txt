@@ -1,0 +1,92 @@
+/*! 
+
+\mainpage lib3ds
+
+\section introduction Introduction
+
+lib3ds is an overall software library for
+managing <b>3D-Studio Release 3 and 4</b> ".3DS" files.
+It is a <b>free</b> alternative to Autodesk's 
+3DS File Toolkit for managing 3DS files.
+It started out in 1996 to be released in 1999 under the GNU General
+Public License (GPL) as Open-Source software. In 2000, the library
+was completely rewritten in ANSI-C to attain more hardware platform
+independence. To enable commercial application the license was
+changed to GNU Lesser General Public License (LGPL).
+
+\section features Features
+
+- Written in portable <b>ANSI-C</b>
+- Supported platforms:
+  - <b>GNU build tools</b> (autoconf, automake, libtool)
+     - UNIX
+     - Mac OS X
+  - <b>Microsoft Visual C++ 8.0</b> 
+- Supports <b>little and big endian</b> CPUs
+- <b>Load</b> and <b>save</b>:
+  - Atmosphere settings
+  - Background settings
+  - Shadow map settings
+  - Viewport setting
+  - Materials
+  - Cameras
+  - Lights
+  - Meshes
+  - Hierarchy
+  - Keyframes
+- <b>Evaluation</b> of all animation (keyframing) data
+- Simple <b>easy</b> to manipulate data structures
+  - <b>Vector</b> mathematics module
+  - <b>Quaternion</b> mathematics module
+  - <b>Matrix</b> mathematics module
+- Integrates seamless with <b>OpenGL</b>
+
+
+\section license License
+
+Copyright (C) 1996-2008 by Jan Eric Kyprianidis <<a href="http://www.kyprianidis.com">www.kyprianidis.com</a>>.<br>
+All rights reserved.
+
+This program is  free  software; you can redistribute it and/or modify it
+under the terms of the <b>GNU Lesser General Public License</b> as published 
+by the Free Software Foundation; either version 2.1 of the License, or (at 
+your option) any later version.
+
+This  program is distributed in the hope that it will be useful, but
+<b>WITHOUT ANY WARRANTY</b>; without even the implied warranty of 
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
+<a href="http://www.gnu.org/copyleft/lesser.html">GNU Lesser General Public License</a>
+for more details.
+
+\section links Links
+
+  - Mailing List: 
+      [<a href="http://lists.sourceforge.net/mailman/listinfo/lib3ds-devel">Developer</a>]
+  - <a href="http://sourceforge.net/tracker/?group_id=4041&atid=104041">Bugs</a>
+  - <a href="http://sourceforge.net/tracker/?group_id=4041&atid=304041">Patches</a>
+  - Sourceforge.NET <a href="http://sourceforge.net/projects/lib3ds">project</a> page
+  - <a href="http://sourceforge.net/svn/?group_id=4041">SVN</a>
+
+
+Please send me <a href="http://www.kyprianidis.com/send-message">feedback</a> if you like (or don't like) lib3ds - I'm always curious who is using it!
+
+\htmlonly
+<center>  
+<a href="http://sourceforge.net/donate/index.php?group_id=4041">
+<img src="http://images.sourceforge.net/images/project-support.jpg" width="88" height="32" border="0" alt="Support This Project" />
+</a>
+</center>
+
+\endhtmlonly
+
+*/
+
+/** \defgroup api API */
+/** \defgroup util Utilities */
+
+
+
+
+
+
+

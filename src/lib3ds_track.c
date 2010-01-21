@@ -223,7 +223,8 @@ find_index(Lib3dsTrack *track, float t, float *u) {
 
 static void 
 setup_segment(Lib3dsTrack *track, int index, Lib3dsKey *pp, Lib3dsKey *p0, Lib3dsKey *p1, Lib3dsKey *pn) {
-    int ip, in;
+    int ip = 0;
+    int in = 0;
     
     pp->frame = pn->frame = -1;
     if (index >= 2) {
@@ -478,7 +479,7 @@ lib3ds_track_read(Lib3dsTrack *track, Lib3dsIo *io) {
 
 void
 tcb_write(Lib3dsKey *key, Lib3dsIo *io) {
-    lib3ds_io_write_word(io, key->flags);
+    lib3ds_io_write_word(io, (uint16_t)key->flags);
     if (key->flags & LIB3DS_KEY_USE_TENS) {
         lib3ds_io_write_float(io, key->tens);
     }

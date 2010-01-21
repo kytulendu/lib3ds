@@ -116,7 +116,7 @@ parse_args(int argc, char **argv) {
 static long
 fileio_seek_func(void *self, long offset, Lib3dsIoSeek origin) {
     FILE *f = (FILE*)self;
-    int o;
+    int o = SEEK_SET;
     switch (origin) {
         case LIB3DS_SEEK_SET:
             o = SEEK_SET;

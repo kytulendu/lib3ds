@@ -78,7 +78,7 @@ lib3ds_mesh_resize_vertices(Lib3dsMesh *mesh, int nvertices, int use_texcos, int
         use_flags? nvertices : 0, 
         2 * sizeof(float)
     );
-    mesh->nvertices = nvertices;
+    mesh->nvertices = (unsigned short)nvertices;
 }
 
 
@@ -90,7 +90,7 @@ lib3ds_mesh_resize_faces(Lib3dsMesh *mesh, int nfaces) {
     for (i = mesh->nfaces; i < nfaces; ++i) {
         mesh->faces[i].material = -1;
     }
-    mesh->nfaces = nfaces;
+    mesh->nfaces = (unsigned short)nfaces;
 }
 
 
@@ -627,7 +627,7 @@ lib3ds_mesh_write(Lib3dsFile *file, Lib3dsMesh *mesh, Lib3dsIo *io) {
         c.size = 92;
         lib3ds_chunk_write(&c, io);
 
-        lib3ds_io_write_word(io, mesh->map_type);
+        lib3ds_io_write_word(io, (uint16_t)mesh->map_type);
 
         for (i = 0; i < 2; ++i) {
             lib3ds_io_write_float(io, mesh->map_tile[i]);
@@ -669,7 +669,7 @@ lib3ds_mesh_write(Lib3dsFile *file, Lib3dsMesh *mesh, Lib3dsIo *io) {
         c.chunk = CHK_MESH_COLOR;
         c.size = 7;
         lib3ds_chunk_write(&c, io);
-        lib3ds_io_write_byte(io, mesh->color);
+        lib3ds_io_write_byte(io, (uint8_t)mesh->color);
     }
     
     face_array_write(file, mesh, io);

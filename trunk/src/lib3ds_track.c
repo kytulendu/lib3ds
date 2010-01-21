@@ -196,7 +196,7 @@ find_index(Lib3dsTrack *track, float t, float *u) {
     t0 = track->keys[0].frame;
     t1 = track->keys[track->nkeys-1].frame;
     if (track->flags & LIB3DS_TRACK_REPEAT) {
-        nt = (float)fmod(t - t0, t1 - t0) + t0;
+        nt = (float)fmod((float)(t - t0), (float)(t1 - t0)) + t0;
     } else {
         nt = t;
     }

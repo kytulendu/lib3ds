@@ -547,7 +547,7 @@ kfdata_read(Lib3dsFile *file, Lib3dsIo *io) {
     }
 
     {
-        Lib3dsNode **nodes = malloc(num_nodes * sizeof(Lib3dsNode*));
+        Lib3dsNode **nodes = (Lib3dsNode**)malloc(num_nodes * sizeof(Lib3dsNode*));
         unsigned i;
         Lib3dsNode *p, *q, *parent;
 
@@ -560,7 +560,7 @@ kfdata_read(Lib3dsFile *file, Lib3dsIo *io) {
 
         p = last;
         while (p) {
-            q = p->user_ptr;
+            q = (Lib3dsNode*)p->user_ptr;
             if (p->user_id != 65535) {
                 parent = *(Lib3dsNode**)bsearch(&p->user_id, nodes, num_nodes, sizeof(Lib3dsNode*), compare_node_id2);
                 if (parent) {

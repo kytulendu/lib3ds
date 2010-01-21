@@ -558,7 +558,8 @@ render_node(Lib3dsNode *node) {
                                 glMaterialfv(GL_FRONT, GL_DIFFUSE, d);
                                 glMaterialfv(GL_FRONT, GL_SPECULAR, s);
                             }
-                            glMaterialf(GL_FRONT, GL_SHININESS, pow(2, 10.0*mat->shininess));
+                            float shininess = pow(2, 10.0*mat->shininess);
+                            glMaterialf(GL_FRONT, GL_SHININESS, shininess <= 128? shininess : 128);
                         } else {
                             static const float a[4] = {0.7, 0.7, 0.7, 1.0};
                             static const float d[4] = {0.7, 0.7, 0.7, 1.0};

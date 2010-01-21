@@ -25,7 +25,7 @@
 #include <stddef.h>
 
 #ifndef LIB3DSAPI
-    #ifdef _MSC_VER
+    #if defined(_MSC_VER) && !defined(LIB3DS_STATIC)
         #ifdef LIB3DS_EXPORTS
             #define LIB3DSAPI __declspec(dllexport)
         #else               

@@ -341,6 +341,35 @@ load_model(void) {
 
     camera = file->cameras[0]->name;
 
+    for (int i = 0; i < file->nmaterials; ++i) {
+        Lib3dsMaterial *mat = file->materials[i];
+        if (mat->texture1_map.name[0]) {  /* texture map? */
+            Lib3dsTextureMap *tex = &mat->texture1_map;
+
+            char texname[1024];
+            PlayerTexture *pt = (PlayerTexture*)calloc(sizeof(*pt),1);
+            tex->user_ptr = pt;
+            strcpy(texname, datapath);
+            strcat(texname, "/");
+            strcat(texname, tex->name);
+
+            printf("Loading %s\n", texname);
+            if (tga_load(texname, &pt->pixels, &pt->w, &pt->h)) {
+                glGenTextures(1, &pt->tex_id);
+
+                glBindTexture(GL_TEXTURE_2D, pt->tex_id);
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, pt->w, pt->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, pt->pixels);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+            } else {
+                fprintf(stderr, "Loading '%s' failed!\n", texname);
+            }
+        }
+    }
+
     lib3ds_file_eval(file, 0);
 }
 
@@ -396,7 +425,6 @@ render_node(Lib3dsNode *node) {
 
                 for (p = 0; p < mesh->nfaces; ++p) {
                     Lib3dsMaterial *mat = 0;
-                    PlayerTexture *pt = NULL;
 
                     if (mesh->faces[p].material >= 0) {
                         mat = file->materials[mesh->faces[p].material];
@@ -404,41 +432,19 @@ render_node(Lib3dsNode *node) {
 
                     if (mat != oldmat) {
                         if (mat) {
-                            if (mat->two_sided)
-                                glDisable(GL_CULL_FACE);
-                            else
-                                glEnable(GL_CULL_FACE);
+                            //if (mat->two_sided)
+                            //    glDisable(GL_CULL_FACE);
+                            //else
+                            //    glEnable(GL_CULL_FACE);
+                            //
+                            //glDisable(GL_CULL_FACE);
 
-                            glDisable(GL_CULL_FACE);
-
-                            /* Texturing added by Gernot < gz@lysator.liu.se > */
-                            if (mat->texture1_map.name[0]) {  /* texture map? */
-                                Lib3dsTextureMap *tex = &mat->texture1_map;
-                                if (!tex->user_ptr) {  /* no player texture yet? */
-                                    char texname[1024];
-                                    pt = (PlayerTexture*)calloc(sizeof(*pt),1);
-                                    tex->user_ptr = pt;
-                                    strcpy(texname, datapath);
-                                    strcat(texname, "/");
-                                    strcat(texname, tex->name);
-
-                                    printf("Loading %s\n", texname);
-                                    if (tga_load(texname, &pt->pixels, &pt->w, &pt->h)) {
-                                        glGenTextures(1, &pt->tex_id);
-
-                                        glBindTexture(GL_TEXTURE_2D, pt->tex_id);
-                                        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, pt->w, pt->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, pt->pixels);
-                                        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-                                        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-                                        glTexParameteri(GL_TEXTURE_2D,
-                                                        GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-                                        glTexParameteri(GL_TEXTURE_2D,
-                                                        GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-                                        glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-                                    } else {
-                                        fprintf(stderr, "Loading '%s' failed!\n", texname);
-                                    }
-                                }
+                            if (mat->texture1_map.user_ptr) {
+                                PlayerTexture* pt = (PlayerTexture*)mat->texture1_map.user_ptr;
+                                glEnable(GL_TEXTURE_2D);
+                                glBindTexture(GL_TEXTURE_2D, pt->tex_id);
+                            } else {
+                                glDisable(GL_TEXTURE_2D);
                             }
 
                             {
@@ -468,25 +474,9 @@ render_node(Lib3dsNode *node) {
                         }
                         oldmat = mat;
                     }
-                    
-                    if (mat && mat->texture1_map.name[0]) {
-                        Lib3dsTextureMap *tex = &mat->texture1_map;
-                        if (tex && tex->user_ptr) {
-                            pt = (PlayerTexture*)tex->user_ptr;
-                        }
-                    }
 
                     {
-                        int i;
-
-                        if (pt && pt->tex_id) {
-                            //printf("Binding texture %d\n", pt->tex_id);
-                            glEnable(GL_TEXTURE_2D);
-                            glBindTexture(GL_TEXTURE_2D, pt->tex_id);
-                        }
-
-#if 0
-                        {
+                        /*{
                             float v1[3], n[3], v2[3];
                             glBegin(GL_LINES);
                             for (i = 0; i < 3; ++i) {
@@ -498,14 +488,13 @@ render_node(Lib3dsNode *node) {
                                 glVertex3fv(v2);
                             }
                             glEnd();
-                        }
-#endif
+                        }*/
 
                         glBegin(GL_TRIANGLES);
-                        for (i = 0; i < 3; ++i) {
+                        for (int i = 0; i < 3; ++i) {
                             glNormal3fv(normalL[3*p+i]);
 
-                            if (pt && pt->tex_id) {
+                            if (mat->texture1_map.user_ptr) {
                                 glTexCoord2f(
                                     mesh->texcos[mesh->faces[p].index[i]][0],
                                     1-mesh->texcos[mesh->faces[p].index[i]][1] );
@@ -514,15 +503,13 @@ render_node(Lib3dsNode *node) {
                             glVertex3fv(mesh->vertices[mesh->faces[p].index[i]]);
                         }
                         glEnd();
-
-                        if (pt && pt->tex_id)
-                            glDisable(GL_TEXTURE_2D);
                     }
                 }
 
                 free(normalL);
             }
 
+            glDisable(GL_TEXTURE_2D);
             glEndList();
         }
 

@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <assert.h>
+#include "tga.h"
 
 #define FRAMES_PER_SECOND 10
 
@@ -29,10 +30,6 @@
 #include <GLUT/glut.h>
 #else
 #include <GL/glut.h>
-#endif
-
-#ifdef USE_SDL
-#include <SDL_image.h>
 #endif
 
 #define MOUSE_SCALE .1 /* degrees/pixel movement */
@@ -98,24 +95,13 @@ static void solidCylinder(double r, double h, int slices);
 static const char *Basename(const char *filename);
 
 
-// texture size: by now minimum standard
-#define TEX_XSIZE 1024
-#define TEX_YSIZE 1024
-
-struct _player_texture {
-    int valid; // was the loading attempt successful ?
-#ifdef USE_SDL
-    SDL_Surface *bitmap;
-#else
-    void *bitmap;
-#endif
+typedef struct {
     GLuint tex_id; //OpenGL texture ID
-    float scale_x, scale_y; // scale the texcoords, as OpenGL thinks in TEX_XSIZE and TEX_YSIZE
-};
+    GLint w;
+    GLint h;
+    unsigned char *pixels;
+} PlayerTexture;
 
-typedef struct _player_texture Player_texture;
-Player_texture *pt;
-int tex_mode; // Texturing active ?
 
 #define NA(a) (sizeof(a)/sizeof(a[0]))
 
@@ -359,40 +345,6 @@ load_model(void) {
 }
 
 
-
-#ifdef  USE_SDL
-/**
-* Convert an SDL bitmap for use with OpenGL.
-*
-* Written by Gernot < gz@lysator.liu.se >
-*/
-void *convert_to_RGB_Surface(SDL_Surface *bitmap) {
-    unsigned char *pixel = (unsigned char *)malloc(sizeof(char) * 4 * bitmap->h * bitmap->w);
-    int soff = 0;
-    int doff = 0;
-    int x, y;
-    unsigned char *spixels = (unsigned char *)bitmap->pixels;
-    SDL_Palette *pal = bitmap->format->palette;
-
-    for (y = 0; y < bitmap->h; y++)
-        for (x = 0; x < bitmap->w; x++) {
-            SDL_Color* col = &pal->colors[spixels[soff]];
-
-            pixel[doff] = col->r;
-            pixel[doff+1] = col->g;
-            pixel[doff+2] = col->b;
-            pixel[doff+3] = 255;
-            doff += 4;
-            soff++;
-        }
-
-    return (void *)pixel;
-}
-#endif
-
-
-
-
 /*!
 * Render node recursively, first children, then parent.
 * Each node receives its own OpenGL display list.
@@ -444,11 +396,9 @@ render_node(Lib3dsNode *node) {
 
                 for (p = 0; p < mesh->nfaces; ++p) {
                     Lib3dsMaterial *mat = 0;
-#ifdef USE_SDL
-                    Player_texture *pt = NULL;
-                    int tex_mode = 0;
-#endif
-                    if (mesh->faces[p].material > 0) {
+                    PlayerTexture *pt = NULL;
+
+                    if (mesh->faces[p].material >= 0) {
                         mat = file->materials[mesh->faces[p].material];
                     }
 
@@ -462,59 +412,22 @@ render_node(Lib3dsNode *node) {
                             glDisable(GL_CULL_FACE);
 
                             /* Texturing added by Gernot < gz@lysator.liu.se > */
-
                             if (mat->texture1_map.name[0]) {  /* texture map? */
                                 Lib3dsTextureMap *tex = &mat->texture1_map;
                                 if (!tex->user_ptr) {  /* no player texture yet? */
                                     char texname[1024];
-                                    pt = (Player_texture*)malloc(sizeof(*pt));
+                                    pt = (PlayerTexture*)calloc(sizeof(*pt),1);
                                     tex->user_ptr = pt;
-                                    //snprintf(texname, sizeof(texname), "%s/%s", datapath, tex->name);
                                     strcpy(texname, datapath);
                                     strcat(texname, "/");
                                     strcat(texname, tex->name);
-#ifdef DEBUG
-                                    printf("Loading texture map, name %s\n", texname);
-#endif /* DEBUG */
-#ifdef USE_SDL
-#ifdef  USE_SDL_IMG_load
-                                    pt->bitmap = IMG_load(texname);
-#else
-                                    pt->bitmap = IMG_Load(texname);
-#endif /* IMG_Load */
 
-#else /* USE_SDL */
-                                    pt->bitmap = NULL;
-                                    fputs("3dsplayer: Warning: No image loading support, skipping texture.\n", stderr);
-#endif /* USE_SDL */
-                                    if (pt->bitmap) { /* could image be loaded ? */
-                                        /* this OpenGL texupload code is incomplete format-wise!
-                                        * to make it complete, examine SDL_surface->format and
-                                        * tell us @lib3ds.sf.net about your improvements :-)
-                                        */
-                                        int upload_format = GL_RED; /* safe choice, shows errors */
-#ifdef USE_SDL
-                                        int bytespp = pt->bitmap->format->BytesPerPixel;
-                                        void *pixel = NULL;
+                                    printf("Loading %s\n", texname);
+                                    if (tga_load(texname, &pt->pixels, &pt->w, &pt->h)) {
                                         glGenTextures(1, &pt->tex_id);
-#ifdef DEBUG
-                                        printf("Uploading texture to OpenGL, id %d, at %d bytepp\n",
-                                               pt->tex_id, bytespp);
-#endif /* DEBUG */
-                                        if (pt->bitmap->format->palette) {
-                                            pixel = convert_to_RGB_Surface(pt->bitmap);
-                                            upload_format = GL_RGBA;
-                                        } else {
-                                            pixel = pt->bitmap->pixels;
-                                            /* e.g. this could also be a color palette */
-                                            if (bytespp == 1) upload_format = GL_LUMINANCE;
-                                            else if (bytespp == 3) upload_format = GL_RGB;
-                                            else if (bytespp == 4) upload_format = GL_RGBA;
-                                        }
+
                                         glBindTexture(GL_TEXTURE_2D, pt->tex_id);
-                                        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
-                                                     TEX_XSIZE, TEX_YSIZE, 0,
-                                                     GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+                                        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, pt->w, pt->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, pt->pixels);
                                         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
                                         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
                                         glTexParameteri(GL_TEXTURE_2D,
@@ -522,26 +435,10 @@ render_node(Lib3dsNode *node) {
                                         glTexParameteri(GL_TEXTURE_2D,
                                                         GL_TEXTURE_MIN_FILTER, GL_LINEAR);
                                         glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-                                        glTexSubImage2D(GL_TEXTURE_2D,
-                                                        0, 0, 0, pt->bitmap->w, pt->bitmap->h,
-                                                        upload_format, GL_UNSIGNED_BYTE, pixel);
-                                        pt->scale_x = (float)pt->bitmap->w / (float)TEX_XSIZE;
-                                        pt->scale_y = (float)pt->bitmap->h / (float)TEX_YSIZE;
-#endif /* USE_SDL */
-                                        pt->valid = 1;
                                     } else {
-                                        fprintf(stderr,
-                                                "Load of texture %s did not succeed "
-                                                "(format not supported !)\n",
-                                                texname);
-                                        pt->valid = 0;
+                                        fprintf(stderr, "Loading '%s' failed!\n", texname);
                                     }
-                                } else {
-                                    pt = (Player_texture *)tex->user_ptr;
                                 }
-                                tex_mode = pt->valid;
-                            } else {
-                                tex_mode = 0;
                             }
 
                             {
@@ -571,20 +468,18 @@ render_node(Lib3dsNode *node) {
                         }
                         oldmat = mat;
                     }
-
-                    else if (mat != NULL && mat->texture1_map.name[0]) {
+                    
+                    if (mat && mat->texture1_map.name[0]) {
                         Lib3dsTextureMap *tex = &mat->texture1_map;
-                        if (tex != NULL && tex->user_ptr != NULL) {
-                            pt = (Player_texture *)tex->user_ptr;
-                            tex_mode = pt->valid;
+                        if (tex && tex->user_ptr) {
+                            pt = (PlayerTexture*)tex->user_ptr;
                         }
                     }
-
 
                     {
                         int i;
 
-                        if (tex_mode) {
+                        if (pt && pt->tex_id) {
                             //printf("Binding texture %d\n", pt->tex_id);
                             glEnable(GL_TEXTURE_2D);
                             glBindTexture(GL_TEXTURE_2D, pt->tex_id);
@@ -610,17 +505,17 @@ render_node(Lib3dsNode *node) {
                         for (i = 0; i < 3; ++i) {
                             glNormal3fv(normalL[3*p+i]);
 
-                            if (tex_mode) {
+                            if (pt && pt->tex_id) {
                                 glTexCoord2f(
-                                    mesh->texcos[mesh->faces[p].index[i]][1]*pt->scale_x,
-                                    pt->scale_y - mesh->texcos[mesh->faces[p].index[i]][0]*pt->scale_y);
+                                    mesh->texcos[mesh->faces[p].index[i]][0],
+                                    1-mesh->texcos[mesh->faces[p].index[i]][1] );
                             }
 
                             glVertex3fv(mesh->vertices[mesh->faces[p].index[i]]);
                         }
                         glEnd();
 
-                        if (tex_mode)
+                        if (pt && pt->tex_id)
                             glDisable(GL_TEXTURE_2D);
                     }
                 }
@@ -1108,9 +1003,6 @@ main(int argc, char** argv) {
         if (strcmp(*argv, "-help") ==  0 || strcmp(*argv, "--help") == 0) {
             fputs("View a 3DS model file using OpenGL.\n", stderr);
             fputs("Usage: 3dsplayer [-nodb|-aa|-flush] <filename>\n", stderr);
-#ifndef USE_SDL
-            fputs("Texture rendering is not available; install SDL_image and recompile.\n", stderr);
-#endif
             exit(0);
         } else if (strcmp(*argv, "-nodb") == 0)
             dbuf = 0;
@@ -1151,8 +1043,6 @@ main(int argc, char** argv) {
     return(0);
 }
 
-
-
 
 
 /* A few small utilities, so generic that they probably
